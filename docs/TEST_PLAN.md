@@ -40,6 +40,9 @@
 | T23 | Ordnerauswahl abbrechen/Berechtigung entziehen/API nicht verfügbar | Keine Endlosschleife; Textalternative und native lokale Einzel-/Mehrfachdateiauswahl funktionieren | offen |
 | T24 | Fehlender/falscher Ordner, geänderte Dateinamen oder falsche Endung | Korrekte Fehlermeldung; andere Funktionen und lokale vorhandene Medien bleiben nutzbar | offen |
 | T25 | PWA vollständig schliessen/neustarten; Verknüpfung erneut prüfen | Berechtigung falls zulässig weiterverwendet oder transparent erneut angefordert; Demo-Reset verändert lokale Dateien nicht | offen |
+| T26 | QR-SVGs (`assets/qr/`) und PDF mit echtem QR-Decoder prüfen | Alle **11 QR-Payloads** ergeben exakt `SH1:<CARD-ID>`; keine URL und keine medizinischen/personalen Angaben | statisch geprüft (PDF-Decoder 11/11), realer Tablet-Test offen |
+| T27 | Faltkarten-PDF mit 100 % auf A4 drucken, ausschneiden und falten | QR und Label liegen auf Aussenseiten, nicht gespiegelt/abgeschnitten; Frontkamera scannt mit realistischem Abstand | offen |
+| T28 | `P-INF-003`, `A-INF-003` scannen, MP3 vorhanden/fehlt | Beide öffnen den richtigen Alma-Dialog; nur lokale MP3, Text und Antwortbuttons auch ohne MP3 verfügbar | offen |
 
 ## Reale Hardwareprüfung – früh durchführen (F)
 

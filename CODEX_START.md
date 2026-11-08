@@ -9,6 +9,9 @@ Erstelle den **ersten funktionsfähigen, installierbaren Interview-Demonstrator*
 
 ## Pflichtlektüre
 
+**Aktualisierung (08.11.2026):** Druckbare QR-SVGs unter `assets/qr/`, PDF unter `print/` und zwei zusätzliche Alma-QR-Karten (`P-INF-003`, `A-INF-003`) wurden als Demo-Vorschlag ergänzt. Für die **ausdrückliche Freigabe** des ersten Drafts gilt das gesondert zu übergebende Prompt in `CODEX_DRAFT_PROMPT.md`; dieses Dokument löst allein keinen Codex-Lauf aus.
+
+
 `AGENTS.md` -> `docs/DECISIONS.md` -> `docs/CONCEPT.md` -> `docs/FUNCTIONAL_SPEC.md` -> `docs/UX_SPEC.md` -> `docs/CONTENT_AND_CARDS.md` -> `docs/DEMO_SCENARIOS.md` -> `docs/TEST_PLAN.md`. Lies ausserdem die **aktuellen** JSON-Beispieldaten unter `content/`.
 
 ## Implementierungsumfang (auf v0.1 begrenzt)

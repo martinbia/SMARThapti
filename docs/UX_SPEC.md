@@ -38,6 +38,8 @@
 
 **Dialog:** U1 -> Alma -> vorbereiteter Text sichtbar / MP3 optional -> Antwortbutton -> Folgeknoten; zurück oder beenden; Ton stoppt sofort.
 
+**Dialog via QR:** Die zusätzlichen Demo-Karten `P-INF-003` und `A-INF-003` sind Informationskarten mit `dialogNodeId`. Ihr Scan zeigt den zugehörigen vorbereiteten Alma-Dialog (U6), kein leerer allgemeiner Medienplayer. Bei fehlender MP3 bleibt der Textdialog vollständig bedienbar.
+
 **Rollenwechsel:** Immer sichtbar oder über leicht erreichbare Übersicht; ggf. laufenden Scanner/Player beenden; Angehörigeninhalte bleiben eigenständig. Private Angehörigennotizen dürfen nicht ungefragt in der Patientenperspektive auftauchen.
 
 ## Fehler- und Randzustände (F)

@@ -38,6 +38,10 @@ Alle Dokumente sind v0.1-Entwürfe. `AGENTS.md` enthält verbindliche *Arbeitsre
 
 **FESTGELEGT (08.11.2026):** Videos, MP3s und weitere Mediendateien liegen ausschliesslich auf dem Android-Tablet unter `Internal storage/Documents/SMART`. Die PWA und Text-/Karten-Daten kommen über GitHub Pages; Medien werden nicht über GitHub Pages ausgeliefert. Zum Lesen muss die App den Ordner mit Einwilligung am Tablet auswählen/verbinden; siehe `media/README.md`.
 - `media/README.md`: **lokalen Medienordner auf dem Tablet** verbinden, Dateinamen, Berechtigungen und Freigaben. **Keine MP4-/MP3-Dateien im öffentlichen Repository.**
+- `assets/qr/`: elf einzelne **SVG-QR-Codes**, davon fünf mit referenziertem Video-/MP3-Dateinamen im Dateinamen.
+- `print/SMARThapti_Faltkarten_A4.pdf`: druckfertige PDF-Vorlage (11 Faltkarten/3 Seiten), links Label und rechts QR-Rückseite; bei 100 % drucken.
+- `print/CARD_INDEX.json` und `print/README.md`: QR-Payloads, Dateizuordnung und Schnitt-/Falthinweise.
+- `CODEX_DRAFT_PROMPT.md`: konkreter Copy-&-Paste-Auftrag zur **ersten PWA-Implementierung**. Die Datei selbst startet Codex nicht.
 
 ## Repository und Veröffentlichungsstand
 

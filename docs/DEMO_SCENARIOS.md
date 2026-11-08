@@ -37,6 +37,7 @@ Alma sitzt sichtbar beim aufgestellten Tablet im Hochformat. Auf dem Tisch liege
 
 **Ausgang:** Rollenwechsel zu Anna, Häftchen plus `A-INF-001`.  
 **Aktion:** kurzes Unterstützungsvideo (oder markierter Test-Slot), vorbereiteter Alma-Dialog, Auswahl „Was können wir bei Physio fragen?“.  
+**Zusätzlich (V):** `A-INF-003` führt per QR direkt zum Dialogstart und dem lokalen MP3-Slot `ALMA_A_START.mp3`.
 **Beobachten:** Fühlt sich Anna eigenständig adressiert statt nur als Hilfsperson?
 
 ### S4 – „Auch ich brauche einmal eine Pause“ (Angehörige)

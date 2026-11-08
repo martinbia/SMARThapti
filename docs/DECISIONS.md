@@ -21,6 +21,7 @@
 | F12 | GitHub als gemeinsame versionierte Spezifikation von Projekt-Chat und Codex; neue Commits starten **keinen** Codex-Auftrag. |
 | F13 | Öffentliches Repo darf keine vertraulichen Ursprungsunterlagen oder echten Patientendaten enthalten. |
 | F14 | **Neu festgelegt am 08.11.2026:** Sämtliche Medien (insbesondere Videos und MP3s) liegen **lokal auf dem Android-Tablet** im Verzeichnis `Internal storage/Documents/SMART`, nicht auf GitHub Pages oder im GitHub-Repository. Die PWA darf nur nach expliziter Benutzerfreigabe darauf zugreifen. |
+| F15 | **Aktuell beauftragt:** QR-Karten als druckbares PDF mit Vorder-/Rückseite auf demselben Blatt und Faltlinie bereitstellen; QR-SVG-Dateien in separatem GitHub-Verzeichnis. Keine personenbezogenen Daten in QR-Payloads. |
 
 ## VORSCHLÄGE – für Umsetzung v0.1
 
@@ -39,6 +40,8 @@
 | V11 | Ursprüngliche fiktive Ereignis-IDs `E02/E06/E07/J10` aus Journey als Referenzen | Stabiler Querverweis, später austauschbar |
 | V12 | Bei der Interviewvorbereitung den lokalen Ordner über `showDirectoryPicker()` (sofern unterstützt) **lesend verbinden**; sonst manuelle Dateiauswahl | PWA kann Dateien nicht durch Angabe eines absoluten Android-Pfads automatisch lesen; auf realem Tablet prüfen |
 | V13 | Manifest speichert nur erwartete **Dateinamen** (keine URLs), zugewiesen über stabile Medien-IDs | Medien bleiben unabhängig von Anwendung und Repository; Name kann redaktionell geändert werden |
+| V14 | Je eine zusätzliche Info-Karte `P-INF-003` und `A-INF-003` als QR-Einstieg in die beiden Alma-Dialoge | Dadurch erhalten auch die zwei MP3-Medien einen eigenen QR-Zugang. Reversibler Demo-Vorschlag, keine neue medizinische Funktion |
+| V15 | Drei A4-Seiten mit 11 Faltkarten; SVG-Vektordateien und das QR-Kurzformat `SH1:<CARD-ID>` | Druckformat und reale Frontkamera-Lesbarkeit erst am Zieltablet abnehmen |
 
 ## OFFENE PUNKTE – priorisiert (max. drei entscheidungsrelevant)
 

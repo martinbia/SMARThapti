@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "qrScheme": "SH1:<CARD-ID>",
+  "cards": [
+    {
+      "cardId": "P-INF-001",
+      "label": "Wieder zu Hause",
+      "payload": "SH1:P-INF-001",
+      "qrFile": "assets/qr/P-INF-001__Wieder_zu_Hause.svg",
+      "mediaFile": null
+    },
+    {
+      "cardId": "P-INF-002",
+      "label": "Meine Operation",
+      "payload": "SH1:P-INF-002",
+      "qrFile": "assets/qr/P-INF-002__Meine_Operation.svg",
+      "mediaFile": null
+    },
+    {
+      "cardId": "P-INF-003",
+      "label": "Alma fragen",
+      "payload": "SH1:P-INF-003",
+      "qrFile": "assets/qr/P-INF-003__ALMA_P_START_mp3.svg",
+      "mediaFile": "ALMA_P_START.mp3"
+    },
+    {
+      "cardId": "P-EX-001",
+      "label": "Meine Übung ansehen",
+      "payload": "SH1:P-EX-001",
+      "qrFile": "assets/qr/P-EX-001__P_EX_001_mp4.svg",
+      "mediaFile": "P_EX_001.mp4"
+    },
+    {
+      "cardId": "P-APT-001",
+      "label": "Nächster Physiotermin",
+      "payload": "SH1:P-APT-001",
+      "qrFile": "assets/qr/P-APT-001__Naechster_Physiotermin.svg",
+      "mediaFile": null
+    },
+    {
+      "cardId": "P-MIL-001",
+      "label": "Mein Alltagsschritt",
+      "payload": "SH1:P-MIL-001",
+      "qrFile": "assets/qr/P-MIL-001__Mein_Alltagsschritt.svg",
+      "mediaFile": null
+    },
+    {
+      "cardId": "A-INF-001",
+      "label": "Unterstützung im Alltag",
+      "payload": "SH1:A-INF-001",
+      "qrFile": "assets/qr/A-INF-001__A_HELP_001_mp4.svg",
+      "mediaFile": "A_HELP_001.mp4"
+    },
+    {
+      "cardId": "A-INF-002",
+      "label": "Auch an mich denken",
+      "payload": "SH1:A-INF-002",
+      "qrFile": "assets/qr/A-INF-002__A_REST_001_mp4.svg",
+      "mediaFile": "A_REST_001.mp4"
+    },
+    {
+      "cardId": "A-INF-003",
+      "label": "Alma für Angehörige",
+      "payload": "SH1:A-INF-003",
+      "qrFile": "assets/qr/A-INF-003__ALMA_A_START_mp3.svg",
+      "mediaFile": "ALMA_A_START.mp3"
+    },
+    {
+      "cardId": "A-APT-001",
+      "label": "Fragen für die Physio",
+      "payload": "SH1:A-APT-001",
+      "qrFile": "assets/qr/A-APT-001__Fragen_fuer_die_Physio.svg",
+      "mediaFile": null
+    },
+    {
+      "cardId": "A-MIL-001",
+      "label": "Meine Auszeit",
+      "payload": "SH1:A-MIL-001",
+      "qrFile": "assets/qr/A-MIL-001__Meine_Auszeit.svg",
+      "mediaFile": null
+    }
+  ]
+}

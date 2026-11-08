@@ -242,6 +242,40 @@
       "sourceDate": "2026-11-10",
       "reviewed": false,
       "mediaIds": []
+    },
+    {
+      "id": "C-P-ALMA",
+      "role": "patient",
+      "title": "Alma fragen",
+      "shortText": "Mit Alma einen vorbereiteten Dialog auswählen.",
+      "detailText": "Alma zeigt ausschliesslich vorbereitete Fragen und Antwortbuttons. Die optionale MP3 wird lokal auf dem Tablet abgespielt, falls vorhanden.",
+      "sourceIds": [
+        "R01"
+      ],
+      "sourceKind": "general",
+      "sourceDate": "2026-11-08",
+      "reviewed": false,
+      "mediaIds": [
+        "M-ALMA-P"
+      ],
+      "dialogNodeId": "ALMA-P-START"
+    },
+    {
+      "id": "C-A-ALMA",
+      "role": "relative",
+      "title": "Alma für Angehörige",
+      "shortText": "Vorbereitete Unterstützungsgespräche mit Alma.",
+      "detailText": "Anna kann aus vorbereiteten Themen wählen, darunter Unterstützung und eigene Entlastung. Kein Gespräch wird generiert; MP3 bleibt optional.",
+      "sourceIds": [
+        "R01"
+      ],
+      "sourceKind": "general",
+      "sourceDate": "2026-11-08",
+      "reviewed": false,
+      "mediaIds": [
+        "M-ALMA-A"
+      ],
+      "dialogNodeId": "ALMA-A-START"
     }
   ],
   "cards": [
@@ -255,7 +289,8 @@
       "icon": "home",
       "qrPayload": "SH1:P-INF-001",
       "contentId": "C-P-RETURN",
-      "eventKey": null
+      "eventKey": null,
+      "printTitle": "Wieder zu Hause"
     },
     {
       "id": "P-INF-002",
@@ -267,7 +302,8 @@
       "icon": "info",
       "qrPayload": "SH1:P-INF-002",
       "contentId": "C-P-OP",
-      "eventKey": null
+      "eventKey": null,
+      "printTitle": "Meine Operation"
     },
     {
       "id": "P-EX-001",
@@ -279,7 +315,8 @@
       "icon": "play-circle",
       "qrPayload": "SH1:P-EX-001",
       "contentId": "C-P-EX",
-      "eventKey": null
+      "eventKey": null,
+      "printTitle": "Meine Übung ansehen"
     },
     {
       "id": "P-APT-001",
@@ -291,7 +328,8 @@
       "icon": "calendar",
       "qrPayload": "SH1:P-APT-001",
       "contentId": "C-P-APT",
-      "eventKey": "J10"
+      "eventKey": "J10",
+      "printTitle": "Nächster Physiotermin"
     },
     {
       "id": "P-MIL-001",
@@ -303,7 +341,8 @@
       "icon": "star",
       "qrPayload": "SH1:P-MIL-001",
       "contentId": "C-P-MIL",
-      "eventKey": "J-MIL-P-001"
+      "eventKey": "J-MIL-P-001",
+      "printTitle": "Mein Alltagsschritt"
     },
     {
       "id": "A-INF-001",
@@ -315,7 +354,8 @@
       "icon": "heart-handshake",
       "qrPayload": "SH1:A-INF-001",
       "contentId": "C-A-HELP",
-      "eventKey": null
+      "eventKey": null,
+      "printTitle": "Unterstützung im Alltag"
     },
     {
       "id": "A-INF-002",
@@ -327,7 +367,8 @@
       "icon": "coffee",
       "qrPayload": "SH1:A-INF-002",
       "contentId": "C-A-REST",
-      "eventKey": null
+      "eventKey": null,
+      "printTitle": "Auch an mich denken"
     },
     {
       "id": "A-APT-001",
@@ -339,7 +380,8 @@
       "icon": "calendar",
       "qrPayload": "SH1:A-APT-001",
       "contentId": "C-A-APT",
-      "eventKey": "J10"
+      "eventKey": "J10",
+      "printTitle": "Fragen für die Physio"
     },
     {
       "id": "A-MIL-001",
@@ -351,7 +393,34 @@
       "icon": "sun",
       "qrPayload": "SH1:A-MIL-001",
       "contentId": "C-A-MIL",
-      "eventKey": "J-MIL-A-001"
+      "eventKey": "J-MIL-A-001",
+      "printTitle": "Meine Auszeit"
+    },
+    {
+      "id": "P-INF-003",
+      "role": "patient",
+      "type": "information",
+      "phase": "discharge",
+      "issuedOn": "2026-11-02",
+      "title": "Alma fragen",
+      "printTitle": "Alma fragen",
+      "icon": "message-circle",
+      "qrPayload": "SH1:P-INF-003",
+      "contentId": "C-P-ALMA",
+      "eventKey": null
+    },
+    {
+      "id": "A-INF-003",
+      "role": "relative",
+      "type": "information",
+      "phase": "discharge",
+      "issuedOn": "2026-11-02",
+      "title": "Alma für Angehörige",
+      "printTitle": "Alma für Angehörige",
+      "icon": "message-circle",
+      "qrPayload": "SH1:A-INF-003",
+      "contentId": "C-A-ALMA",
+      "eventKey": null
     }
   ],
   "timeline": [

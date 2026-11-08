@@ -33,15 +33,19 @@ Bei relevanten Ereignissen/Übergängen erhalten Patienten bzw. Angehörige **se
 | --- | --- | --- | --- |
 | `P-INF-001` | Patient, Austritt 02.11. | „Wieder zu Hause“ / Kurzinfo; E06-Demoquelle | ansehen |
 | `P-INF-002` | Patient, Austritt | „Was ist bei der Operation passiert?“ / E02-Demoquelle | ansehen |
+| `P-INF-003` | Patient, Austritt | **„Alma fragen“**, vorbereiteter Dialog mit lokalem `ALMA_P_START.mp3` | Dialog ansehen; MP3 optional |
 | `P-EX-001` | Patient, Austritt oder Physio | „Meine Übung ansehen“ / **Video-Slot ohne medizinischen Inhalt bis Freigabe** | ansehen, nicht abhaken |
 | `P-APT-001` | Patient, Austritt | „Nächster Physiotherapietermin“ / 10.11. (fiktiv) | nach Bestätigung in Timeline |
 | `P-MIL-001` | Patient, Physio 10.11. | „Ein eigener Alltagsschritt“ / selbst berichteter Meilenstein | nach Bestätigung in Timeline |
 | `A-INF-001` | Angehörige, Austritt | „Unterstützen ohne zu übernehmen“ / Unterstützungsvideo-Slot | ansehen |
 | `A-INF-002` | Angehörige, Austritt | „Auch an mich denken“ / Entlastungsinfo, Video-Slot | ansehen |
+| `A-INF-003` | Angehörige, Austritt | **„Alma für Angehörige“**, vorbereiteter Dialog mit lokalem `ALMA_A_START.mp3` | Dialog ansehen; MP3 optional |
 | `A-APT-001` | Angehörige, Austritt | „Physiotherapie: gemeinsam Fragen sammeln“ / **derselbe Termin-Eventkey wie P-APT-001** | nach Bestätigung; kein doppelter Termin |
 | `A-MIL-001` | Angehörige, Physio 10.11. | „Eine Pause für mich eingeplant“ / eigene Angabe | nach Bestätigung; nur Angehörigenansicht |
 
 **V:** P-MIL-001 ist bewusst ein **freiwillig berichteter Alltagsschritt**, keine klinische Leistungszusage. Beispielsatz: „Ich habe heute selbst das Frühstück vorbereitet.“ Das ist **keine** Aussage über Freigabe oder Sicherheit dieser Handlung.
+
+**V (08.11.2026):** Damit auch beide vorgesehenen Alma-MP3s per QR erreichbar sind, ergänzt die Demo die zwei Informationskarten `P-INF-003` und `A-INF-003`. Beide verwenden den bestehenden QR-Vertrag und einen `dialogNodeId` in ihrem Content. Beim Scan öffnet U6 den vorbereiteten Dialog; die MP3 ist dessen optionale Tonspur, nicht ein neuer, offener Chat.
 
 ## 4. QR-Vertrag und Duplikate (V)
 
@@ -70,3 +74,10 @@ Eine abgespielte MP3 stammt aus vorbereiteter Datei, nicht aus Laufzeit-TTS; Dia
 **V – Mediennamen im Manifest:** `P_EX_001.mp4` (Patienten-Übung), `A_HELP_001.mp4` (Alltagsbegleitung), `A_REST_001.mp4` (Entlastung), `ALMA_P_START.mp3` und `ALMA_A_START.mp3`. Dies sind **erwartete Dateinamen, keine erzeugten oder freigegebenen Medien**; andere Bezeichnungen nur nach konsistenter Anpassung des Manifests.
 
 **V – Setup:** Moderator wählt `Documents/SMART` einmal über eine durch Benutzeraktion gestartete Verzeichnisauswahl. Falls dies auf dem Tablet/Browser nicht funktioniert: eine oder mehrere Dateien im Android-Dateidialog explizit wählen. Die Zuordnung erfolgt über die Dateinamen, ohne Datei-Upload, ohne Schreiben in den Medienordner. Fehlende Videos/MP3s zeigen Textalternativen. `media/README.md` beschreibt den Medienvertrag.
+
+## 7. Druckmaterial und QR-Dateien (F: Ausgabewunsch; V: Layoutdetails)
+
+- `assets/qr/` enthält **11 einzeln druckbare SVG-QR-Codes** mit eindeutiger Karten-ID. Bei direkt verlinktem Video/MP3 enthält **auch der Dateiname** den vorgesehenen lokalen Mediennamen, z. B. `P-EX-001__P_EX_001_mp4.svg`.
+- `print/SMARThapti_Faltkarten_A4.pdf` enthält alle elf Karten auf **3 A4-Seiten**: links menschenlesbare Vorderseite, rechts QR-Rückseite, senkrechte Faltlinie und äussere Schnittkontur. Auf 100 %/Originalgrösse drucken und **mit den unbedruckten Seiten nach innen** falten.
+- `print/CARD_INDEX.json` bildet Karten-ID, exakt kodierten QR-Text und Medien-Dateiname ab. QR kodiert bewusst **nur** `SH1:<CARD-ID>`; Dateiname wird durch Manifest-Verknüpfung ermittelt. **Ein gewöhnlicher Smartphone-QR-Scanner öffnet dadurch keine Medien-URL.**
+- `P-INF-003` und `A-INF-003` sind **zusätzliche, als Vorschlag markierte** Alma-Zugriffskarten. Vor breitem Druck/Praxiseinsatz QR-Grösse, Kontrast und Lesbarkeit am realen Tablet prüfen.
