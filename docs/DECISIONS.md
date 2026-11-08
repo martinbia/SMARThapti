@@ -20,6 +20,7 @@
 | F11 | Spätere EPIC-Nutzung ist Idee; Demo arbeitet ausschliesslich mit vorbereiteten fiktiven Beispieldokumenten. |
 | F12 | GitHub als gemeinsame versionierte Spezifikation von Projekt-Chat und Codex; neue Commits starten **keinen** Codex-Auftrag. |
 | F13 | Öffentliches Repo darf keine vertraulichen Ursprungsunterlagen oder echten Patientendaten enthalten. |
+| F14 | **Neu festgelegt am 08.11.2026:** Sämtliche Medien (insbesondere Videos und MP3s) liegen **lokal auf dem Android-Tablet** im Verzeichnis `Internal storage/Documents/SMART`, nicht auf GitHub Pages oder im GitHub-Repository. Die PWA darf nur nach expliziter Benutzerfreigabe darauf zugreifen. |
 
 ## VORSCHLÄGE – für Umsetzung v0.1
 
@@ -36,6 +37,8 @@
 | V09 | Eine leicht auffindbare, moderatorseitige Demo-Reset-/Szenarioansicht | Wiederholbare Interviews |
 | V10 | Portrait zuerst; Landscape nur als tolerierter Zustand | Keine Drehpflicht; Gestaltungsprüfung auf Gerät |
 | V11 | Ursprüngliche fiktive Ereignis-IDs `E02/E06/E07/J10` aus Journey als Referenzen | Stabiler Querverweis, später austauschbar |
+| V12 | Bei der Interviewvorbereitung den lokalen Ordner über `showDirectoryPicker()` (sofern unterstützt) **lesend verbinden**; sonst manuelle Dateiauswahl | PWA kann Dateien nicht durch Angabe eines absoluten Android-Pfads automatisch lesen; auf realem Tablet prüfen |
+| V13 | Manifest speichert nur erwartete **Dateinamen** (keine URLs), zugewiesen über stabile Medien-IDs | Medien bleiben unabhängig von Anwendung und Repository; Name kann redaktionell geändert werden |
 
 ## OFFENE PUNKTE – priorisiert (max. drei entscheidungsrelevant)
 
@@ -45,7 +48,7 @@
 
 ## Nicht blockierend, aber nachzuweisen
 
-GitHub Pages ist im Repo noch nicht konfiguriert; die tatsächliche Aktivierung in den GitHub-Einstellungen konnte nicht ausgelesen werden. Lizenz-/Publikationsrechte für spätere Videos sowie klinische Prüfung fehlen. Die fiktiven Namen/Termine ersetzen ausdrücklich keine Therapieunterlagen.
+GitHub Pages ist im Repo noch nicht konfiguriert; die tatsächliche Aktivierung in den GitHub-Einstellungen konnte nicht ausgelesen werden. Freigabe/Lizenz und klinische Prüfung konkreter Medien fehlen. **Technische Ordnerauswahl und Wiederverwendung der Berechtigung müssen auf dem realen Android-Tablet getestet werden.** Die fiktiven Namen/Termine ersetzen ausdrücklich keine Therapieunterlagen.
 
 ## Freigabestand und nächste Entscheidung
 

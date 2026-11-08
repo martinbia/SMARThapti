@@ -8,7 +8,7 @@
 - Testgerät mit aktuellem Chrome/Android, bekannter Displayauflösung und sichtbaren oberen/unteren Systemleisten; wenn möglich PWA installiert.
 - Gedruckte, ausreichend grosse QR-Muster der `SH1:...`-IDs; gute/schwache Beleuchtung, verschiedene Abstände.
 - Nur fiktive JSON-Daten; keine Originalunterlagen, realen Personeninformationen oder ungeprüften Therapievideos.
-- Für Player-Test neutrale, rechtlich unproblematische Test-MP4 und Test-MP3; sonst „Medien fehlen“ ausdrücklich testen.
+- Für Player-Test neutrale, rechtlich unproblematische MP4/MP3 **lokal in `Internal storage/Documents/SMART` auf dem Android-Tablet ablegen**; Dateinamen mit `content/demo_manifest.json` abgleichen. Keine Medien ins GitHub-Repo legen. Fehlende/gesperrte Dateien ausdrücklich testen.
 - GitHub Pages erst nach Konfiguration und Live-Aufruf als „erreichbar“ markieren.
 
 ## Prüftabelle
@@ -26,15 +26,20 @@
 | T09 | Rolle Patient/Angehörige wechseln | Passende Startkarten und Inhalte, private Anliegen nicht versehentlich geteilt | offen |
 | T10 | Karte manuell wählen | Gleicher Karteninhalt wie QR-Scan | offen |
 | T11 | Übungskarte vor jeglichem Meilenstein öffnen | Übungsansicht/Medien-Fallback erreichbar, kein Freigabe-Gate | offen |
-| T12 | neutrales MP4 abspielen; Zurück/Home | Bild/Ton stoppen sofort; kein Hintergrundvideo | offen |
-| T13 | Alma-MP3 abspielen; Antwortbuttons/Zurück | Richtiger Folgeknoten, Player endet bei Navigation | offen |
-| T14 | Mediendatei fehlt/404 | Kein kaputter Player, sichtbare Textalternative | offen |
+| T12 | lokales MP4 aus `Documents/SMART` abspielen; Zurück/Home | Bild/Ton stoppen sofort; kein Hintergrundvideo, kein Server-Download | offen |
+| T13 | lokale Alma-MP3 aus `Documents/SMART` abspielen; Antwortbuttons/Zurück | Richtiger Folgeknoten, Player endet bei Navigation, kein Server-Download | offen |
+| T14 | Mediendatei im lokalen Ordner fehlt/umbenannt/ungültig | Kein kaputter Player, verständlicher Dateihinweis und Textalternative | offen |
 | T15 | Termin scannen, **Abbrechen** | Timeline unverändert | offen |
 | T16 | Termin scannen, **Hinzufügen**, wiederholen | Genau ein Event mit gleichem Eventkey; keine Doppelung über Rollen-Karte | offen |
 | T17 | Meilenstein bestätigen / ohne Bestätigung verlassen | Nur bewusst bestätigte Selbstangabe erscheint als solche | offen |
 | T18 | Video anschauen und beenden | **Keine** neue „Übung durchgeführt“-Markierung | offen |
 | T19 | Timeline/Langtext/Datum und Quellen | Allgemeine, persönliche Demo-Quelle und eigene Angabe visuell unterscheidbar; fiktive Daten erkennbar | offen |
 | T20 | Demo-Reset und Neustart | Selbstberichte/Bestätigungen zurückgesetzt; Grunddaten korrekt; Medien/Kamera geschlossen | offen |
+| T21 | In Android-Chrome/PWA Ordner `Internal storage/Documents/SMART` verbinden | Erst nach Benutzeraktion/Berechtigung werden erwartete MP4-/MP3-Dateien über IDs/Dateinamen gefunden | offen |
+| T22 | Abspielen bei verfügbarer Internetverbindung beobachten | Medien stammen vom lokalen Tablet, **keine** HTTP-/GitHub-Pages-/CDN-Medienabrufe oder Uploads | offen |
+| T23 | Ordnerauswahl abbrechen/Berechtigung entziehen/API nicht verfügbar | Keine Endlosschleife; Textalternative und native lokale Einzel-/Mehrfachdateiauswahl funktionieren | offen |
+| T24 | Fehlender/falscher Ordner, geänderte Dateinamen oder falsche Endung | Korrekte Fehlermeldung; andere Funktionen und lokale vorhandene Medien bleiben nutzbar | offen |
+| T25 | PWA vollständig schliessen/neustarten; Verknüpfung erneut prüfen | Berechtigung falls zulässig weiterverwendet oder transparent erneut angefordert; Demo-Reset verändert lokale Dateien nicht | offen |
 
 ## Reale Hardwareprüfung – früh durchführen (F)
 
@@ -42,6 +47,7 @@
 2. **QR-Erkennung testen:** Frontkamera initial; Lesedistanz, Erkennungsdauer, Spiegelung, Fokus und Beleuchtung beobachten; Rückkamera und Touch-Alternative testen.
 3. **Lesbarkeit und Bedienbarkeit:** Schrift, Touch-Ziele, Scrollaufwand, Position von Zurück/Stopp, Videogrösse im Portrait und Landscape.
 4. **Medien- und Stream-Lebenszyklus:** Zurück, Home, Rollenwechsel, Browserwechsel, Screen-Lock (soweit prüfbar); keine unbeabsichtigte Fortsetzung.
+   Zusätzlich: **lokales Ordner-Grant**, Datei-Zuordnung nach Dateiname, Abbruch, Berechtigungsentzug, Neustart und Nachweis, dass beim Video-/MP3-Start keine Mediendatei von GitHub geladen wird.
 5. **Offline nur falls explizit beauftragt:** PWA-Cache/Medienumfang getrennt testen; ansonsten keine Offline-Zusage.
 
 ## Interview-Usability (Forschungsziel, nicht klinische Wirksamkeit)

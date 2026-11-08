@@ -68,41 +68,46 @@
       "id": "M-P-EX-001",
       "kind": "video",
       "purpose": "exercise",
-      "path": null,
       "status": "not-provided-or-clinically-reviewed",
-      "transcriptOrFallback": "Hier wird spaeter ein fachlich geprueftes Uebungsvideo angezeigt. Fuer die Demo ist derzeit keine konkrete Anleitung hinterlegt."
+      "transcriptOrFallback": "Hier wird spaeter ein fachlich geprueftes Uebungsvideo angezeigt. Fuer die Demo ist derzeit keine konkrete Anleitung hinterlegt.",
+      "storage": "tablet-local",
+      "fileName": "P_EX_001.mp4"
     },
     {
       "id": "M-A-INF-001",
       "kind": "video",
       "purpose": "daily-support",
-      "path": null,
       "status": "not-provided-or-clinically-reviewed",
-      "transcriptOrFallback": "Hier kann ein vorbereitetes, fachlich geprueftes Video zur Unterstuetzung im Alltag gezeigt werden."
+      "transcriptOrFallback": "Hier kann ein vorbereitetes, fachlich geprueftes Video zur Unterstuetzung im Alltag gezeigt werden.",
+      "storage": "tablet-local",
+      "fileName": "A_HELP_001.mp4"
     },
     {
       "id": "M-A-INF-002",
       "kind": "video",
       "purpose": "respite",
-      "path": null,
       "status": "not-provided",
-      "transcriptOrFallback": "Hier kann ein kurzes Video ueber die eigene Entlastung von Angehoerigen gezeigt werden."
+      "transcriptOrFallback": "Hier kann ein kurzes Video ueber die eigene Entlastung von Angehoerigen gezeigt werden.",
+      "storage": "tablet-local",
+      "fileName": "A_REST_001.mp4"
     },
     {
       "id": "M-ALMA-P",
       "kind": "audio",
       "purpose": "dialog",
-      "path": null,
       "status": "not-provided",
-      "transcriptOrFallback": "Hallo, Ernst. Moechten Sie Ihre Karten, ein Video oder Ihren Weg ansehen?"
+      "transcriptOrFallback": "Hallo, Ernst. Moechten Sie Ihre Karten, ein Video oder Ihren Weg ansehen?",
+      "storage": "tablet-local",
+      "fileName": "ALMA_P_START.mp3"
     },
     {
       "id": "M-ALMA-A",
       "kind": "audio",
       "purpose": "dialog",
-      "path": null,
       "status": "not-provided",
-      "transcriptOrFallback": "Hallo, Anna. Moechten Sie Informationen zur Begleitung oder zu Ihrer eigenen Entlastung?"
+      "transcriptOrFallback": "Hallo, Anna. Moechten Sie Informationen zur Begleitung oder zu Ihrer eigenen Entlastung?",
+      "storage": "tablet-local",
+      "fileName": "ALMA_A_START.mp3"
     }
   ],
   "contents": [
@@ -421,5 +426,14 @@
       "requiresConfirmation": true,
       "visibility": "relative"
     }
-  ]
+  ],
+  "mediaStorage": {
+    "mode": "tablet-local",
+    "rootLabel": "Internal storage/Documents/SMART",
+    "androidDocumentsSubfolder": "SMART",
+    "permissions": "explicit-user-selection-read-only",
+    "remoteMediaAllowed": false,
+    "setupStatus": "folder-selection-implementation-proposal",
+    "detail": "The rootLabel is a user-visible folder, NOT a file:// URL. The PWA needs a user-selected folder or native file picker. Media bytes are not served by GitHub Pages."
+  }
 }

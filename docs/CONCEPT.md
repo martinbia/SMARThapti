@@ -14,6 +14,8 @@ SMARThapti untersucht in Interviews, ob ältere Patienten nach operierter Hüftf
 
 Ein eigenes Smartphone ist **keine** Voraussetzung. Tablet, Papier und Anhänger werden während Interviews gemeinsam erprobt.
 
+**Lokale Medien (F, ergänzt 08.11.2026):** Filme, MP3s und weitere Mediendateien befinden sich auf dem Android-Tablet unter `Internal storage/Documents/SMART`, nicht auf GitHub Pages. Die PWA stellt Bedienoberfläche und Zuordnung bereit und liest Medien nach expliziter Ordner-/Dateifreigabe. Die Verknüpfung soll in der Interviewvorbereitung erfolgen; Details sind in `media/README.md` spezifiziert.
+
 ## Eigenständige Zielgruppen (F)
 
 **Patienten:** Wollen verstehen, was passiert ist, relevante Information nachlesen, eigene Ziele verfolgen, Übungen aus dem **individuellen, geprüften Plan** auffinden und selbst entscheiden, ob etwas als erledigt berichtet wird. Nicht jede Person möchte laufend erinnert oder bewertet werden.

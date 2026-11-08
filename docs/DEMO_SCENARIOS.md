@@ -17,6 +17,8 @@
 
 Alma sitzt sichtbar beim aufgestellten Tablet im Hochformat. Auf dem Tisch liegen **zwei getrennte Papier-Häftchen**, Patienten- und Angehörigen-Karten/Schlüsselanhänger. Interviewperson wählt passende Perspektive; Moderator erklärt, dass alle Namen und medizinischen Unterlagen fiktiv und Medien gegebenenfalls reine Technikdemos sind. Keine Teilnahmevoraussetzung „eigenes Smartphone“.
 
+**F – Medienvorbereitung:** Falls MP4-/MP3-Medien verwendet werden, legt die Moderatorperson diese **lokal** unter `Internal storage/Documents/SMART` auf dem Tablet ab und verbindet den Ordner über die PWA mit ausdrücklicher Android-Freigabe. Dateien bleiben auf dem Tablet und werden nicht von GitHub Pages heruntergeladen. Verfügbare Dateinamen/Freigaben vor S2–S4 prüfen; fehlende Dateien ergeben den beschrifteten Text-Fallback. **V:** der Vorgang gehört in den Moderatorbereich U9.
+
 ## Sechs kurze Szenen (V)
 
 ### S1 – „Zu Hause: Welche Informationen habe ich bekommen?“ (Patient)

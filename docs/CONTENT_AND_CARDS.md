@@ -53,7 +53,7 @@ Mehrere Karten dürfen auf **denselben fachlichen Eventkey** verweisen (z. B. `J
 
 Redaktionelle Basis: `content/demo_manifest.json` (Personen, Demoquellen, Karten, Contents, Medienreferenzen, Timeline-Basis). Dialoge: `content/demo_dialogs.json`. App-Code kennt nur IDs/Schemas und zeigt Daten an; keine Texte oder Medienpfade in UI-Komponenten duplizieren. Alle JSON-Datensätze sind **fiktive Interviewvorlagen**.
 
-Inhaltssatz benötigt mindestens: `id, role, title, shortText, detailText, sourceIds, sourceKind, sourceDate, reviewed, mediaIds`. Medienzuordnung: `id, kind, path, status, transcriptOrFallback`. `path: null` bedeutet **nicht vorhanden**, kein defekter Pfad. Erst bei konkretem File im Repo den relativen Pfad eintragen.
+Inhaltssatz benötigt mindestens: `id, role, title, shortText, detailText, sourceIds, sourceKind, sourceDate, reviewed, mediaIds`. Medienzuordnung: `id, kind, storage, fileName, status, transcriptOrFallback`. **F:** `storage: tablet-local` und der Ordner `Internal storage/Documents/SMART`. **V:** `fileName` enthält ausschliesslich den erwarteten Dateinamen (z. B. `P_EX_001.mp4`), niemals einen Web-/Android-Pfad. Die Datei selbst liegt **nicht im Repository**; `status` gibt den redaktionellen Liefer-/Freigabestand an, nicht einen überprüften Dateibestand auf dem Tablet. Die PWA prüft zusätzlich zur Laufzeit, ob die Datei nach Ordnerfreigabe auffindbar ist.
 
 **Quellenkategorien:** `general` (allgemein, mit Redaktionsstand); `personal-demo` (persönliches fiktives Dokument, keine Anordnung); `self-report` (ausdrücklich eigene Angabe). UI übersetzt sie verständlich und zeigt „Stand: Datum“. Ungeprüfte Anordnung bleibt gesperrt.
 
@@ -63,4 +63,10 @@ Inhaltssatz benötigt mindestens: `id, role, title, shortText, detailText, sourc
 
 **Übungsvideos** und **Videos zur Alltagsunterstützung** sind zentrale Wege, aber nicht vorhandene Inhalte werden nicht improvisiert. Jeder Player bietet sichtbare Steuerung und einen verständlichen Fallback. Bei Übungsvideos sind fachliche Freigabe, Inhaltsherkunft und Aktualität notwendig. Die erste Technikprüfung kann mit **neutralen, klar als Techniktest gekennzeichneten Clips** erfolgen.
 
-Eine abgespielte MP3 stammt aus vorbereiteter Datei, nicht aus Laufzeit-TTS; Dialogtext bleibt immer lesbar. Medien stoppen bei Navigation. `media/README.md` erklärt die spätere Ablage.
+Eine abgespielte MP3 stammt aus vorbereiteter Datei, nicht aus Laufzeit-TTS; Dialogtext bleibt immer lesbar. Medien stoppen bei Navigation.
+
+**F – Medienort:** Sämtliche Filme, MP3s und weitere Mediendateien werden auf dem **Tablet** in `Internal storage/Documents/SMART` abgelegt. GitHub Pages stellt nur Anwendung/Metadaten bereit. Auf `file://...` oder einen Android-Systempfad kann die Browser-PWA **nicht ungefragt** zugreifen. Für das Lesen benötigt sie die explizite lokale Auswahl/Berechtigung (vgl. `media/README.md`).
+
+**V – Mediennamen im Manifest:** `P_EX_001.mp4` (Patienten-Übung), `A_HELP_001.mp4` (Alltagsbegleitung), `A_REST_001.mp4` (Entlastung), `ALMA_P_START.mp3` und `ALMA_A_START.mp3`. Dies sind **erwartete Dateinamen, keine erzeugten oder freigegebenen Medien**; andere Bezeichnungen nur nach konsistenter Anpassung des Manifests.
+
+**V – Setup:** Moderator wählt `Documents/SMART` einmal über eine durch Benutzeraktion gestartete Verzeichnisauswahl. Falls dies auf dem Tablet/Browser nicht funktioniert: eine oder mehrere Dateien im Android-Dateidialog explizit wählen. Die Zuordnung erfolgt über die Dateinamen, ohne Datei-Upload, ohne Schreiben in den Medienordner. Fehlende Videos/MP3s zeigen Textalternativen. `media/README.md` beschreibt den Medienvertrag.

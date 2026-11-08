@@ -35,7 +35,9 @@ Alle Dokumente sind v0.1-Entwürfe. `AGENTS.md` enthält verbindliche *Arbeitsre
 
 - `content/demo_manifest.json`: fiktive Personen, Beispiele, Karten, Quellen, Ereignisse und Medienreferenzen.
 - `content/demo_dialogs.json`: ausschliesslich vorbereitete Alma-Dialogknoten und Antwortbuttons.
-- `media/README.md`: erwartete Video-/Audioverzeichnisse und Regeln. **Es sind noch keine freigegebenen Medien enthalten.**
+
+**FESTGELEGT (08.11.2026):** Videos, MP3s und weitere Mediendateien liegen ausschliesslich auf dem Android-Tablet unter `Internal storage/Documents/SMART`. Die PWA und Text-/Karten-Daten kommen über GitHub Pages; Medien werden nicht über GitHub Pages ausgeliefert. Zum Lesen muss die App den Ordner mit Einwilligung am Tablet auswählen/verbinden; siehe `media/README.md`.
+- `media/README.md`: **lokalen Medienordner auf dem Tablet** verbinden, Dateinamen, Berechtigungen und Freigaben. **Keine MP4-/MP3-Dateien im öffentlichen Repository.**
 
 ## Repository und Veröffentlichungsstand
 

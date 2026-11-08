@@ -18,9 +18,9 @@ Erstelle den **ersten funktionsfähigen, installierbaren Interview-Demonstrator*
 3. Inhalte aus `content/demo_manifest.json` laden; Dialoge aus `content/demo_dialogs.json`. IDs, Quellen, Datenstand und Typ-Labels anzeigen. Datenpflege **nicht** in JSX/HTML/JS-Strings vergraben.
 4. Echten QR-Scanner implementieren (vorzugsweise Frontkamera) und robuste Touch-Alternative. **Keine** reine QR-Simulation. Event-Lifecycle korrekt: CameraTrack bei Verlassen stoppen. Für Browser ohne nutzbaren `BarcodeDetector` eine **gebündelte** Decoder-Fallback-Bibliothek erwägen (V; keine Pflicht auf externen CDN angewiesen zu sein).
 5. Kartendetails zu Information, Übung, Termin, Meilenstein. Ein QR öffnet Details, schreibt **nichts**. Testbare Bestätigungsdialoge und idempotenter Timeline-Eintrag für Termin/Meilenstein; keine automatisch gemeldeten Übungen.
-6. MP4- und MP3-Player mit Start/Pause/Stopp, Textalternative und sofortigem Stop beim Navigieren. Alma-Dialoggraph mit auswählbaren Antwortbuttons; keine Speech-to-Text-/KI-APIs.
+6. **Verbindliche lokale Medienablage:** MP4, MP3 und andere Medien **ausschliesslich** unter `Internal storage/Documents/SMART` auf dem Android-Tablet. Kein Hosting oder Streaming von Medien über GitHub Pages, kein externer Server, kein Upload. Medien über stabile ID und `fileName` in `content/demo_manifest.json` auflösen; App-Dateien bleiben über Pages geladen. **V:** Im Moderatorbereich den Ordner per explizitem Benutzerklick via `showDirectoryPicker()` nur lesend verbinden, wenn unterstützt; ansonsten über Android-Dateiauswahl lokal eine oder mehrere Dateien verbinden. Keine direkte Path-/`file://`-Zugriffsfiktion und keine stillschweigende Vorabfreigabe. Gewährleiste lokale Wiedergabe, Start/Pause/Stopp, Textalternative und Stop bei Navigation; Alma-Dialoggraph mit Antwortbuttons, ohne Speech-to-Text-/KI-APIs.
 7. Demo-Steuerung zum Umschalten der fiktiven Austritts-/Physiotermin-Szene und Zurücksetzen lokaler bestätigter Einträge; keine echte Nutzerverwaltung.
-8. Fehlende Medien müssen als **fehlende oder nicht freigegebene** Inhalte erscheinen. Für reine Player-Tests optional **selbst erstellte neutrale** Testclips/-MP3 ohne Therapiebotschaft integrieren; produktionsreife Übungsclips **nicht** erfinden.
+8. Fehlende Medien/Dateiberechtigungen müssen als **fehlende oder nicht freigegebene lokale** Inhalte erscheinen. Für Player-Tests allenfalls **selbst erstellte neutrale Test-MP4/MP3** in `Documents/SMART` auf dem Tablet bereitstellen oder Moderator dafür anleiten; **keine Medien ins öffentliche Repo committen**, keine produktionsreifen Übungsclips erfinden. Nach PWA-Neustart Rechte prüfen und ggf. Ordner erneut verbinden.
 9. Papier-/Karten-Prototypen: einfache druckbare Darstellung oder reproduzierbare Druckvorlagen der Kartenvorder- und -rückseiten mit lesbaren QR-Codes, getrennte Rollen-Sets; Druckformat bleibt bis Test **Vorschlag**.
 10. Dokumentation/Tests mit implementiertem Stand und real nicht geprüften Anforderungen abgleichen; keine verdeckten Funktionsannahmen.
 
@@ -29,7 +29,7 @@ Erstelle den **ersten funktionsfähigen, installierbaren Interview-Demonstrator*
 - PWA lässt sich über GitHub Pages installieren/öffnen (Pages-Aktivierung ggf. manuell).
 - Echter Scan einer **gedruckten** Demo-Karte öffnet den richtigen Inhalt; alternative Touch-Karte führt zum selben Ziel.
 - Patienten- und Angehörigenrolle haben erkennbar **unterschiedliche** Video-/Informationsangebote.
-- MP4 und MP3 lassen sich bei verfügbaren, rechtmässigen Testmedien starten und stoppen; Zurück beendet beides zuverlässig.
+- MP4 und MP3 werden nach lokaler Freigabe **aus `Internal storage/Documents/SMART`** abgespielt, nicht vom Webserver; bei fehlender Berechtigung oder Datei funktioniert die verständliche Text-/Dateiauswahl-Alternative. Zurück beendet beide Player zuverlässig.
 - Termine/Meilensteine nur nach Bestätigung; Wiederholung ohne Duplikat; Video erzeugt **keinen** Übungseintrag.
 - Quellen, Datum, fiktiver Status sichtbar; kein erfundener medizinischer Inhalt.
 - Kernseiten passen bei sichtbaren Android-Systemleisten; nicht am Desktop allein als „Tablet getestet“ deklarieren.

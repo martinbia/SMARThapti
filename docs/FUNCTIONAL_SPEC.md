@@ -21,12 +21,14 @@
 | FS-12 | F | Speichern ist **idempotent** auf stabilem Ereignisschlüssel (und Perspektive, sofern privat). Erneutes Scannen/Bestätigen erzeugt keinen zweiten Eintrag. |
 | FS-13 | F | Das Ansehen/Beenden eines Videos ändert weder Übungsstatus noch Timeline. Nur gesonderte explizite Selbstangabe kann „ich habe …“ dokumentieren; nicht automatisch validiert. |
 | FS-14 | F | Angehörige finden Videos und Informationen über hilfreiche Begleitung sowie eigene Entlastung, nicht nur eine Kopie der Patientenansicht. |
-| FS-15 | F | Fehlende/ungültige Mediendateien führen zu klarem Hinweis und erreichbarem Text bzw. Alternativaktion, nicht zu leerem Player. |
+| FS-15 | F | Fehlender lokaler Ordner, fehlende Berechtigung, fehlende oder ungültige Mediendateien führen zu einem klaren Hinweis und Text-/Dateiauswahl-Alternative, nicht zu leerem Player. |
 | FS-16 | F | Inhalte und Medienreferenzen sind als Daten ausserhalb des UI-/Anwendungscodes pflegbar; IDs bilden die Verbindung. |
 | FS-17 | F | Simulierte persönliche Dokumente sind ausdrücklich als **fiktiv** und **nicht klinisch validiert** markiert. Keine konkreten Belastungs-/Dosierungsangaben ohne Prüfung. |
 | FS-18 | F | Audio und Video stoppen auch bei Startseitenwechsel, Dialogabbruch und Wechsel in Scan-Ansicht. Kamera-Stream wird beim Verlassen gestoppt. |
 | FS-19 | F | Sichtbare Möglichkeit, zur Übersicht zurückzukehren; keine Sackgasse in Dialog, Kamera, Detail oder Timeline. |
-| FS-20 | F | Interview-Reset setzt nur lokale Demo-Einträge zurück; löscht keine System-/Gerätedateien. |
+| FS-20 | F | Interview-Reset setzt nur lokale Demo-Einträge zurück; löscht **keine** lokalen Medien oder anderen Gerätedateien. |
+| FS-21 | F | **Medien ausschliesslich lokal:** Filme, MP3s und weitere Mediendateien liegen unter `Internal storage/Documents/SMART` auf dem Android-Tablet. PWA lädt die Mediendateien weder von GitHub Pages noch von externen Servern; anhand von Medien-ID und Dateiname wird das zuvor freigegebene lokale Medium abgespielt. |
+| FS-22 | F | Vor lokalem Medienzugriff ist eine **explizite Berechtigung/Dateiauswahl** nötig. Fehlt diese oder ist das Medienformat ungültig, bleibt der Inhalt mit verständlicher Textalternative zugänglich; Audio/Video werden nicht ungefragt übertragen oder kopiert. |
 
 ## Vorschlag für v0.1-Implementierung
 
@@ -36,6 +38,8 @@
 - **V-F4:** QR-Nutzlast `SH1:<KARTEN-ID>`, z. B. `SH1:P-INF-001`. Keine Namen, Diagnosen, Termine oder geheimen Tokens im Code. Externe URL-QRs erst nach Pages-Prüfung erwägen.
 - **V-F5:** Für die Demo ein Fixdatum (06.11.2026) mit separatem späteren Physiotermin-Szenario statt eine reale Heilungsfrist; Datum wird aus Demodaten geladen.
 - **V-F6:** Button für „Karten auswählen“ immer sichtbar; Scanner wird nicht als Zugangshürde erzwungen.
+- **V-F7:** Moderator verbindet einmal in der Vorbereitung `Documents/SMART` über eine vom Nutzer ausgelöste Ordnerauswahl (z. B. `showDirectoryPicker()` in kompatiblem Chrome). Dateinamen stehen im JSON-Manifest; App löst sie in diesem Ordner auf. Ordnerzugriff ist **nicht automatisch** aus einem Android-Pfad ableitbar.
+- **V-F8:** Bei fehlender Ordner-API oder Berechtigung: per nativer Dateiauswahl eine oder mehrere Dateien aus `Documents/SMART` auswählen und anhand ihrer Dateinamen zuordnen; falls möglich bestehende Handles nutzen, bei Rechteverlust erneute Freigabe anbieten. Nur lesender Zugriff, keine Vervielfältigung oder Mediendateien im App-Cache.
 
 ## Keine stillschweigende klinische Erweiterung
 
@@ -44,6 +48,6 @@ Eine individualisierte Übung ist erst dann als „konkret durchführen“ darst
 ## Traceability
 
 - Rollen und Alltag: `docs/CONCEPT.md`, `docs/UX_SPEC.md`.
-- QR-, Karten- und Ereignis-IDs: `docs/CONTENT_AND_CARDS.md`, `content/demo_manifest.json`.
-- Konkrete Tests: `docs/TEST_PLAN.md` (T01–T20).
+- QR-, Karten- und Ereignis-IDs sowie Dateinamen: `docs/CONTENT_AND_CARDS.md`, `content/demo_manifest.json`, `media/README.md`.
+- Konkrete Tests: `docs/TEST_PLAN.md` (T01–T25).
 - Freigabestatus: `docs/DECISIONS.md`.

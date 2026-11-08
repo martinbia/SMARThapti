@@ -24,9 +24,11 @@
 | U6 | Alma-Dialog | Sprechtext lesbar, optional MP3, 2–4 grosse Antwortbuttons, „Beenden“ |
 | U7 | Timeline | Stationen „geschehen“, „geplant“, „selbst berichtet“, „persönliches Ziel“; Details ansehen, neue Einträge nur auf Bestätigung |
 | U8 | Bestätigung | „Diesen Eintrag hinzufügen?“ + Titel, Datum, Herkunft, „Hinzufügen“ / „Abbrechen“; nach Erfolg deutliches, neutrales Feedback |
-| U9 | Demo-Steuerung | Szenario/Datum auswählen, Demo zurücksetzen, Kamera- und Medientest; als Moderatorbereich gekennzeichnet |
+| U9 | Demo-Steuerung | Szenario/Datum auswählen, Demo zurücksetzen, Kamera-/Medientest und **„Medienordner verbinden“**; als Moderatorbereich gekennzeichnet |
 
 ## Kernabläufe (F)
+
+**Vorbereitung lokaler Medien:** Vor dem Interview kopiert die Moderatorperson die zulässigen MP4-/MP3-Dateien nach `Internal storage/Documents/SMART`. In U9 öffnet sie „Medienordner verbinden“ und wählt diesen Ordner ausdrücklich im Android-Dateidialog (V: `showDirectoryPicker()`). Die PWA zeigt die gefundenen/fehlenden Dateinamen und verknüpft sie per Manifest-ID. Bei fehlender Ordnerunterstützung „Lokale Datei(en) auswählen“ als Alternative. **Keine** direkte Dateisystemfreigabe durch blosses Hinterlegen eines Pfades. Patient und Angehörige müssen bei gültiger Verbindung nicht jedes Video einzeln auswählen.
 
 **Papier -> Tablet -> Video:** Häftchen/Anhängerkärtchen lesen -> QR vor Tablet-Frontkamera halten -> erkannte ID -> Kartendetail -> „Video ansehen“ -> Video starten/pausieren/stoppen -> zurück; Video endet beim Verlassen. **Touch-Alternative:** Start -> „Karten wählen“ -> dieselbe Karte -> identischer Inhalt.
 
@@ -46,8 +48,12 @@
 | Keine Kamera / Frontkamera ungeeignet | Alternative Kamera auswählen und Touch-Einstieg; kein endloser Ladezustand |
 | QR unbekannt, defekt, anderer Code | „Diese Karte kenne ich noch nicht“ + erneutes Scannen / manuelle Kartenauswahl |
 | Scan wird wiederholt ausgelöst | Nur **eine** Detailnavigation; kein Stapeln der Ansichten oder doppelte Einträge |
-| Karte verweist auf fehlendes Medium | Kein kaputter Player; „Dieses Video/Audio ist noch nicht hinterlegt“ plus Text-/Alternativansicht |
+| Karte verweist auf fehlendes Medium | Kein kaputter Player; „Diese lokale Datei fehlt unter Documents/SMART“ mit erwartetem Dateinamen und Textalternative |
 | Medienwechsel / Zurück | Vorherige Wiedergabe vollständig stoppen und Position/Player kontrolliert schliessen |
+| Medienordner noch nicht freigegeben | In U9 sichtbare Schaltfläche „Medienordner verbinden“; in U5 Textalternative und Hinweis „Medien nicht verbunden“ |
+| Ordnerauswahl abgebrochen / Berechtigung entzogen | Keine Wiederholschleife und kein versteckter Upload; erneutes Auswählen oder einzelne Datei(en) manuell wählen |
+| Falscher Ordner / Datei umbenannt / nicht unterstütztes Format | Benannte Datei als fehlend/nicht abspielbar zeigen; Manifest und realen Dateinamen abgleichen, andere Inhalte bleiben nutzbar |
+| App-Neustart | Falls gespeicherter Ordner-Handle nicht mehr autorisiert ist, erneutes Verbinden mit einer verständlichen Aktion anbieten |
 | Ungültige Antwortknoten | Sicher zu Übersichts-/Dialogstart zurückkehren, Fehler für Entwicklung sichtbar (ohne Patientendaten) |
 | Timeline-Eintrag bereits vorhanden | Neutraler Hinweis, vorhandenen Eintrag öffnen; kein zweiter Eintrag |
 | Eintrag abgebrochen | Keine Datenänderung; zur Karte zurückkehren |
@@ -57,4 +63,4 @@
 
 ## Noch zu validieren (O)
 
-Reale Tablet-Auflösung, Chrome/PWA-Standalone-Verhalten, Höhe der Android-Systemleisten, Frontkamera-Fokus auf Druckkarten, Ablesedistanz, Schriftgrösse und gewünschte Schnelligkeit der Dialoge. Zuerst am tatsächlichen Gerät testen, erst danach visuell feinjustieren.
+Reale Tablet-Auflösung, Chrome/PWA-Standalone-Verhalten, Höhe der Android-Systemleisten, Frontkamera-Fokus auf Druckkarten, **Ordnerauswahl und Medienberechtigungen auf Android**, Ablesedistanz, Schriftgrösse und gewünschte Schnelligkeit der Dialoge. Zuerst am tatsächlichen Gerät testen, erst danach visuell feinjustieren.
