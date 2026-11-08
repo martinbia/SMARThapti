@@ -52,3 +52,7 @@ GitHub-Pages-Zieladresse nach Einrichtung (Vorschlag): `https://martinbia.github
 ## Pflegeprozess
 
 Konzeptkanal entscheidet; dokumentierte Änderung im Repo ist Grundlage für Codex; Codex implementiert erst nach explizitem Auftrag, meldet Abweichungen und reale Testresultate zurück. Ein Commit löst keinen Codex-Auftrag automatisch aus.
+
+## Implementierter PWA-Draft (08.11.2026)
+
+Nach ausdrücklichem Implementierungsauftrag im Cloud-Chat liegt jetzt ein funktionsfähiger PWA-Draft vor. Start, Funktionen, Testergebnisse, Grenzen und Pages-Aktivierung: [`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md). Der historische Erstcheck und die vorbereiteten Aufträge oben bleiben als Herkunft erhalten. Dieser Draft ersetzt keine Tablet- oder klinische Abnahme.
