@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "0.1.0",
+  "status": "PROPOSAL - prewritten dialogue graph; no speech recognition or generative AI",
+  "startNodes": {
+    "patient": "ALMA-P-START",
+    "relative": "ALMA-A-START"
+  },
+  "nodes": [
+    {
+      "id": "ALMA-P-START",
+      "role": "patient",
+      "text": "Hallo, Ernst. Moechten Sie Ihre Karten, ein Video oder Ihren Weg ansehen?",
+      "audioMediaId": "M-ALMA-P",
+      "answers": [
+        {
+          "label": "Meine Uebung ansehen",
+          "action": "open-card",
+          "target": "P-EX-001"
+        },
+        {
+          "label": "Meine Karten",
+          "action": "open-view",
+          "target": "cards"
+        },
+        {
+          "label": "Meinen Weg sehen",
+          "action": "open-view",
+          "target": "timeline"
+        },
+        {
+          "label": "Beenden",
+          "action": "end",
+          "target": null
+        }
+      ]
+    },
+    {
+      "id": "ALMA-A-START",
+      "role": "relative",
+      "text": "Hallo, Anna. Moechten Sie Informationen zur Begleitung oder zu Ihrer eigenen Entlastung?",
+      "audioMediaId": "M-ALMA-A",
+      "answers": [
+        {
+          "label": "Gut unterstuetzen",
+          "action": "open-card",
+          "target": "A-INF-001"
+        },
+        {
+          "label": "Eigene Entlastung",
+          "action": "open-card",
+          "target": "A-INF-002"
+        },
+        {
+          "label": "Naechsten Termin ansehen",
+          "action": "open-card",
+          "target": "A-APT-001"
+        },
+        {
+          "label": "Beenden",
+          "action": "end",
+          "target": null
+        }
+      ]
+    }
+  ]
+}
