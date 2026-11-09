@@ -8,7 +8,7 @@
 | ID | Status | Anforderung und überprüfbares Kriterium |
 | --- | --- | --- |
 | FS-01 | F | Installierbare, lokal auf dem Tablet benutzbare PWA; Aufruf per HTTPS über GitHub Pages, Hochformat als Primärlayout, kein eigenes Smartphone nötig. |
-| FS-02 | F | Wechsel zwischen **Patienten-** und **Angehörigenperspektive**; jeweils eigenständige Startinhalte und Karten. Rollenlabel im Menü und in Inhaltsansichten einzeilig sichtbar, Wechsel primär über QR-Karten ohne Informationsverlust; dekorativer Einstieg zunächst ohne Rollenwahl (F16). |
+| FS-02 | F17 | Ein einziger fiktiver Patient; nur P-Karten, Patientenmedien und -dialoge; keine Rollenumschaltung und keine Angehörigenansicht. |
 | FS-03 | F | Kurze Info aus Häftchen wird digital vertieft; jede Detailansicht nennt Quelle, Stand und Kategorie (allgemein / persönliche Demo-Vorgabe / eigene Angabe). |
 | FS-04 | F | Vier Kartentypen: **Information, Übung, Termin, Meilenstein**. Vorderseite Titel+Bildsymbol, Rückseite QR; identische Inhalte über Touch-Auswahl erreichbar. |
 | FS-05 | F | Kamera scannt **echte** QR-Codes; zuerst Frontkamera anfragen, bei inkompatibler/ungeeigneter Kamera Wechsel zur Rückkamera anbieten; unbekannte Codes höflich behandeln. |
@@ -20,7 +20,7 @@
 | FS-11 | F | Neu hinzuzufügende Termin-/Meilensteineinträge zeigen vor dem Speichern eine verständliche Bestätigungsansicht mit „Hinzufügen“ und „Abbrechen“. Abbrechen verändert Timeline nicht. |
 | FS-12 | F | Speichern ist **idempotent** auf stabilem Ereignisschlüssel (und Perspektive, sofern privat). Erneutes Scannen/Bestätigen erzeugt keinen zweiten Eintrag. |
 | FS-13 | F | Das Ansehen/Beenden eines Videos ändert weder Übungsstatus noch Timeline. Nur gesonderte explizite Selbstangabe kann „ich habe …“ dokumentieren; nicht automatisch validiert. |
-| FS-14 | F | Angehörige finden Videos und Informationen über hilfreiche Begleitung sowie eigene Entlastung, nicht nur eine Kopie der Patientenansicht. |
+| FS-14 | F17 | Patienten finden sämtliche vorgesehenen Übungsvideos sowie ihre Berichte/Erklärungen und geeignete Alltagshilfe-Inhalte. Keine separate Angehörigenperspektive. |
 | FS-15 | F | Fehlender lokaler Ordner, fehlende Berechtigung, fehlende oder ungültige Mediendateien führen zu einem klaren Hinweis und Text-/Dateiauswahl-Alternative, nicht zu leerem Player. |
 | FS-16 | F | Inhalte und Medienreferenzen sind als Daten ausserhalb des UI-/Anwendungscodes pflegbar; IDs bilden die Verbindung. |
 | FS-17 | F | Simulierte persönliche Dokumente sind ausdrücklich als **fiktiv** und **nicht klinisch validiert** markiert. Keine konkreten Belastungs-/Dosierungsangaben ohne Prüfung. |
@@ -54,7 +54,7 @@ Eine individualisierte Übung ist erst dann als „konkret durchführen“ darst
 
 ## Ergänzung 09.11.2026 – Einstieg
 
-FS-23: Vor dem Menü erscheint die dekorative Bergwiese mit Kühen. Die QR-Anleitung blendet in 3 Sekunden ein, demonstriert fünfmal die Karte mit Code zur Tablet-Kamera, blendet in 3 Sekunden aus und pausiert 10 Sekunden vollständig. Tippen oder Tastaturaktivierung öffnet das Menü. Kameraerkennung nach Browserfreigabe ist bereits am Einstieg aktiv; Anna-/Ernst-Karten wählen automatisch die jeweilige Perspektive. Der manuelle Perspektivwechsel bleibt nachgeordnet erreichbar. Bei reduzierter Bewegungseinstellung wird die Hand nicht bewegt. Die Bergwiesen-Appgrafik ist gemäss F16 als App-Shell erlaubt; lokale Therapie-/Dialogmedien bleiben vom Webhosting und Cache ausgeschlossen.
+FS-23: Vor dem Menü erscheint die dekorative Bergwiese mit Kühen. Die QR-Anleitung blendet in 3 Sekunden ein, demonstriert fünfmal die Karte mit Code zur Tablet-Kamera, blendet in 3 Sekunden aus und pausiert 10 Sekunden vollständig. Tippen oder Tastaturaktivierung öffnet das Menü. Kameraerkennung nach Browserfreigabe ist bereits am Einstieg aktiv; Patientenkarten öffnen ohne Rollenwechsel nur die Patientenperspektive. Alte Angehörigenkarten sind inaktiv. Bei reduzierter Bewegungseinstellung wird die Hand nicht bewegt. Die Bergwiesen-Appgrafik ist gemäss F16 als App-Shell erlaubt; lokale Therapie-/Dialogmedien bleiben vom Webhosting und Cache ausgeschlossen.
 
 FS-24 (Nutzerauftrag 09.11.2026): Roter Abschaltbutton auf allen normalen Ansichten. Abschalten stoppt sofort Kamera, Player, Animations-Timer und QR-Erkennung, entfernt den Indikator und zeigt eine schwarze App-Fläche. Eine spätere Antwort auf eine noch offene Kamerafreigabe darf keinen Stream aktiv halten. Bis zum nächsten bewussten Tippen bzw. Tastaturaktivieren bleibt die App im Ruhemodus, auch nach Navigation oder Reload. Aktivieren öffnet die Bergwiese und startet nach Freigabe wieder die normale QR-Erkennung; lokale Bestätigungen und Dateiverbindungen bleiben erhalten. Der Kameraindikator erscheint auch im Menü-Scanner erst bei laufender Kamera.
 
@@ -63,3 +63,9 @@ FS-25: Sieben benannte lokale Übungsfilme über P-EX-101–107 erreichbar; IDs/
 FS-26: Verbundener Ordner füllt die Dateizuordnung unmittelbar. Dateiliste und Anzahl machen Erfolg/Leerzustand sichtbar. Android-Fallback verlangt keine Galerie-Anbindung; generischer Dateidialog ohne Medien-MIME-Filter und Verzeichnis-Input stehen zur Verfügung. Ein Picker-bedingter Sichtbarkeitswechsel darf gewählte Dateien nicht verwerfen. Dateiauswahl und Navigation/Abschalten besitzen getrennte Lebenszyklen.
 
 FS-27: Bei Online-Start, Online-Ereignis, Wiederaufnahme und regelmässig während Nutzung auf Updates prüfen. Nur vollständig installierte Updates anbieten. Zustimmung aktiviert und lädt neu; Später unterbricht die Sitzung nicht. Offline/Fehler erhält vorhandene Version. Kein Hinweis bei Erstinstallation, Ruhemodus oder Dateiauswahl. Filmzuordnungen/Demo-Einträge überleben Aktivierung; auf Sitzungs-/Dateifreigabeverlust hinweisen.
+
+## Aktueller Beschluss F17 – ausschliesslich Patient (09.11.2026)
+
+- Ein fiktiver Patient **Ernst** ist die einzige Zielgruppe. Kein Angehörigenmodus, keine zweite Timeline, keine Rollenumschaltung. Nur P-Karten und Patienten-Alma-Dialog sind aktiv; alte A-QRs und die bisherige Misch-PDF bleiben Archiv und dürfen nicht auf Patienteninhalte umgeleitet werden.
+- Patienten-Karten: sechs Basiskarten und sieben weitere Übungen, also **13 aktive Karten**, darunter **acht Übungsvideos**. Die lokale Medienablage, das bewusst bestätigte Speichern und alle klinischen Grenzen bleiben erhalten.
+- **GUI-Freeze:** Nur Entfernung des Perspektivenwechsels ist mit F17 ausdrücklich freigegeben. Die zuvor besprochene Zweispalten-Startseite (links Videos, rechts nächster Physiotermin und Berichte/Erklärungen) ist **Vorschlag V16, noch nicht implementierungsfreigegeben**.

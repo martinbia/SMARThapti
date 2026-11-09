@@ -15,8 +15,7 @@
 | Kennung | Ansicht | Inhalt und wichtigste Aktionen |
 | --- | --- | --- |
 | U0 | Bergwiesen-Einstieg | Landschaft mit Kühen, Kamera nach Freigabe im Hintergrund; 3 s Einblendung, fünf Kartenvorführungen à 2,4 s, 3 s Ausblendung, 10 s Bildruhe. Tippen/Enter öffnet das Menü. |
-| U1-P | Patient – Heute | „Übungsvideo ansehen“, „Meine Karten“, „Mein Weg“, „Alma fragen“; zuletzt ausgehändigte Karte |
-| U1-A | Angehörige – Heute | „Unterstützungsvideo“, „Eigene Entlastung“, „Karten & Termine“, „Alma fragen“ |
+| U1 | Patienten-Hauptmenü | Nur Ernst: alle acht Patienten-Übungsvideos, Karten, Mein Weg und Alma direkt erreichbar; kein Perspektivwechsel. Zweispaltiges Layout bleibt V16. |
 | U2 | QR scannen | Live-Kamera, Positionierungshinweis, Kamerawechsel, „Karte ohne Kamera wählen“, Schliessen |
 | U3 | Kartenübersicht | Nach Rolle und Typ sortierbare grosse Karten mit Bildsymbol; manuelle Auswahl öffnet denselben Detailinhalt wie QR |
 | U4 | Kartendetail | Kurztitel, kleine Kernaussage, Quelle/Stand, Vertiefungsbuttons, je nach Typ „Video“ / „Termin vormerken“ / „Eintrag vorschlagen“ |
@@ -28,7 +27,7 @@
 
 ## Kernabläufe (F)
 
-**Vorbereitung lokaler Medien:** Vor dem Interview kopiert die Moderatorperson die zulässigen MP4-/MP3-Dateien nach `Internal storage/Documents/SMART`. In U9 öffnet sie „Medienordner verbinden“ und wählt diesen Ordner ausdrücklich im Android-Dateidialog (V: `showDirectoryPicker()`). Die PWA zeigt die gefundenen/fehlenden Dateinamen und verknüpft sie per Manifest-ID. Bei fehlender Ordnerunterstützung „Lokale Datei(en) auswählen“ als Alternative. **Keine** direkte Dateisystemfreigabe durch blosses Hinterlegen eines Pfades. Patient und Angehörige müssen bei gültiger Verbindung nicht jedes Video einzeln auswählen.
+**Vorbereitung lokaler Medien:** Vor dem Interview kopiert die Moderatorperson die zulässigen MP4-/MP3-Dateien nach `Internal storage/Documents/SMART`. In U9 öffnet sie „Medienordner verbinden“ und wählt diesen Ordner ausdrücklich im Android-Dateidialog (V: `showDirectoryPicker()`). Die PWA zeigt die gefundenen/fehlenden Dateinamen und verknüpft sie per Manifest-ID. Bei fehlender Ordnerunterstützung „Lokale Datei(en) auswählen“ als Alternative. **Keine** direkte Dateisystemfreigabe durch blosses Hinterlegen eines Pfades. Der Patient muss bei gültiger Verbindung nicht jedes Video einzeln auswählen.
 
 **Papier -> Tablet -> Video:** Häftchen/Anhängerkärtchen lesen -> QR vor Tablet-Frontkamera halten -> erkannte ID -> Kartendetail -> „Video ansehen“ -> Video starten/pausieren/stoppen -> zurück; Video endet beim Verlassen. **Touch-Alternative:** Start -> „Karten wählen“ -> dieselbe Karte -> identischer Inhalt.
 
@@ -40,7 +39,7 @@
 
 **Dialog via QR:** Die zusätzlichen Demo-Karten `P-INF-003` und `A-INF-003` sind Informationskarten mit `dialogNodeId`. Ihr Scan zeigt den zugehörigen vorbereiteten Alma-Dialog (U6), kein leerer allgemeiner Medienplayer. Bei fehlender MP3 bleibt der Textdialog vollständig bedienbar.
 
-**Rollenwechsel:** Primär automatisch durch die gescannte Kartenrolle, auch bereits vom Bergwiesen-Einstieg. Im Menü nur eine kompakte Zeile „Für Ernst/Anna“; manuell über „Andere Perspektive ohne QR-Code“ im Fussbereich; ggf. laufenden Scanner/Player beenden; Angehörigeninhalte bleiben eigenständig. Private Angehörigennotizen dürfen nicht ungefragt in der Patientenperspektive auftauchen.
+**Patientenansicht (F17):** Kein Rollenwechsel oder Angehörigenmodus. „Für Ernst“ kennzeichnet nur den fiktiven Patienten. Historische A-QRs sind inaktiv; keine Umleitung.
 
 ## Fehler- und Randzustände (F)
 
@@ -90,3 +89,9 @@ Ein zusätzliches, nicht modales Hinweispanel „Neue Version verfügbar“ biet
 ## Verfügbare Tabletbreite (ausdrücklicher Nutzerauftrag)
 
 Die feste 850-CSS-Pixel-Begrenzung der App-Fläche entfällt. Menü und Unteransichten nutzen die verfügbare Breite im Hoch- und Querformat; bestehende Rand-/Safe-Area-Abstände bleiben erhalten. Keine weitere Änderung an Navigation, Anordnung, Schrift oder Farben.
+
+## Aktueller Beschluss F17 – ausschliesslich Patient (09.11.2026)
+
+- Ein fiktiver Patient **Ernst** ist die einzige Zielgruppe. Kein Angehörigenmodus, keine zweite Timeline, keine Rollenumschaltung. Nur P-Karten und Patienten-Alma-Dialog sind aktiv; alte A-QRs und die bisherige Misch-PDF bleiben Archiv und dürfen nicht auf Patienteninhalte umgeleitet werden.
+- Patienten-Karten: sechs Basiskarten und sieben weitere Übungen, also **13 aktive Karten**, darunter **acht Übungsvideos**. Die lokale Medienablage, das bewusst bestätigte Speichern und alle klinischen Grenzen bleiben erhalten.
+- **GUI-Freeze:** Nur Entfernung des Perspektivenwechsels ist mit F17 ausdrücklich freigegeben. Die zuvor besprochene Zweispalten-Startseite (links Videos, rechts nächster Physiotermin und Berichte/Erklärungen) ist **Vorschlag V16, noch nicht implementierungsfreigegeben**.

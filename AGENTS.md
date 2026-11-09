@@ -18,7 +18,7 @@
 - Nur vorbereitete Inhalte und fiktive Demo-Dokumente. **Keine Medikamentendosierung, Belastungsfreigaben, Übungsdosierung, Hebe-/Transferanweisungen oder Therapieempfehlungen erfinden.**
 - Quellenklasse und Aktualitätsdatum sichtbar: `allgemein`, `persönliche Demo-Vorgabe (fiktiv)`, `eigene Angabe`; fehlende klinische Prüfung als solche markieren.
 - EPIC ist nur eine spätere Integrationsperspektive, nicht Teil der PWA. Keine API-Keys, externen LLM-/Speech-Services, Spracherkennung oder versteckte Netzwerk-Uploads.
-- Angehörigenansicht eigenständig; eigene Sorgen nicht ungefragt in gemeinsamer Timeline zeigen. Perspektivwechsel ist **keine Authentifizierung**.
+- **F17 (09.11.2026): Nur Patienten.** Angehörigenmodus und Rollenwechsel entfallen. Historische A-QR-Codes bleiben Archiv, sind aber in der aktuellen PWA inaktiv und dürfen nicht auf Patientenkarten umgeleitet werden.
 - Technische Videos und MP3s dürfen keine unvalidierten Therapieanweisungen enthalten. Kein automatischer Schluss aus Videoansicht auf Übungsdurchführung.
 - **FESTGELEGT:** Alle Videos, MP3s und sonstigen Mediendateien ausschliesslich **lokal auf dem Android-Tablet** unter `Internal storage/Documents/SMART` bereitstellen. Keine Therapie-/Dialog-Mediendateien in GitHub Pages, Repository, CDN oder auf einen Server hochladen. **Explizite Ergänzung des Nutzers vom 09.11.2026:** Die dekorative Bergwiesen-Appgrafik darf mit der PWA ausgeliefert werden; die Karten-Handbewegung ist eine SVG-/Browseranimation. Diese Ausnahme erlaubt keine Veröffentlichung lokaler MP4-/MP3-Inhalte.
 
@@ -79,3 +79,9 @@
 5. Änderungen zunächst auf einem Arbeitsbranch/PR zur Prüfung anbieten, sofern der Auftraggeber nicht ausdrücklich eine andere Vorgehensweise vorgibt.
 
 **Vorrang:** Diese Regel schränkt die Freiheit bei reversiblen technischen Detailentscheidungen auf **nicht visuell wirksame** Änderungen ein. Projektspezifische fachliche, medizinische, Datenschutz- und Sicherheitsanforderungen gelten unverändert. Ein neuer Commit löst keinen Codex-Auftrag automatisch aus.
+
+## Aktueller Beschluss F17 – ausschliesslich Patient (09.11.2026)
+
+- Ein fiktiver Patient **Ernst** ist die einzige Zielgruppe. Kein Angehörigenmodus, keine zweite Timeline, keine Rollenumschaltung. Nur P-Karten und Patienten-Alma-Dialog sind aktiv; alte A-QRs und die bisherige Misch-PDF bleiben Archiv und dürfen nicht auf Patienteninhalte umgeleitet werden.
+- Patienten-Karten: sechs Basiskarten und sieben weitere Übungen, also **13 aktive Karten**, darunter **acht Übungsvideos**. Die lokale Medienablage, das bewusst bestätigte Speichern und alle klinischen Grenzen bleiben erhalten.
+- **GUI-Freeze:** Nur Entfernung des Perspektivenwechsels ist mit F17 ausdrücklich freigegeben. Die zuvor besprochene Zweispalten-Startseite (links Videos, rechts nächster Physiotermin und Berichte/Erklärungen) ist **Vorschlag V16, noch nicht implementierungsfreigegeben**.
