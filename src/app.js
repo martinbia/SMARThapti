@@ -97,15 +97,22 @@ function go(path) {
   else location.hash = path;
 }
 function appendPowerButton() {
+  let target = root;
   if (!root.classList.contains("welcome-mode")) {
     const content = document.createElement("div");
     content.className = "app-content";
     content.append(...root.childNodes);
     root.append(content);
+    let header = content.querySelector("header");
+    if (!header) {
+      header = document.createElement("header");
+      content.prepend(header);
+    }
+    target = header;
   }
-  root.insertAdjacentHTML(
+  target.insertAdjacentHTML(
     "beforeend",
-    button("⏻ Abschalten", "power-off", 'class="power-off"'),
+    '<button class="power-off" data-action="power-off" aria-label="Abschalten" title="Abschalten"><span aria-hidden="true">⏻</span><span class="power-label"> Abschalten</span></button>',
   );
 }
 function setSleeping(value) {
@@ -312,7 +319,7 @@ function render() {
     go("home");
     return;
   }
-  root.innerHTML = `<header>${button(view === "home" ? "← Zur Bergwiese" : "← Zum Menü", view === "home" ? "welcome" : "home", 'class="back-navigation"')}<strong class="role-line">Für ${esc(persona().displayName.split(" ")[0])}</strong>${button("⚙︎", "settings", 'class="settings-button" aria-label="Einstellungen" title="Einstellungen"')}</header><main id="main" tabindex="-1" aria-label="${esc(title)}">${body}<div id="status" role="status" aria-live="polite"></div>${!storageOK ? '<p class="notice">Lokaler Speicher nicht verfügbar. Einträge bleiben nur während dieser Sitzung erhalten.</p>' : ""}</main><footer>Fiktive Interview-Demo · keine medizinische Anweisung · nicht klinisch geprüft<div class="actions">${button("Mein Weg", "timeline")}${button("Demo vorbereiten", "moderator")}${button("Alle Karten", "cards")}</div><details class="perspective-options"><summary>Andere Perspektive ohne QR-Code</summary><p>Normalerweise wählt Ihre QR-Karte die passende Perspektive.</p>${button(role === "patient" ? "Zu Anna wechseln" : "Zu Ernst wechseln", "role")}</details><small>Perspektivwechsel ist keine Authentifizierung. Nur fiktive Daten verwenden.</small></footer><input id="local-files" type="file" accept=".mp4,.webm,.m4v,.mp3,.m4a,.wav,.ogg,video/*,audio/*" multiple hidden>`;
+  root.innerHTML = `<header>${button(view === "home" ? "← Bergwiese" : "← Zum Menü", view === "home" ? "welcome" : "home", 'class="back-navigation"')}<strong class="role-line">Für ${esc(persona().displayName.split(" ")[0])}</strong>${button("⚙︎", "settings", 'class="settings-button" aria-label="Einstellungen" title="Einstellungen"')}</header><main id="main" tabindex="-1" aria-label="${esc(title)}">${body}<div id="status" role="status" aria-live="polite"></div>${!storageOK ? '<p class="notice">Lokaler Speicher nicht verfügbar. Einträge bleiben nur während dieser Sitzung erhalten.</p>' : ""}</main><footer>Fiktive Interview-Demo · keine medizinische Anweisung · nicht klinisch geprüft<div class="actions">${button("Mein Weg", "timeline")}${button("Demo vorbereiten", "moderator")}${button("Alle Karten", "cards")}</div><details class="perspective-options"><summary>Andere Perspektive ohne QR-Code</summary><p>Normalerweise wählt Ihre QR-Karte die passende Perspektive.</p>${button(role === "patient" ? "Zu Anna wechseln" : "Zu Ernst wechseln", "role")}</details><small>Perspektivwechsel ist keine Authentifizierung. Nur fiktive Daten verwenden.</small></footer><input id="local-files" type="file" accept=".mp4,.webm,.m4v,.mp3,.m4a,.wav,.ogg,video/*,audio/*" multiple hidden>`;
   document.title = `${title} · SMARThapti`;
   appendPowerButton();
   document.querySelector("#main").focus({ preventScroll: true });
