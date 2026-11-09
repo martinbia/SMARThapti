@@ -8,7 +8,9 @@ permissions:
   contents: read
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Playwright 1.56.1 requires the supported Ubuntu 24.04 browser/ffmpeg setup.
+    # ubuntu-latest can resolve to 26.04, where Playwright browser install fails.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
