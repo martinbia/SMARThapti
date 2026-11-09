@@ -136,10 +136,13 @@ test("camera denial and directory fallback keep touch selection usable", async (
   await click(page, "cards");
   await expect(page.locator("#card-list button")).toHaveCount(13);
   await click(page, "moderator");
+  const chooser = page.waitForEvent("filechooser");
   await click(page, "choose-directory");
-  await expect(page.locator("#status")).toContainText(
-    "Ordnerauswahl in diesem Browser nicht verfügbar",
-  );
+  await chooser;
+  await page.locator("#local-directory").dispatchEvent("cancel");
+  await expect(page.locator("#status")).toContainText("Auswahl abgebrochen");
+  await click(page, "cards");
+  await expect(page.locator("#card-list button")).toHaveCount(13);
 });
 test("local file binding, media errors, URL revocation, reset preserves media binding", async ({
   page,
@@ -817,4 +820,95 @@ test("assignment backup export and restore keep card identities stable", async (
   await page.goto("./#card/P-EX-101");
   await expect(page.locator("main")).toContainText("P-EX-101");
   await expect(page.locator(".media-status")).toContainText("Ersatzfilm.mp4");
+});
+
+test("native folder fallback fills assignment choices without a second file selection", async ({
+  page,
+}) => {
+  const { mkdtempSync, writeFileSync, rmSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const dir = mkdtempSync(tmpdir() + "/SMART-");
+  try {
+    writeFileSync(dir + "/Mein Film.mp4", "test only");
+    writeFileSync(dir + "/not-a-movie.txt", "ignored");
+    await page.addInitScript(() => {
+      window.showDirectoryPicker = undefined;
+      window.showOpenFilePicker = undefined;
+    });
+    await page.goto("./#settings");
+    expect(
+      await page.locator("#local-files").getAttribute("accept"),
+    ).toBeNull();
+    await expect(page.locator(".assignment-choice").first()).toBeDisabled();
+    const chooser = page.waitForEvent("filechooser");
+    await click(page, "choose-directory");
+    await (await chooser).setFiles(dir);
+    await expect(page.locator(".connection-status")).toContainText(
+      "1 Mediendateien",
+    );
+    const choice = page.locator(
+      '.assignment-choice[data-target="assign-M-P-EX-101"]',
+    );
+    await choice.selectOption("Mein Film.mp4");
+    await expect(page.locator('[data-id="M-P-EX-101"]')).toHaveValue(
+      "Mein Film.mp4",
+    );
+    await page.locator('#assignment-form button[type="submit"]').click();
+    await expect(page.locator("#status")).toContainText("dauerhaft");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("folder results survive backgrounding and native file picker reopens the connected folder", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    window.testHidden = false;
+    Object.defineProperty(document, "hidden", {
+      configurable: true,
+      get: () => window.testHidden,
+    });
+    const picked = {
+      name: "SMART",
+      async *values() {
+        yield {
+          kind: "file",
+          name: "Uebung.mp4",
+          getFile: async () =>
+            new File(["test"], "Uebung.mp4", { type: "video/mp4" }),
+        };
+      },
+    };
+    window.showDirectoryPicker = async () => {
+      window.testHidden = true;
+      document.dispatchEvent(new Event("visibilitychange"));
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      window.testHidden = false;
+      document.dispatchEvent(new Event("visibilitychange"));
+      return picked;
+    };
+    window.showOpenFilePicker = async (options) => {
+      window.openedAtConnectedFolder = options.startIn === picked;
+      window.pickerHasMediaFilter = !!options.types;
+      return [
+        {
+          getFile: async () =>
+            new File(["test"], "Weiterer Film.mp4", { type: "video/mp4" }),
+        },
+      ];
+    };
+  });
+  await page.goto("./#settings");
+  await click(page, "choose-directory");
+  await expect(page.locator(".connection-status")).toContainText(
+    "1 Mediendateien",
+  );
+  await expect(page.locator(".assignment-choice").first()).toBeEnabled();
+  await click(page, "choose-files");
+  await expect(page.locator(".connection-status")).toContainText(
+    "2 Mediendateien",
+  );
+  expect(await page.evaluate(() => window.openedAtConnectedFolder)).toBe(true);
+  expect(await page.evaluate(() => window.pickerHasMediaFilter)).toBe(false);
 });

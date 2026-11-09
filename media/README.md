@@ -59,3 +59,11 @@ Das dezente Zahnrad in der Kopfzeile öffnet **Einstellungen**. Die hervorgehobe
 5. Die Zuordnung ersetzt keine Android-Dateiberechtigung. Nach vollständigem App-Neustart ggf. die lokalen Dateien erneut auswählen; keine automatische Freigabe allein durch einen Android-Pfad. Keine Medien werden hochgeladen oder in den Service-Worker-Cache kopiert.
 
 Standardzuordnung: P-EX-101 Gehen mit Teilbelastung; 102 Hüftflexion im Stehen; 103 Kniebeugen; 104 Tandemstand; 105 Treppensteigen mit Krücken; 106 Treppensteigen mit Teilbelastung; 107 Wadenheber mit Festhalten. Die bestehende Karte P-EX-001 bleibt ebenfalls frei zuordenbar. Neue SVGs lassen sich direkt in den Einstellungen herunterladen. Reproduzierbar erzeugen: `node scripts/generate-exercise-qr.mjs`.
+
+## Korrektur des Android-Dateidialogs
+
+„Medienordner verbinden“ liest alle unterstützten Dateien direkt im gewählten SMART-Ordner ein. Danach **keine zusätzliche Einzelauswahl**: Die Auswahlfelder pro Karte sind sofort gefüllt. Oben werden Anzahl und Namen der verbundenen Medien angezeigt. Ohne Dateifreigabe bleiben die Auswahlfelder mit verständlichem Hinweis deaktiviert.
+
+Wenn `showDirectoryPicker()` fehlt, wird die native Verzeichnisauswahl (`webkitdirectory`) verwendet. „Lokale Dateien auswählen“ nutzt, falls unterstützt, `showOpenFilePicker()` mit dem bereits freigegebenen Ordner als Startpunkt, sonst eine allgemeine Dateiauswahl **ohne** `video/*`-/`audio/*`-Filter, damit Android nicht gezielt die Galerie öffnet. Falls Android eine Anbieterauswahl zeigt: **Dateien / Durchsuchen → Interner Speicher → Documents → SMART**, gewünschte Filme markieren. Ein Browser kann einen absoluten Android-Pfad nicht ungefragt erzwingen; nach expliziter Ordnerfreigabe reicht die Ordnerauswahl aus.
+
+Der Auswahldialog darf die App vorübergehend in den Hintergrund versetzen: Die Rückkehr verwirft die Auswahl nicht mehr und ersetzt das native Dateielement während der Auswahl nicht. Bewusstes Navigieren oder Abschalten verwirft dagegen verspätete Dialogergebnisse. Es werden nur ausgewählte Dateireferenzen gehalten, keine Medien hochgeladen oder in den App-Cache kopiert. Bei leerem/falschem Ordner bleibt die Anzahl null sichtbar; Auswählen und dauerhaftes Zuordnen sind weiterhin getrennte Schritte.

@@ -71,3 +71,7 @@ Jede normale Ansicht, einschliesslich Einstieg, Scanner und Ladefehler, besitzt 
 ## F18 – Filmzuordnung und Navigation (09.11.2026)
 
 Nutzerauftrag: grössere, deutlich sichtbare Navigation; dezentes Zahnrad für Einstellungen in der ersten Zeile. Sieben explizit benannte lokale Übungsfilme erhalten eigene Karten P-EX-101–107. Gespeicherte Zuordnungen verbinden stabile Medien-/Karten-IDs mit lokalen Dateinamen und überleben Neustarts sowie neue Builds bei gleicher Website. LocalStorage ist vom Demo-Reset getrennt; Export/Import als Sicherung. Android-Dateifreigaben bleiben separat erforderlich. Keine klinische Freigabe aus dem Vorliegen einer Datei ableiten.
+
+## Android-Auswahl korrigieren
+
+Nutzerrückmeldung: Galerie statt SMART-Dateien sowie leere Filmzuordnung. Umsetzung: generischer Dateidialog ohne Medien-MIME-Filter; nativer Ordner-Input als Fallback; vorhandener freigegebener Ordner als Startpunkt bei unterstützter Dateiauswahl. Anzahl/Dateiliste und deaktivierte leere Auswahlfelder zeigen den Verbindungsstatus. Kurzzeitiges Verbergen der App durch den Picker verwirft das Ergebnis nicht. Absolute Android-Pfade bleiben nur Orientierung, keine ungefragte Freigabe.

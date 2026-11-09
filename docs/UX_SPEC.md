@@ -80,3 +80,5 @@ Auf dem Alm-Begrüssungsbild bleibt der rote „⏻ Abschalten“-Button unten r
 ## Einstellungen und deutlichere Navigation (09.11.2026)
 
 Hervorgehobene Zurück-Buttons (mindestens 56 CSS-Pixel) und ein dezentes, beschriftetes Zahnrad in derselben Kopfzeile. Einstellungen verbinden lokale Dateien und zeigen pro Karte/Medieneintrag Dateinamenfeld, Auswahl verbundener Dateien und ggf. Download des zusätzlichen QR-Codes. Speichern bestätigt nur erfolgreichen dauerhaften Schreibzugriff; Export/Import dienen als Sicherung. Neustart/New Build behält Zuordnungen, Android-Freigabe ggf. erneut erforderlich.
+
+Einstellungen führen jetzt in drei Schritten durch Ordnerfreigabe → Film pro Karte wählen → Zuordnungen speichern. Nach erfolgreicher Ordnerfreigabe sind Anzahl und Dateinamen sichtbar; eine zweite Dateiauswahl ist nicht erforderlich. Leere Auswahlfelder erklären die noch fehlende Verbindung. Android-Fallback öffnet eine allgemeine Dateiauswahl ohne Galerie-MIME-Filter; „Dateien / Durchsuchen“ führt zu Documents/SMART.
