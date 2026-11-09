@@ -67,3 +67,13 @@ Gemäss `docs/TEST_PLAN.md` T01–T28 am tatsächlichen Zielgerät protokolliere
 - Netzwerkbeobachtung auf dem Tablet: keine MP4-/MP3-Downloads oder Uploads, nur lokal gewählte Dateien. Rechte-/Codecfehler müssen Text und Dateiauswahl zugänglich lassen.
 - PWA-Installation, Pages-Direktaufruf/Reload, Offline-App-Shell nach Erstladung, bestätigte Einträge und Reset; vorhandene Karten-PDF bei 100 % drucken und physisch falten/scannen.
 - Klinische, redaktionelle und lizenzrechtliche Freigabe konkreter Medien bleibt unabhängig von diesen technischen Tests notwendig.
+
+## Neuer Einstieg vom 09.11.2026
+
+Beim Aufruf ohne Inhalts-Hash oder über `#welcome` erscheint die Bergwiese mit Kühen. Der Kamera-Scanner beginnt dort nach Browserfreigabe; eine gescannte Karte öffnet automatisch die richtige Perspektive. Tippen oder Enter öffnet `#home`. Das Menü ersetzt den grossen Personenblock durch eine kompakte Kopfzeile „Für Ernst/Anna“; manueller Wechsel liegt im aufklappbaren Fussbereich. Die Wiese ist eine generierte Appgrafik (F16), für offline verfügbare App-Shell vorgesehen; MP4/MP3 bleiben ausschliesslich lokal. Die Handanimation benötigt keine Mediendatei: 3 Sekunden einblenden, fünf Bewegungen à 2,4 Sekunden, 3 Sekunden ausblenden, 10 Sekunden reine Bildruhe; danach Wiederholung. Bei reduzierter Bewegungseinstellung bleibt die Hand still. Kamera, Animation und Timer enden beim Verlassen oder Verbergen.
+
+Zusätzlich automatisiert geprüft: echter Decoder mit Anna-/Ernst-Kamerabildern direkt am Einstieg, Touch-/Tastaturzugang, kompakte Kopfzeile, vollständiger Animationszyklus mit fünf Wiederholungen und zehn Sekunden Bildruhe sowie reduzierte Bewegung. Reale Tablet-Kamerafreigabe, Lesedistanz, Animation und sichtbare Android-Leisten bleiben am Gerät zu prüfen.
+
+**Kameraindikator (Nutzerauftrag 09.11.2026):** Ein kleiner roter Punkt oben rechts zeigt der Interviewführung, dass der Kamerastream läuft und die QR-Erkennung bereit ist. Er bleibt auch in den zehn Sekunden reiner Landschaft sichtbar. Beim Verlassen, Fehler oder Kameraende verschwindet er. Vor Freigabe bzw. bei Ablehnung wird er nicht angezeigt.
+
+Verifikation dieser Ergänzung: Produktionsbuild erfolgreich, alle **24 Playwright-Tests** in Linux-System-Chromium bestanden; Hochformat-Ansichten zusätzlich visuell geprüft. Die früheren 19 Tests bleiben erhalten und sind um fünf Einstiegs-/Kamerapunktprüfungen ergänzt. Reale Android-Hardware weiterhin nicht getestet.

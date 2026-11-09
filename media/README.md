@@ -43,3 +43,7 @@ Datenschema: `mediaStorage.rootLabel` ist ein **menschlich lesbarer Ort**, keine
 Rechte an Medien, fachliche Prüfung der Therapieanweisungen, Quellenstand, Untertitel/Transkript separat klären. Solange die Medien fehlen, **klar bezeichnete Platzhalter** anzeigen. Für reine Abspieltests dürfen eigene neutrale Testmedien im lokalen Ordner liegen; keine erfundenen medizinischen Übungsanleitungen.
 
 **Tests:** `docs/TEST_PLAN.md` T12–T14 und T21–T25. **Kein Implementierungsauftrag** durch diese Datei.
+
+## Dekorative Appgrafik – ausdrückliche Ausnahme vom 09.11.2026
+
+Der Nutzer hat für den Startbildschirm ein Bergwiesenmotiv mit Kühen beauftragt. `public/alpine-meadow.webp` ist eine KI-generierte dekorative Appgrafik mit Zentralschweizer Alpencharakter und wird mit der App-Shell ausgeliefert und zwischengespeichert. Die Hand-/Kartenanleitung ist SVG mit Browseranimation, keine Video-Datei. Diese begrenzte Ausnahme betrifft keine Therapieclips oder Alma-MP3s; deren Speicher-, Freigabe- und Uploadregeln oben gelten weiterhin.

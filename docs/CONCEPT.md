@@ -49,3 +49,5 @@ Austritt nach Hause -> Häftchen und QR-Anhänger -> Patient oder Angehörige ö
 ## Abgrenzung v0.1
 
 Kein eigener Sprachassistent mit offener Konversation, keine Spracherkennung, keine KI-generierten Antworten, keine Geräteintegration in Alma, kein EMR-/EPIC-Zugriff, keine echte Nutzerauthentifizierung, keine reale Patientendatenspeicherung, keine automatische Therapiebeurteilung.
+
+**Ergänzung 09.11.2026 (F16):** Das ausdrücklich beauftragte dekorative Bergwiesenbild gehört zur App-Shell und darf mit der PWA ausgeliefert werden. Die QR-Kartenanleitung wird mit SVG und Browseranimation umgesetzt. Therapie-/Dialog-MP4s und MP3s bleiben ausschliesslich lokal auf dem Tablet. QR-Karten wählen primär automatisch die passende Perspektive.

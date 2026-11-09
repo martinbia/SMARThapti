@@ -8,7 +8,7 @@
 | ID | Status | Anforderung und überprüfbares Kriterium |
 | --- | --- | --- |
 | FS-01 | F | Installierbare, lokal auf dem Tablet benutzbare PWA; Aufruf per HTTPS über GitHub Pages, Hochformat als Primärlayout, kein eigenes Smartphone nötig. |
-| FS-02 | F | Wechsel zwischen **Patienten-** und **Angehörigenperspektive**; jeweils eigenständige Startinhalte und Karten. Rollenlabel jederzeit sichtbar, Wechsel ohne Informationsverlust. |
+| FS-02 | F | Wechsel zwischen **Patienten-** und **Angehörigenperspektive**; jeweils eigenständige Startinhalte und Karten. Rollenlabel im Menü und in Inhaltsansichten einzeilig sichtbar, Wechsel primär über QR-Karten ohne Informationsverlust; dekorativer Einstieg zunächst ohne Rollenwahl (F16). |
 | FS-03 | F | Kurze Info aus Häftchen wird digital vertieft; jede Detailansicht nennt Quelle, Stand und Kategorie (allgemein / persönliche Demo-Vorgabe / eigene Angabe). |
 | FS-04 | F | Vier Kartentypen: **Information, Übung, Termin, Meilenstein**. Vorderseite Titel+Bildsymbol, Rückseite QR; identische Inhalte über Touch-Auswahl erreichbar. |
 | FS-05 | F | Kamera scannt **echte** QR-Codes; zuerst Frontkamera anfragen, bei inkompatibler/ungeeigneter Kamera Wechsel zur Rückkamera anbieten; unbekannte Codes höflich behandeln. |
@@ -27,7 +27,7 @@
 | FS-18 | F | Audio und Video stoppen auch bei Startseitenwechsel, Dialogabbruch und Wechsel in Scan-Ansicht. Kamera-Stream wird beim Verlassen gestoppt. |
 | FS-19 | F | Sichtbare Möglichkeit, zur Übersicht zurückzukehren; keine Sackgasse in Dialog, Kamera, Detail oder Timeline. |
 | FS-20 | F | Interview-Reset setzt nur lokale Demo-Einträge zurück; löscht **keine** lokalen Medien oder anderen Gerätedateien. |
-| FS-21 | F | **Medien ausschliesslich lokal:** Filme, MP3s und weitere Mediendateien liegen unter `Internal storage/Documents/SMART` auf dem Android-Tablet. PWA lädt die Mediendateien weder von GitHub Pages noch von externen Servern; anhand von Medien-ID und Dateiname wird das zuvor freigegebene lokale Medium abgespielt. |
+| FS-21 | F | **Therapie-/Dialogmedien ausschliesslich lokal:** Filme, MP3s und weitere inhaltliche Mediendateien liegen unter `Internal storage/Documents/SMART` auf dem Android-Tablet. PWA lädt die Mediendateien weder von GitHub Pages noch von externen Servern; anhand von Medien-ID und Dateiname wird das zuvor freigegebene lokale Medium abgespielt. |
 | FS-22 | F | Vor lokalem Medienzugriff ist eine **explizite Berechtigung/Dateiauswahl** nötig. Fehlt diese oder ist das Medienformat ungültig, bleibt der Inhalt mit verständlicher Textalternative zugänglich; Audio/Video werden nicht ungefragt übertragen oder kopiert. |
 
 ## Vorschlag für v0.1-Implementierung
@@ -51,3 +51,7 @@ Eine individualisierte Übung ist erst dann als „konkret durchführen“ darst
 - QR-, Karten- und Ereignis-IDs sowie Dateinamen: `docs/CONTENT_AND_CARDS.md`, `content/demo_manifest.json`, `media/README.md`.
 - Konkrete Tests: `docs/TEST_PLAN.md` (T01–T25).
 - Freigabestatus: `docs/DECISIONS.md`.
+
+## Ergänzung 09.11.2026 – Einstieg
+
+FS-23: Vor dem Menü erscheint die dekorative Bergwiese mit Kühen. Die QR-Anleitung blendet in 3 Sekunden ein, demonstriert fünfmal die Karte mit Code zur Tablet-Kamera, blendet in 3 Sekunden aus und pausiert 10 Sekunden vollständig. Tippen oder Tastaturaktivierung öffnet das Menü. Kameraerkennung nach Browserfreigabe ist bereits am Einstieg aktiv; Anna-/Ernst-Karten wählen automatisch die jeweilige Perspektive. Der manuelle Perspektivwechsel bleibt nachgeordnet erreichbar. Bei reduzierter Bewegungseinstellung wird die Hand nicht bewegt. Die Bergwiesen-Appgrafik ist gemäss F16 als App-Shell erlaubt; lokale Therapie-/Dialogmedien bleiben vom Webhosting und Cache ausgeschlossen.

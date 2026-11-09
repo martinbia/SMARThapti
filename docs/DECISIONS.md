@@ -20,7 +20,8 @@
 | F11 | Spätere EPIC-Nutzung ist Idee; Demo arbeitet ausschliesslich mit vorbereiteten fiktiven Beispieldokumenten. |
 | F12 | GitHub als gemeinsame versionierte Spezifikation von Projekt-Chat und Codex; neue Commits starten **keinen** Codex-Auftrag. |
 | F13 | Öffentliches Repo darf keine vertraulichen Ursprungsunterlagen oder echten Patientendaten enthalten. |
-| F14 | **Neu festgelegt am 08.11.2026:** Sämtliche Medien (insbesondere Videos und MP3s) liegen **lokal auf dem Android-Tablet** im Verzeichnis `Internal storage/Documents/SMART`, nicht auf GitHub Pages oder im GitHub-Repository. Die PWA darf nur nach expliziter Benutzerfreigabe darauf zugreifen. |
+| F14 | **Neu festgelegt am 08.11.2026:** Sämtliche Medien (insbesondere Videos und MP3s) liegen **lokal auf dem Android-Tablet** im Verzeichnis `Internal storage/Documents/SMART`, nicht auf GitHub Pages oder im GitHub-Repository (Ausnahme für dekorative Appgrafik: F16). Die PWA darf nur nach expliziter Benutzerfreigabe darauf zugreifen. |
+| F16 | **Nutzerauftrag 09.11.2026:** Start mit Zentralschweizer Bergwiese und Kühen; Kamera scannt nach Browserfreigabe bereits dort. QR-Karten bestimmen primär Ernst/Anna. Tippen öffnet das Menü mit einzeiligem Rollenhinweis. Anleitung: 3 s einblenden, fünf Vorführungen, 3 s ausblenden, 10 s nur Landschaft, dann wiederholen. Dekorative Appgrafik darf mit der PWA ausgeliefert werden; Therapie-/Dialogmedien bleiben lokal. |
 | F15 | **Aktuell beauftragt:** QR-Karten als druckbares PDF mit Vorder-/Rückseite auf demselben Blatt und Faltlinie bereitstellen; QR-SVG-Dateien in separatem GitHub-Verzeichnis. Keine personenbezogenen Daten in QR-Payloads. |
 
 ## VORSCHLÄGE – für Umsetzung v0.1
@@ -60,3 +61,5 @@ GitHub Pages ist im Repo noch nicht konfiguriert; die tatsächliche Aktivierung 
 ## Implementierungsstand nach ausdrücklicher Freigabe (08.11.2026)
 
 Der Nutzer hat im Cloud-Chat die Ausführung von `CODEX_DRAFT_PROMPT.md` ausdrücklich beauftragt. Der erste PWA-Draft setzt V02/V03/V04 und V12/V13 um; V12 hat die native Mehrfach-Dateiauswahl als gleichwertige Alternative. Reversible technische Umsetzung: Vanilla-JavaScript mit Vite, gebündeltem jsQR, LocalStorage nur für fiktive Bestätigungen/Szenario und App-Shell-Cache ohne Medien. Medienhandles werden bewusst nur während der Sitzung gehalten; nach App-Neustart erneut verbinden. Szenariowechsel setzt den fiktiven Interviewzeitpunkt, sperrt aber keine Übungskarte. Keine neuen klinischen Festlegungen. Validierung und offene Hardwareabnahme: `IMPLEMENTATION.md`.
+
+**Ergänzung zu F16, 09.11.2026:** Der Nutzer verlangt einen kleinen roten Punkt als Signal für die Interviewführung, sobald die Kamera aktiv und QR-Erkennung bereit ist. Das Signal bleibt unabhängig von der Hinweisanimation sichtbar und endet mit der Kamera.

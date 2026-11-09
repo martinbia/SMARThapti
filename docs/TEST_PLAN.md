@@ -76,3 +76,9 @@ Die obige Tabelle dokumentiert den ursprünglichen Planungsstand. In der Cloud w
 | T27 | Bestehende Druckmaterialien unverändert | Physischer Ausdruck/Falten und Scan |
 
 Alle realen Tablet-Tests bleiben offen. Automatisierte Browserprüfungen sind keine klinische Freigabe.
+
+## Ergänzende Einstiegstests vom 09.11.2026
+
+T29: Bergwiese ohne Menü beim Erstaufruf, Kamera nach Freigabe, Anna-/Ernst-QR wählen automatisch die Perspektive; Touch und Enter öffnen das Menü. T30: 3 s Einblenden, fünf Vorführungen à 2,4 s, 3 s Ausblenden, 10 s ausschliesslich Hintergrundbild, Wiederholung und Timer-Ende bei Navigation. T31: Kopfzeile „Für Ernst/Anna“ einzeilig, manueller Wechsel nachgeordnet, reduzierte Bewegungseinstellung ohne Handbewegung. Browserautomation prüft diese Abläufe; Darstellung, Einwilligung, Kamerafokus und Systemleisten auf dem realen Android-Tablet bleiben offen.
+
+T32: Roter Punkt erst bei laufendem Stream und bereiter QR-Erkennung; bei fehlender/verweigerter Kamera kein Punkt. Punkt bleibt während der Animationspause sichtbar und verschwindet nach erkanntem QR oder Navigation. Browserautomation mit Kamerastream prüft Ein-/Ausschalten; Sichtbarkeit bei realen Android-Systemleisten am Tablet prüfen.

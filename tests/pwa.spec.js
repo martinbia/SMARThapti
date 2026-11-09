@@ -6,8 +6,14 @@ import { resolveQR, visibleEvents, addEvent } from "../src/model.js";
 const m = JSON.parse(readFileSync("content/demo_manifest.json"));
 const dialogs = JSON.parse(readFileSync("content/demo_dialogs.json"));
 const index = JSON.parse(readFileSync("print/CARD_INDEX.json"));
-const click = (page, action) =>
-  page.locator(`[data-action="${action}"]`).first().click();
+const click = async (page, action) => {
+  if (
+    action === "role" &&
+    !(await page.locator('[data-action="role"]').isVisible())
+  )
+    await page.locator(".perspective-options summary").click();
+  await page.locator(`[data-action="${action}"]`).first().click();
+};
 
 test("manifest references, eleven existing cards and event identity", () => {
   expect(m.cards).toHaveLength(11);
@@ -52,7 +58,7 @@ for (const entry of index.cards)
     expect(
       jsQR(new Uint8ClampedArray(png.data), png.width, png.height)?.data,
     ).toBe(entry.payload);
-    await page.goto("./");
+    await page.goto("./#home");
     if (entry.cardId.startsWith("A-")) await click(page, "role");
     await click(page, "cards");
     await click(page, "card:" + entry.cardId);
@@ -114,6 +120,7 @@ test("camera denial and directory fallback keep touch selection usable", async (
   });
   await page.goto("./#scan");
   await expect(page.locator("#status")).toContainText("Kamera nicht verfügbar");
+  await expect(page.locator("#camera-indicator")).toHaveCount(0);
   await click(page, "cards");
   await expect(page.locator("#card-list button")).toHaveCount(6);
   await click(page, "moderator");
@@ -207,7 +214,7 @@ test("production PWA shell, offline text and no media caching", async ({
     await navigator.serviceWorker.ready;
   });
   await page.reload();
-  await expect(page.locator("h1")).toContainText("Ernst");
+  await expect(page.locator(".welcome-open")).toBeVisible();
   const cacheURLs = await page.evaluate(async () => {
     const result = [];
     for (const name of await caches.keys()) {
@@ -220,6 +227,7 @@ test("production PWA shell, offline text and no media caching", async ({
   expect(cacheURLs.some((u) => /\.(mp4|mp3)$/.test(u))).toBe(false);
   await context.setOffline(true);
   await page.reload();
+  await click(page, "home");
   await click(page, "cards");
   await expect(page.locator("#card-list button")).toHaveCount(6);
 });
@@ -357,4 +365,198 @@ test("actual local MP4 and MP3 playback stops and revokes blobs on navigation", 
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test("landscape welcome opens a compact menu by touch and keyboard", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    navigator.mediaDevices.getUserMedia = async () => {
+      throw new DOMException("denied", "NotAllowedError");
+    };
+  });
+  await page.goto("./");
+  await expect(page.locator(".welcome-open")).toBeVisible();
+  await expect(page.locator("header")).toHaveCount(0);
+  expect(
+    await page
+      .locator(".alpine-background")
+      .evaluate((img) => img.complete && img.naturalWidth > 0),
+  ).toBe(true);
+  await page.locator(".welcome-open").focus();
+  await page.keyboard.press("Enter");
+  await expect(page.locator(".role-line")).toHaveText("Für Ernst");
+  expect(
+    (await page.locator("header").boundingBox()).height,
+  ).toBeLessThanOrEqual(72);
+  expect((await page.locator(".role-line").boundingBox()).height).toBeLessThan(
+    32,
+  );
+  await expect(page.locator('[data-action="role"]')).toBeHidden();
+  await click(page, "role");
+  await expect(page.locator(".role-line")).toHaveText("Für Anna");
+  await click(page, "welcome");
+  await expect(page.locator(".welcome-open")).toBeVisible();
+});
+
+test("welcome fades, presents the card five times and rests for ten seconds", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    navigator.mediaDevices.getUserMedia = async () => {
+      throw new Error("No camera in timing test");
+    };
+  });
+  await page.clock.install({ time: new Date("2026-11-09T12:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-11-09T12:00:00Z"));
+  await page.goto("./");
+  const guide = page.locator(".welcome-guide");
+  await expect(guide).toHaveAttribute("data-phase", "fade-in");
+  expect(
+    await guide.evaluate(
+      (el) => el.getAnimations()[0].effect.getTiming().duration,
+    ),
+  ).toBe(3000);
+  await page.clock.runFor(3000);
+  await expect(guide).toHaveAttribute("data-phase", "present");
+  expect(
+    await page
+      .locator(".presented-card")
+      .evaluate((el) => el.getAnimations()[0].effect.getTiming().iterations),
+  ).toBe(5);
+  await page.clock.runFor(12000);
+  await expect(guide).toHaveAttribute("data-phase", "fade-out");
+  await page.clock.runFor(3000);
+  await expect(guide).toBeHidden();
+  await expect(guide).toHaveAttribute("data-phase", "rest");
+  await page.clock.runFor(9999);
+  await expect(guide).toBeHidden();
+  await page.clock.runFor(1);
+  await expect(guide).toHaveAttribute("data-phase", "fade-in");
+  await click(page, "home");
+  await page.clock.runFor(60000);
+  await expect(page.locator(".welcome-guide")).toHaveCount(0);
+  await expect(page.locator(".role-line")).toHaveText("Für Ernst");
+});
+
+test("reduced motion keeps the instruction readable without moving the hand", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.clock.install({ time: new Date("2026-11-09T12:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-11-09T12:00:00Z"));
+  await page.goto("./");
+  await page.clock.runFor(3000);
+  await expect(page.locator(".welcome-guide")).toBeVisible();
+  expect(
+    await page
+      .locator(".presented-card")
+      .evaluate((el) => el.getAnimations().length),
+  ).toBe(0);
+});
+
+test("QR codes on the welcome screen automatically switch between Anna and Ernst", async ({
+  page,
+}) => {
+  const anna = readFileSync(
+    index.cards.find((c) => c.cardId === "A-INF-001").qrFile,
+    "utf8",
+  );
+  const ernst = readFileSync(
+    index.cards.find((c) => c.cardId === "P-INF-001").qrFile,
+    "utf8",
+  );
+  await page.addInitScript(
+    ({ svg }) => {
+      window.cameraSvg = svg;
+      window.stopped = 0;
+      navigator.mediaDevices.getUserMedia = async () => {
+        const img = new Image();
+        img.src = "data:image/svg+xml;base64," + btoa(window.cameraSvg);
+        await img.decode();
+        const canvas = document.createElement("canvas");
+        canvas.width = 640;
+        canvas.height = 640;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, 640, 640);
+        ctx.drawImage(img, 60, 60, 520, 520);
+        const stream = canvas.captureStream(10);
+        for (const t of stream.getTracks()) {
+          const stop = t.stop.bind(t);
+          t.stop = () => {
+            window.stopped++;
+            stop();
+          };
+        }
+        return stream;
+      };
+    },
+    { svg: anna },
+  );
+  await page.goto("./");
+  await expect(page).toHaveURL(/#card\/A-INF-001/);
+  await expect(page.locator(".role-line")).toHaveText("Für Anna");
+  await page.evaluate((svg) => {
+    window.cameraSvg = svg;
+  }, ernst);
+  await page.goto("./#welcome");
+  await expect(page).toHaveURL(/#card\/P-INF-001/);
+  await expect(page.locator(".role-line")).toHaveText("Für Ernst");
+  expect(await page.evaluate(() => window.stopped)).toBe(2);
+  expect(
+    await page.evaluate(() => localStorage.getItem("smarthapti-demo")),
+  ).toBeNull();
+});
+
+test("red camera dot appears only when scanning is ready and clears on navigation or detection", async ({
+  page,
+}) => {
+  const svg = readFileSync(index.cards[0].qrFile, "utf8");
+  await page.addInitScript(
+    ({ svg }) => {
+      window.stopped = 0;
+      navigator.mediaDevices.getUserMedia = async () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 640;
+        canvas.height = 640;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, 640, 640);
+        window.paintQR = async () => {
+          const image = new Image();
+          image.src = "data:image/svg+xml;base64," + btoa(svg);
+          await image.decode();
+          ctx.drawImage(image, 60, 60, 520, 520);
+          // A canvas mock must explicitly publish its changed frame, like a live camera.
+          stream.getVideoTracks()[0].requestFrame();
+        };
+        const stream = canvas.captureStream(10);
+        for (const t of stream.getTracks()) {
+          const stop = t.stop.bind(t);
+          t.stop = () => {
+            window.stopped++;
+            stop();
+          };
+        }
+        return stream;
+      };
+    },
+    { svg },
+  );
+  await page.goto("./");
+  await expect(page.locator("#camera-indicator")).toBeVisible();
+  await expect(page.locator("#camera-indicator")).toHaveAttribute(
+    "aria-label",
+    "Kamera aktiv – QR-Erkennung bereit",
+  );
+  await click(page, "home");
+  await expect(page.locator("#camera-indicator")).toHaveCount(0);
+  expect(await page.evaluate(() => window.stopped)).toBe(1);
+  await click(page, "welcome");
+  await expect(page.locator("#camera-indicator")).toBeVisible();
+  await page.evaluate(() => window.paintQR());
+  await expect(page).toHaveURL(/#card\/P-INF-001/);
+  await expect(page.locator("#camera-indicator")).toHaveCount(0);
+  expect(await page.evaluate(() => window.stopped)).toBe(2);
 });

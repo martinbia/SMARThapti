@@ -205,4 +205,171 @@ select {
   }
 }
 /* Programmatic focus announces the new view without drawing a box around it. */
-main:focus { outline: none; }
+main:focus {
+  outline: none;
+}
+
+/* One compact row; the QR code chooses the perspective. */
+header {
+  flex-wrap: nowrap;
+  min-height: 64px;
+  padding: 8px 0;
+}
+header button {
+  padding: 0.45rem 0.75rem;
+  background: transparent;
+  border-color: transparent;
+}
+.role-line {
+  white-space: nowrap;
+  line-height: 1.3;
+}
+.menu-heading {
+  margin: 8px 0 18px;
+  font-size: 1.35rem;
+}
+.perspective-options {
+  margin: 12px 0 20px;
+}
+.perspective-options summary {
+  display: list-item;
+  cursor: pointer;
+  min-height: 48px;
+  padding: 10px 0;
+}
+.perspective-options summary:focus-visible {
+  outline: 3px solid #af5a22;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0 !important;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+#app.welcome-mode {
+  max-width: none;
+  padding: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+.welcome {
+  padding: 0;
+}
+.welcome-open {
+  display: block;
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: #fffef5;
+  background: #7c9b76;
+  text-align: center;
+}
+.welcome-open:hover {
+  background: #7c9b76;
+}
+.welcome-open:focus-visible {
+  outline-offset: -6px;
+}
+.alpine-background {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.welcome-guide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  position: absolute;
+  inset: 0;
+  padding: max(24px, env(safe-area-inset-top))
+    max(22px, env(safe-area-inset-right)) max(40px, env(safe-area-inset-bottom))
+    max(22px, env(safe-area-inset-left));
+  background: linear-gradient(transparent 35%, #142d2733 50%, #142d27d9 100%);
+  pointer-events: none;
+}
+.welcome-kicker {
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 8px #18372a;
+}
+.welcome-heading {
+  display: block;
+  font-family: Georgia, serif;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  line-height: 1.2;
+  margin-top: 12px;
+  text-shadow: 0 2px 15px #173a2b;
+}
+.card-demonstration {
+  display: block;
+  width: min(100%, 460px);
+  height: min(31dvh, 270px);
+  margin: 4px 0 12px;
+  overflow: visible;
+}
+.presented-card {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.welcome-instruction {
+  display: block;
+  font-size: clamp(1rem, 2.6vw, 1.3rem);
+  font-weight: 650;
+}
+.welcome-caption {
+  display: block;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin-top: 8px;
+  max-width: 34rem;
+}
+.welcome-camera {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+@media (orientation: landscape) and (max-height: 750px) {
+  .welcome-guide {
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+  .welcome-heading {
+    font-size: 1.6rem;
+  }
+  .card-demonstration {
+    height: 28dvh;
+  }
+}
+.camera-indicator {
+  position: fixed;
+  z-index: 20;
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  right: calc(env(safe-area-inset-right, 0px) + 10px);
+  width: 11px;
+  height: 11px;
+  border: 2px solid white;
+  border-radius: 50%;
+  background: #d82222;
+  box-shadow: 0 0 0 1px #41232344;
+  pointer-events: none;
+}
