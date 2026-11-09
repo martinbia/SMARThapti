@@ -33,3 +33,9 @@ self.addEventListener("fetch", (event) => {
       ),
   );
 });
+
+// A fully installed update activates only after a user accepts the offer.
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "ACTIVATE_UPDATE")
+    event.waitUntil(self.skipWaiting());
+});

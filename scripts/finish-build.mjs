@@ -14,8 +14,9 @@ async function walk(dir = "dist") {
 await walk();
 const hash = createHash("sha256");
 for (const file of files) hash.update(await readFile("dist/" + file.slice(2)));
-const version = hash.digest("hex").slice(0, 16);
 const sw = await readFile("src/sw.js", "utf8");
+hash.update(sw);
+const version = hash.digest("hex").slice(0, 16);
 await writeFile(
   "dist/sw.js",
   sw

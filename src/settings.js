@@ -33,7 +33,7 @@ export function settingsMarkup(manifest, files, esc, button) {
   const names = [
     ...new Set([...manifest.media.map((m) => m.fileName), ...files.keys()]),
   ];
-  return `<h1>Einstellungen</h1><p>Für die Administration: lokale Filme mit Karten verknüpfen. Die QR-Kennung bleibt gleich, wenn Sie den Film austauschen.</p><p>Ordner: <strong>Internal storage/Documents/SMART</strong>. Nach einem Neustart Dateien bei Bedarf erneut freigeben; die gespeicherte Zuordnung bleibt erhalten.</p><div class="actions">${button("Medienordner verbinden", "choose-directory")}${button("Lokale Dateien auswählen", "choose-files")}</div><div id="settings-status" aria-hidden="true"></div><form id="assignment-form"><button class="primary" type="submit">Zuordnungen speichern</button>${manifest.media
+  return `<h1>Einstellungen</h1><ol class="setup-steps"><li><strong>Ordner verbinden:</strong> Interner Speicher → Documents → SMART auswählen. Danach ist keine Einzelauswahl mehr nötig.</li><li><strong>Film zuordnen:</strong> Unten bei jeder Karte „Aus verbundenen Dateien auswählen“ öffnen.</li><li><strong>Zuordnungen speichern</strong> drücken.</li></ol><p>Ordner: <strong>Internal storage/Documents/SMART</strong>. Nach einem Neustart Dateien bei Bedarf erneut freigeben; die gespeicherte Zuordnung bleibt erhalten.</p><div class="actions">${button("Medienordner verbinden", "choose-directory")}${button("Lokale Dateien auswählen", "choose-files")}</div><section class="panel connection-status"><strong>${files.size ? `${files.size} Mediendateien in dieser Sitzung verbunden` : "Noch keine lokalen Mediendateien verbunden"}</strong>${files.size ? `<details><summary>Gefundene Dateien anzeigen</summary><ul>${[...files.keys()].map((n) => `<li>${esc(n)}</li>`).join("")}</ul></details>` : "<p>Eine Dateinamenzuordnung allein ist noch keine Dateifreigabe. Wenn der Ordnerdialog nicht funktioniert: „Lokale Dateien auswählen“, dann im Android-Dialog „Dateien“ oder „Durchsuchen“ wählen und zu Documents/SMART gehen.</p>"}</section><div id="settings-status" aria-hidden="true"></div><form id="assignment-form"><button class="primary" type="submit">Zuordnungen speichern</button>${manifest.media
     .slice()
     .sort(
       (a, b) =>
@@ -52,7 +52,7 @@ export function settingsMarkup(manifest, files, esc, button) {
         .map((n) => `<option value="${esc(n)}"></option>`)
         .join(
           "",
-        )}</datalist><label>Aus verbundenen Dateien auswählen<select class="assignment-choice" data-target="assign-${esc(m.id)}"><option value="">Datei auswählen …</option>${[
+        )}</datalist><label>Aus verbundenen Dateien auswählen<select class="assignment-choice" data-target="assign-${esc(m.id)}" ${[...files.keys()].some((n) => validMediaName(n, m.kind)) ? "" : "disabled"}><option value="">${[...files.keys()].some((n) => validMediaName(n, m.kind)) ? "Datei auswählen …" : "Zuerst Ordner oder Dateien verbinden"}</option>${[
         ...files.keys(),
       ]
         .filter((n) => validMediaName(n, m.kind))

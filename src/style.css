@@ -539,3 +539,30 @@ header .power-off:hover {
     grid-column: 4;
   }
 }
+/* The update offer is the only new UI; existing views keep their layout. */
+.app-update {
+  position: fixed;
+  z-index: 50;
+  left: max(16px, env(safe-area-inset-left));
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(84px, calc(env(safe-area-inset-bottom, 0px) + 76px));
+  max-width: 640px;
+  max-height: 70dvh;
+  overflow-y: auto;
+  margin: auto;
+  padding: 16px 20px;
+  border: 2px solid #23675b;
+  border-radius: 16px;
+  background: #fffef7;
+  color: #203a35;
+  box-shadow: 0 8px 32px #0003;
+}
+.app-update[hidden] {
+  display: none;
+}
+.app-update p {
+  margin: 8px 0;
+}
+.app-update .actions {
+  margin-bottom: 0;
+}

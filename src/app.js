@@ -1,4 +1,5 @@
 import jsQR from "jsqr";
+import { setupUpdates } from "./updates.js";
 import "./style.css";
 import { types, resolveQR, visibleEvents, addEvent } from "./model.js";
 import { welcomeMarkup, animateWelcome } from "./welcome.js";
@@ -22,6 +23,7 @@ const button = (text, action, extra = "") =>
   `<button data-action="${esc(action)}" ${extra}>${esc(text)}</button>`;
 let manifest,
   dialogs,
+  updateManager = null,
   catalog,
   assignments = {},
   mediaDefaults = {},
@@ -29,6 +31,8 @@ let manifest,
   scenario = "discharge",
   keys = [],
   directory = null,
+  pickerPending = false,
+  selectionRequest = 0,
   files = new Map(),
   stream = null,
   frame = 0,
@@ -57,6 +61,9 @@ function save() {
   } catch {
     storageOK = false;
   }
+}
+function supportedFile(name) {
+  return /\.(mp4|webm|m4v|mp3|m4a|wav|ogg)$/i.test(name);
 }
 function persistAssignments(value) {
   try {
@@ -93,6 +100,8 @@ function cleanup() {
   urls = [];
 }
 function go(path) {
+  selectionRequest++;
+  pickerPending = false;
   if (location.hash === `#${path}`) render();
   else location.hash = path;
 }
@@ -117,6 +126,8 @@ function appendPowerButton() {
 }
 function setSleeping(value) {
   sleeping = value;
+  selectionRequest++;
+  pickerPending = false;
   try {
     if (value) sessionStorage.setItem("smarthapti-asleep", "true");
     else sessionStorage.removeItem("smarthapti-asleep");
@@ -125,6 +136,7 @@ function setSleeping(value) {
   render();
 }
 function message(text) {
+  updateManager?.refresh();
   const el = document.querySelector("#status");
   if (el) el.textContent = text;
   const visibleStatus = document.querySelector("#settings-status");
@@ -211,6 +223,7 @@ async function mountMedia(token) {
   }
 }
 function render() {
+  updateManager?.refresh();
   cleanup();
   const token = generation;
   const [view, id] = (location.hash.slice(1) || "welcome").split("/");
@@ -319,7 +332,7 @@ function render() {
     go("home");
     return;
   }
-  root.innerHTML = `<header>${button(view === "home" ? "← Bergwiese" : "← Zum Menü", view === "home" ? "welcome" : "home", 'class="back-navigation"')}<strong class="role-line">Für ${esc(persona().displayName.split(" ")[0])}</strong>${button("⚙︎", "settings", 'class="settings-button" aria-label="Einstellungen" title="Einstellungen"')}</header><main id="main" tabindex="-1" aria-label="${esc(title)}">${body}<div id="status" role="status" aria-live="polite"></div>${!storageOK ? '<p class="notice">Lokaler Speicher nicht verfügbar. Einträge bleiben nur während dieser Sitzung erhalten.</p>' : ""}</main><footer>Fiktive Interview-Demo · keine medizinische Anweisung · nicht klinisch geprüft<div class="actions">${button("Mein Weg", "timeline")}${button("Demo vorbereiten", "moderator")}${button("Alle Karten", "cards")}</div><details class="perspective-options"><summary>Andere Perspektive ohne QR-Code</summary><p>Normalerweise wählt Ihre QR-Karte die passende Perspektive.</p>${button(role === "patient" ? "Zu Anna wechseln" : "Zu Ernst wechseln", "role")}</details><small>Perspektivwechsel ist keine Authentifizierung. Nur fiktive Daten verwenden.</small></footer><input id="local-files" type="file" accept=".mp4,.webm,.m4v,.mp3,.m4a,.wav,.ogg,video/*,audio/*" multiple hidden>`;
+  root.innerHTML = `<header>${button(view === "home" ? "← Bergwiese" : "← Zum Menü", view === "home" ? "welcome" : "home", 'class="back-navigation"')}<strong class="role-line">Für ${esc(persona().displayName.split(" ")[0])}</strong>${button("⚙︎", "settings", 'class="settings-button" aria-label="Einstellungen" title="Einstellungen"')}</header><main id="main" tabindex="-1" aria-label="${esc(title)}">${body}<div id="status" role="status" aria-live="polite"></div>${!storageOK ? '<p class="notice">Lokaler Speicher nicht verfügbar. Einträge bleiben nur während dieser Sitzung erhalten.</p>' : ""}</main><footer>Fiktive Interview-Demo · keine medizinische Anweisung · nicht klinisch geprüft<div class="actions">${button("Mein Weg", "timeline")}${button("Demo vorbereiten", "moderator")}${button("Alle Karten", "cards")}</div><details class="perspective-options"><summary>Andere Perspektive ohne QR-Code</summary><p>Normalerweise wählt Ihre QR-Karte die passende Perspektive.</p>${button(role === "patient" ? "Zu Anna wechseln" : "Zu Ernst wechseln", "role")}</details><small>Perspektivwechsel ist keine Authentifizierung. Nur fiktive Daten verwenden.</small></footer><input id="local-files" type="file" multiple hidden><input id="local-directory" type="file" webkitdirectory directory multiple hidden>`;
   document.title = `${title} · SMARThapti`;
   appendPowerButton();
   document.querySelector("#main").focus({ preventScroll: true });
@@ -375,13 +388,45 @@ function render() {
       "Interview-Szenario eingestellt. Vorhandene Einträge bleiben erhalten.",
     );
   });
-  document.querySelector("#local-files").addEventListener("change", (e) => {
-    for (const file of e.target.files)
-      if (/\.(mp4|webm|m4v|mp3|m4a|wav|ogg)$/i.test(file.name))
-        files.set(file.name, file);
-    render();
-    message("Ausgewählte passende Dateien lokal verbunden.");
-  });
+  for (const id of ["local-files", "local-directory"]) {
+    const input = document.getElementById(id);
+    input.addEventListener("change", (e) => {
+      if (
+        sleeping ||
+        (input.dataset.request &&
+          Number(input.dataset.request) !== selectionRequest)
+      )
+        return;
+      pickerPending = false;
+      const chosen = [...e.target.files];
+      if (!chosen.length) {
+        message(
+          "Keine Dateien ausgewählt. Vorhandene Verbindung bleibt erhalten.",
+        );
+        return;
+      }
+      const selected = chosen.filter(
+        (f) =>
+          supportedFile(f.name) &&
+          (id !== "local-directory" ||
+            !f.webkitRelativePath ||
+            f.webkitRelativePath.split("/").length === 2),
+      );
+      if (id === "local-directory") {
+        directory = null;
+        files = new Map();
+      }
+      for (const file of selected) files.set(file.name, file);
+      render();
+      message(
+        `${selected.length} Mediendateien lokal verbunden. Jetzt unten pro Karte auswählen und „Zuordnungen speichern“ drücken.`,
+      );
+    });
+    input.addEventListener("cancel", () => {
+      pickerPending = false;
+      message("Auswahl abgebrochen. Vorhandene Verbindung bleibt erhalten.");
+    });
+  }
 }
 async function updateMediaStatus(token) {
   const results = await Promise.all(
@@ -575,37 +620,74 @@ root.addEventListener("click", async (e) => {
   } else if (name === "switch-camera") {
     facing = facing === "user" ? "environment" : "user";
     render();
-  } else if (name === "choose-files")
-    document.querySelector("#local-files").click();
-  else if (name === "choose-directory") {
-    if (!window.showDirectoryPicker) {
-      message(
-        "Ordnerauswahl in diesem Browser nicht verfügbar. Bitte „Lokale Datei(en) auswählen“ verwenden.",
+  } else if (name === "choose-files" || name === "choose-directory") {
+    const request = ++selectionRequest;
+    pickerPending = true;
+    updateManager?.refresh();
+    const active = () => !sleeping && request === selectionRequest;
+    const directoryMode = name === "choose-directory";
+    const fallback = () => {
+      const input = document.getElementById(
+        directoryMode ? "local-directory" : "local-files",
       );
+      input.dataset.request = String(request);
+      input.value = "";
+      input.click();
+    };
+    if (
+      (directoryMode && !window.showDirectoryPicker) ||
+      (!directoryMode && !window.showOpenFilePicker)
+    ) {
+      message(
+        directoryMode
+          ? "Im Dateimanager: Interner Speicher → Documents → SMART wählen. Falls die Ordnerauswahl nicht unterstützt wird, Dateien im Dateimanager auswählen."
+          : "Im Dateimanager über „Durchsuchen“/„Dateien“ → Interner Speicher → Documents → SMART gehen und die Filme markieren.",
+      );
+      fallback();
       return;
     }
-    const token = generation;
     try {
-      const picked = await window.showDirectoryPicker({ mode: "read" });
-      if (token !== generation) return;
-      const selected = [];
-      for await (const entry of picked.values()) {
-        if (
-          entry.kind === "file" &&
-          /\.(mp4|webm|m4v|mp3|m4a|wav|ogg)$/i.test(entry.name)
-        )
-          selected.push(await entry.getFile());
+      const options = {
+        id: "smarthapti-local-media",
+        startIn: directory || "documents",
+      };
+      if (directoryMode) {
+        const picked = await window.showDirectoryPicker({
+          ...options,
+          mode: "read",
+        });
+        if (!active()) return;
+        const selected = [];
+        for await (const entry of picked.values())
+          if (entry.kind === "file" && supportedFile(entry.name))
+            selected.push(await entry.getFile());
+        if (!active()) return;
+        directory = picked;
+        files = new Map(selected.map((file) => [file.name, file]));
+      } else {
+        const handles = await window.showOpenFilePicker({
+          ...options,
+          multiple: true,
+        });
+        const selected = await Promise.all(
+          handles.map((handle) => handle.getFile()),
+        );
+        if (!active()) return;
+        for (const file of selected)
+          if (supportedFile(file.name)) files.set(file.name, file);
       }
-      if (token !== generation) return;
-      directory = picked;
-      for (const file of selected) files.set(file.name, file);
+      pickerPending = false;
       render();
       message(
-        "Ordner lesend verbunden. Fehlende Dateien können einzeln ausgewählt werden.",
+        `${files.size} Mediendateien lokal verbunden. Keine zusätzliche Einzelauswahl nötig. Unten zuordnen und speichern.`,
       );
-    } catch {
+    } catch (error) {
+      if (!active()) return;
+      pickerPending = false;
       message(
-        "Ordner nicht freigegeben. Bitte erneut verbinden oder lokale Dateien auswählen.",
+        error.name === "AbortError"
+          ? "Auswahl abgebrochen. Vorhandene Verbindung bleibt erhalten."
+          : "Ordner/Dateien konnten nicht gelesen werden. Bitte über den Dateimanager erneut auswählen oder lokale Dateien verbinden.",
       );
     }
   } else if (name === "reset") {
@@ -624,12 +706,14 @@ root.addEventListener("click", async (e) => {
   }
 });
 window.addEventListener("hashchange", () => {
+  selectionRequest++;
+  pickerPending = false;
   if (manifest) render();
 });
 window.addEventListener("pagehide", cleanup);
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) cleanup();
-  else if (manifest) render();
+  else if (manifest && !pickerPending) render();
 });
 render();
 try {
@@ -659,8 +743,19 @@ try {
   });
   render();
   if (import.meta.env.PROD && "serviceWorker" in navigator)
-    navigator.serviceWorker
-      .register(base + "sw.js")
+    setupUpdates({
+      base,
+      beforeReload: () => {
+        selectionRequest++;
+        pickerPending = false;
+        cleanup();
+      },
+      canShow: () => !sleeping && !pickerPending && !document.hidden,
+    })
+      .then((manager) => {
+        updateManager = manager;
+        manager.refresh();
+      })
       .catch(() =>
         message(
           "App-Cache nicht verfügbar. Die Demo benötigt eine Internetverbindung.",
