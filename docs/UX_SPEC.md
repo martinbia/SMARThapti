@@ -76,3 +76,7 @@ Die Hintergrundgrafik ist ein KI-generiertes Zentralschweizer Alpenmotiv, keine 
 ## Abschalten / schwarzer Ruhemodus (09.11.2026)
 
 U0–U9 sowie Lade-/Fehleransichten bieten unten rechts einen roten „⏻ Abschalten“-Button mit grossem Touch-Ziel und Abstand zu Android-Safe-Areas. Der Inhalt erhält entsprechenden Platz, sodass der Button keine letzte Zeile verdeckt. Abschalten beendet Kamera/Medien/Animation und lässt ausschliesslich die schwarze App-Fläche sichtbar. Diese gesamte Fläche ist die barrierefrei benannte Schaltfläche „App einschalten“; Tippen, Enter oder Leertaste führen zurück zum Bergwiesen-Einstieg und zum normalen Kamerabetrieb. Ein Sichtbarkeitswechsel oder eine neue URL allein weckt die App nicht. Die Hardware und Android-Leisten werden nicht ausgeschaltet. Im Kamera-Scanner über das Menü ist derselbe rote Bereitschaftspunkt oben rechts sichtbar wie auf der Bergwiese.
+
+## Einstellungen und deutlichere Navigation (09.11.2026)
+
+Hervorgehobene Zurück-Buttons (mindestens 56 CSS-Pixel) und ein dezentes, beschriftetes Zahnrad in derselben Kopfzeile. Einstellungen verbinden lokale Dateien und zeigen pro Karte/Medieneintrag Dateinamenfeld, Auswahl verbundener Dateien und ggf. Download des zusätzlichen QR-Codes. Speichern bestätigt nur erfolgreichen dauerhaften Schreibzugriff; Export/Import dienen als Sicherung. Neustart/New Build behält Zuordnungen, Android-Freigabe ggf. erneut erforderlich.

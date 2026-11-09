@@ -47,3 +47,15 @@ Rechte an Medien, fachliche Prüfung der Therapieanweisungen, Quellenstand, Unte
 ## Dekorative Appgrafik – ausdrückliche Ausnahme vom 09.11.2026
 
 Der Nutzer hat für den Startbildschirm ein Bergwiesenmotiv mit Kühen beauftragt. `public/alpine-meadow.webp` ist eine KI-generierte dekorative Appgrafik mit Zentralschweizer Alpencharakter und wird mit der App-Shell ausgeliefert und zwischengespeichert. Die Hand-/Kartenanleitung ist SVG mit Browseranimation, keine Video-Datei. Diese begrenzte Ausnahme betrifft keine Therapieclips oder Alma-MP3s; deren Speicher-, Freigabe- und Uploadregeln oben gelten weiterhin.
+
+## Lokale Filmzuordnung (Nutzerauftrag 09.11.2026)
+
+Das dezente Zahnrad in der Kopfzeile öffnet **Einstellungen**. Die hervorgehobenen Zurück-Buttons sind mindestens 56 CSS-Pixel hoch. Sieben neue Übungskarten `P-EX-101` bis `P-EX-107` stehen in `content/exercise_catalog.json`; ihre QR-SVGs liegen unter `assets/qr/`. Alte Karten, Codes und Druck-PDF bleiben erhalten. Die Zuordnung der benannten Filme ist eine technische Referenz, keine klinische Prüfung oder persönliche Übungsfreigabe.
+
+1. Medien aus `Internal storage/Documents/SMART` über Ordner- oder native Mehrfach-Dateiauswahl verbinden.
+2. Pro Karten-/Medieneintrag eine verbundene Datei auswählen oder den exakten Dateinamen eintragen. Leerzeichen und Schreibweise inklusive `beien` im gelieferten Wadenheber-Dateinamen werden unverändert übernommen. Es sind nur Dateinamen erlaubt, keine Pfade oder Webadressen.
+3. **Zuordnungen speichern** schreibt die Zuordnung Medien-ID → Dateiname getrennt vom Demo-Zustand in LocalStorage (`smarthapti-media-assignments-v1`). Stabile IDs bleiben beim Filmtausch gleich. Reset, Neustart und neue Builds unter derselben Website löschen diese Einstellung nicht.
+4. **Zuordnungen sichern** exportiert ausschliesslich Namen/IDs als JSON, keine Filme. Diese Sicherung ermöglicht Wiederherstellen nach Löschen der Browserdaten oder auf einem anderen Gerät. Bei gesperrtem Speicher wird ein Fehler statt eines Speichererfolgs angezeigt.
+5. Die Zuordnung ersetzt keine Android-Dateiberechtigung. Nach vollständigem App-Neustart ggf. die lokalen Dateien erneut auswählen; keine automatische Freigabe allein durch einen Android-Pfad. Keine Medien werden hochgeladen oder in den Service-Worker-Cache kopiert.
+
+Standardzuordnung: P-EX-101 Gehen mit Teilbelastung; 102 Hüftflexion im Stehen; 103 Kniebeugen; 104 Tandemstand; 105 Treppensteigen mit Krücken; 106 Treppensteigen mit Teilbelastung; 107 Wadenheber mit Festhalten. Die bestehende Karte P-EX-001 bleibt ebenfalls frei zuordenbar. Neue SVGs lassen sich direkt in den Einstellungen herunterladen. Reproduzierbar erzeugen: `node scripts/generate-exercise-qr.mjs`.

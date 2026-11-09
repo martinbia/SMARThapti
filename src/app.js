@@ -2,6 +2,12 @@ import jsQR from "jsqr";
 import "./style.css";
 import { types, resolveQR, visibleEvents, addEvent } from "./model.js";
 import { welcomeMarkup, animateWelcome } from "./welcome.js";
+import {
+  assignmentKey,
+  validMediaName,
+  validateAssignments,
+  settingsMarkup,
+} from "./settings.js";
 const base = import.meta.env.BASE_URL;
 const root = document.querySelector("#app");
 const esc = (value) =>
@@ -16,6 +22,9 @@ const button = (text, action, extra = "") =>
   `<button data-action="${esc(action)}" ${extra}>${esc(text)}</button>`;
 let manifest,
   dialogs,
+  catalog,
+  assignments = {},
+  mediaDefaults = {},
   role = "patient",
   scenario = "discharge",
   keys = [],
@@ -47,6 +56,23 @@ function save() {
     localStorage.setItem("smarthapti-demo", JSON.stringify({ keys, scenario }));
   } catch {
     storageOK = false;
+  }
+}
+function persistAssignments(value) {
+  try {
+    const next = validateAssignments(value, manifest.media);
+    localStorage.setItem(
+      assignmentKey,
+      JSON.stringify({ version: 1, assignments: next }),
+    );
+    assignments = next;
+    manifest.media.forEach((m) => {
+      m.fileName = assignments[m.id] || mediaDefaults[m.id];
+    });
+    render();
+    message("Zuordnungen dauerhaft auf diesem Gerät gespeichert.");
+  } catch (error) {
+    message("Nicht gespeichert: " + error.message);
   }
 }
 function cleanup() {
@@ -94,6 +120,8 @@ function setSleeping(value) {
 function message(text) {
   const el = document.querySelector("#status");
   if (el) el.textContent = text;
+  const visibleStatus = document.querySelector("#settings-status");
+  if (visibleStatus) visibleStatus.textContent = text;
 }
 function persona() {
   return manifest.personas.find((p) => p.role === role);
@@ -141,12 +169,7 @@ async function mountMedia(token) {
       status.textContent = `Nicht verbunden oder nicht lesbar: ${m.fileName}. Bitte lokal aus Documents/SMART auswählen. Der Text bleibt verfügbar.`;
       continue;
     }
-    if (
-      !file.size ||
-      !new RegExp(m.kind === "video" ? "\\.mp4$" : "\\.mp3$", "i").test(
-        file.name,
-      )
-    ) {
+    if (!file.size || !validMediaName(file.name, m.kind)) {
       status.textContent = `Dateiformat nicht lesbar: ${m.fileName}. Bitte eine gültige ${m.kind === "video" ? "MP4" : "MP3"}-Datei auswählen.`;
       continue;
     }
@@ -213,7 +236,7 @@ function render() {
   let body = "";
   let title = "Heute mit Alma";
   if (view === "home") {
-    body = `<h1 class="menu-heading">Was möchten Sie ansehen?</h1><div class="actions">${button("QR-Karte scannen", "scan", 'class="primary"')}${button("Karte auswählen", "cards")}</div>${cardButtons(manifest.cards.filter((c) => c.role === role && (role === "patient" ? c.type === "exercise" : ["A-INF-001", "A-INF-002"].includes(c.id))))}<div class="actions">${button("Alma fragen", "dialog:" + dialogs.startNodes[role])}${button("Mein Weg", "timeline")}</div>`;
+    body = `<h1 class="menu-heading">Was möchten Sie ansehen?</h1><div class="actions">${button("QR-Karte scannen", "scan", 'class="primary"')}${button("Karte auswählen", "cards")}</div>${cardButtons(manifest.cards.filter((c) => c.role === role && (role === "patient" ? c.type === "exercise" && c.id !== "P-EX-001" : ["A-INF-001", "A-INF-002"].includes(c.id))))}<div class="actions">${button("Alma fragen", "dialog:" + dialogs.startNodes[role])}${button("Mein Weg", "timeline")}</div>`;
   } else if (view === "cards") {
     title = "Meine Karten";
     body = `<h1>Meine Karten</h1><label>Kartentyp <select id="filter"><option value="all">Alle Karten</option>${Object.entries(
@@ -279,6 +302,9 @@ function render() {
   } else if (view === "scan") {
     title = "QR-Karte scannen";
     body = `<h1>QR-Karte scannen</h1><p>Halten Sie eine gedruckte Karte vor die Kamera. Der Scan öffnet Inhalte und speichert keinen Eintrag.</p><video id="camera" autoplay muted playsinline aria-label="Kameravorschau"></video><div class="actions">${button("Kamera wechseln", "switch-camera")}${button("Karte ohne Kamera wählen", "cards", 'class="primary"')}</div>`;
+  } else if (view === "settings") {
+    title = "Einstellungen";
+    body = settingsMarkup(manifest, files, esc, button);
   } else if (view === "moderator") {
     title = "Moderatorbereich";
     body = `<h1>Demo vorbereiten</h1><p>Medien ausschliesslich lokal unter <strong>Internal storage/Documents/SMART</strong>. Auswahl erlaubt nur Lesen; kein Upload und keine Kopie in den App-Speicher.</p><div class="actions">${button("Medienordner verbinden", "choose-directory")}${button("Lokale Datei(en) auswählen", "choose-files")}</div><ul id="media-list">${manifest.media.map((m) => `<li>${esc(m.fileName)}: wird geprüft …</li>`).join("")}</ul><p>Nach App-Neustart Medien erneut verbinden. Ordner- und Dateifreigaben werden nicht dauerhaft gespeichert.</p><label>Interview-Szenario <select id="scenario"><option value="discharge" ${scenario === "discharge" ? "selected" : ""}>Austritt · ${esc(manifest.asOf)}</option><option value="physio" ${scenario === "physio" ? "selected" : ""}>Physiotermin · 10.11.2026</option></select></label><p>Alle Karten bleiben in beiden Szenarien erreichbar. Die Szene setzt nur den fiktiven Interviewzeitpunkt.</p>${button("Fiktive Einträge zurücksetzen", "reset")}<div class="actions"><a class="button" href="${base}print/SMARThapti_Faltkarten_A4.pdf">Bestehende Faltkarten (PDF)</a></div>`;
@@ -286,7 +312,7 @@ function render() {
     go("home");
     return;
   }
-  root.innerHTML = `<header>${button(view === "home" ? "← Bergwiese" : "← Menü", view === "home" ? "welcome" : "home")}<strong class="role-line">Für ${esc(persona().displayName.split(" ")[0])}</strong></header><main id="main" tabindex="-1" aria-label="${esc(title)}">${body}<div id="status" role="status" aria-live="polite"></div>${!storageOK ? '<p class="notice">Lokaler Speicher nicht verfügbar. Einträge bleiben nur während dieser Sitzung erhalten.</p>' : ""}</main><footer>Fiktive Interview-Demo · keine medizinische Anweisung · nicht klinisch geprüft<div class="actions">${button("Mein Weg", "timeline")}${button("Demo vorbereiten", "moderator")}${button("Alle Karten", "cards")}</div><details class="perspective-options"><summary>Andere Perspektive ohne QR-Code</summary><p>Normalerweise wählt Ihre QR-Karte die passende Perspektive.</p>${button(role === "patient" ? "Zu Anna wechseln" : "Zu Ernst wechseln", "role")}</details><small>Perspektivwechsel ist keine Authentifizierung. Nur fiktive Daten verwenden.</small></footer><input id="local-files" type="file" accept=".mp4,.mp3,video/mp4,audio/mpeg" multiple hidden>`;
+  root.innerHTML = `<header>${button(view === "home" ? "← Zur Bergwiese" : "← Zum Menü", view === "home" ? "welcome" : "home", 'class="back-navigation"')}<strong class="role-line">Für ${esc(persona().displayName.split(" ")[0])}</strong>${button("⚙︎", "settings", 'class="settings-button" aria-label="Einstellungen" title="Einstellungen"')}</header><main id="main" tabindex="-1" aria-label="${esc(title)}">${body}<div id="status" role="status" aria-live="polite"></div>${!storageOK ? '<p class="notice">Lokaler Speicher nicht verfügbar. Einträge bleiben nur während dieser Sitzung erhalten.</p>' : ""}</main><footer>Fiktive Interview-Demo · keine medizinische Anweisung · nicht klinisch geprüft<div class="actions">${button("Mein Weg", "timeline")}${button("Demo vorbereiten", "moderator")}${button("Alle Karten", "cards")}</div><details class="perspective-options"><summary>Andere Perspektive ohne QR-Code</summary><p>Normalerweise wählt Ihre QR-Karte die passende Perspektive.</p>${button(role === "patient" ? "Zu Anna wechseln" : "Zu Ernst wechseln", "role")}</details><small>Perspektivwechsel ist keine Authentifizierung. Nur fiktive Daten verwenden.</small></footer><input id="local-files" type="file" accept=".mp4,.webm,.m4v,.mp3,.m4a,.wav,.ogg,video/*,audio/*" multiple hidden>`;
   document.title = `${title} · SMARThapti`;
   appendPowerButton();
   document.querySelector("#main").focus({ preventScroll: true });
@@ -294,6 +320,38 @@ function render() {
   if (view === "scan") startCamera(token);
   mountMedia(token);
   if (view === "moderator") updateMediaStatus(token);
+  document.querySelectorAll(".assignment-choice").forEach((select) =>
+    select.addEventListener("change", () => {
+      if (select.value)
+        document.getElementById(select.dataset.target).value = select.value;
+    }),
+  );
+  document
+    .querySelector("#assignment-form")
+    ?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const next = Object.fromEntries(
+        [...document.querySelectorAll(".media-assignment")].map((input) => [
+          input.dataset.id,
+          input.value,
+        ]),
+      );
+      persistAssignments({ version: 1, assignments: next });
+    });
+  document
+    .querySelector("#assignment-backup")
+    ?.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const token = generation;
+      try {
+        if (file.size > 64000) throw Error("Die Sicherung ist zu gross.");
+        const value = JSON.parse(await file.text());
+        if (token === generation) persistAssignments(value);
+      } catch (error) {
+        if (token === generation) message(error.message);
+      }
+    });
   document.querySelector("#filter")?.addEventListener("change", (e) => {
     document.querySelector("#card-list").innerHTML = cardButtons(
       manifest.cards.filter(
@@ -312,7 +370,7 @@ function render() {
   });
   document.querySelector("#local-files").addEventListener("change", (e) => {
     for (const file of e.target.files)
-      if (manifest.media.some((m) => m.fileName === file.name))
+      if (/\.(mp4|webm|m4v|mp3|m4a|wav|ogg)$/i.test(file.name))
         files.set(file.name, file);
     render();
     message("Ausgewählte passende Dateien lokal verbunden.");
@@ -429,12 +487,48 @@ root.addEventListener("click", async (e) => {
     setSleeping(true);
     return;
   }
+  if (name === "export-assignments") {
+    const blob = new Blob(
+      [
+        JSON.stringify(
+          {
+            version: 1,
+            assignments: Object.fromEntries(
+              manifest.media.map((m) => [m.id, m.fileName]),
+            ),
+          },
+          null,
+          2,
+        ),
+      ],
+      { type: "application/json" },
+    );
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "SMARThapti-Zuordnungen.json";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    return;
+  }
+  if (name === "import-assignments") {
+    document.querySelector("#assignment-backup").click();
+    return;
+  }
   if (name === "reload") {
     location.reload();
     return;
   }
   if (
-    ["welcome", "home", "cards", "timeline", "scan", "moderator"].includes(name)
+    [
+      "welcome",
+      "home",
+      "cards",
+      "timeline",
+      "scan",
+      "moderator",
+      "settings",
+    ].includes(name)
   )
     go(name);
   else if (name === "role") {
@@ -487,7 +581,17 @@ root.addEventListener("click", async (e) => {
     try {
       const picked = await window.showDirectoryPicker({ mode: "read" });
       if (token !== generation) return;
+      const selected = [];
+      for await (const entry of picked.values()) {
+        if (
+          entry.kind === "file" &&
+          /\.(mp4|webm|m4v|mp3|m4a|wav|ogg)$/i.test(entry.name)
+        )
+          selected.push(await entry.getFile());
+      }
+      if (token !== generation) return;
       directory = picked;
+      for (const file of selected) files.set(file.name, file);
       render();
       message(
         "Ordner lesend verbunden. Fehlende Dateien können einzeln ausgewählt werden.",
@@ -525,9 +629,27 @@ try {
   const responses = await Promise.all([
     fetch(base + "content/demo_manifest.json"),
     fetch(base + "content/demo_dialogs.json"),
+    fetch(base + "content/exercise_catalog.json"),
   ]);
   if (responses.some((r) => !r.ok)) throw Error("Inhalte fehlen");
-  [manifest, dialogs] = await Promise.all(responses.map((r) => r.json()));
+  [manifest, dialogs, catalog] = await Promise.all(
+    responses.map((r) => r.json()),
+  );
+  for (const key of ["cards", "contents", "media"])
+    manifest[key].push(...catalog[key]);
+  mediaDefaults = Object.fromEntries(
+    manifest.media.map((m) => [m.id, m.fileName]),
+  );
+  try {
+    const saved = localStorage.getItem(assignmentKey);
+    if (saved)
+      assignments = validateAssignments(JSON.parse(saved), manifest.media);
+  } catch {
+    storageOK = false;
+  }
+  manifest.media.forEach((m) => {
+    m.fileName = assignments[m.id] || m.fileName;
+  });
   render();
   if (import.meta.env.PROD && "serviceWorker" in navigator)
     navigator.serviceWorker
