@@ -75,3 +75,7 @@ Nutzerauftrag: grössere, deutlich sichtbare Navigation; dezentes Zahnrad für E
 ## Android-Auswahl korrigieren
 
 Nutzerrückmeldung: Galerie statt SMART-Dateien sowie leere Filmzuordnung. Umsetzung: generischer Dateidialog ohne Medien-MIME-Filter; nativer Ordner-Input als Fallback; vorhandener freigegebener Ordner als Startpunkt bei unterstützter Dateiauswahl. Anzahl/Dateiliste und deaktivierte leere Auswahlfelder zeigen den Verbindungsstatus. Kurzzeitiges Verbergen der App durch den Picker verwirft das Ergebnis nicht. Absolute Android-Pfade bleiben nur Orientierung, keine ungefragte Freigabe.
+
+## F19 – Updates anbieten bei Internetverbindung
+
+Expliziter Nutzerauftrag: Bei Verbindung nach Updates suchen und eine neue Version zum Laden anbieten. Umsetzung: Standard-Service-Worker-Updateprüfung mit vollständig vorbereiteter App-Shell, Zustimmung vor Aktivierung und Neustart; „Später“ hält die laufende Version. Sichtbare Ergänzung ausschliesslich der neue Updatehinweis; übrige GUI unter Bestandsschutz. Gespeicherte Daten bleiben erhalten; lokaler Medienzugriff ggf. erneut freizugeben. Keine automatische Veröffentlichung oder PR-Übernahme.

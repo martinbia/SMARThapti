@@ -1,4 +1,5 @@
 import jsQR from "jsqr";
+import { setupUpdates } from "./updates.js";
 import "./style.css";
 import { types, resolveQR, visibleEvents, addEvent } from "./model.js";
 import { welcomeMarkup, animateWelcome } from "./welcome.js";
@@ -22,6 +23,7 @@ const button = (text, action, extra = "") =>
   `<button data-action="${esc(action)}" ${extra}>${esc(text)}</button>`;
 let manifest,
   dialogs,
+  updateManager = null,
   catalog,
   assignments = {},
   mediaDefaults = {},
@@ -134,6 +136,7 @@ function setSleeping(value) {
   render();
 }
 function message(text) {
+  updateManager?.refresh();
   const el = document.querySelector("#status");
   if (el) el.textContent = text;
   const visibleStatus = document.querySelector("#settings-status");
@@ -220,6 +223,7 @@ async function mountMedia(token) {
   }
 }
 function render() {
+  updateManager?.refresh();
   cleanup();
   const token = generation;
   const [view, id] = (location.hash.slice(1) || "welcome").split("/");
@@ -619,6 +623,7 @@ root.addEventListener("click", async (e) => {
   } else if (name === "choose-files" || name === "choose-directory") {
     const request = ++selectionRequest;
     pickerPending = true;
+    updateManager?.refresh();
     const active = () => !sleeping && request === selectionRequest;
     const directoryMode = name === "choose-directory";
     const fallback = () => {
@@ -738,8 +743,19 @@ try {
   });
   render();
   if (import.meta.env.PROD && "serviceWorker" in navigator)
-    navigator.serviceWorker
-      .register(base + "sw.js")
+    setupUpdates({
+      base,
+      beforeReload: () => {
+        selectionRequest++;
+        pickerPending = false;
+        cleanup();
+      },
+      canShow: () => !sleeping && !pickerPending && !document.hidden,
+    })
+      .then((manager) => {
+        updateManager = manager;
+        manager.refresh();
+      })
       .catch(() =>
         message(
           "App-Cache nicht verfügbar. Die Demo benötigt eine Internetverbindung.",

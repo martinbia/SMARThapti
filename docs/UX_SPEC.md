@@ -82,3 +82,7 @@ Auf dem Alm-Begrüssungsbild bleibt der rote „⏻ Abschalten“-Button unten r
 Hervorgehobene Zurück-Buttons (mindestens 56 CSS-Pixel) und ein dezentes, beschriftetes Zahnrad in derselben Kopfzeile. Einstellungen verbinden lokale Dateien und zeigen pro Karte/Medieneintrag Dateinamenfeld, Auswahl verbundener Dateien und ggf. Download des zusätzlichen QR-Codes. Speichern bestätigt nur erfolgreichen dauerhaften Schreibzugriff; Export/Import dienen als Sicherung. Neustart/New Build behält Zuordnungen, Android-Freigabe ggf. erneut erforderlich.
 
 Einstellungen führen jetzt in drei Schritten durch Ordnerfreigabe → Film pro Karte wählen → Zuordnungen speichern. Nach erfolgreicher Ordnerfreigabe sind Anzahl und Dateinamen sichtbar; eine zweite Dateiauswahl ist nicht erforderlich. Leere Auswahlfelder erklären die noch fehlende Verbindung. Android-Fallback öffnet eine allgemeine Dateiauswahl ohne Galerie-MIME-Filter; „Dateien / Durchsuchen“ führt zu Documents/SMART.
+
+## Updateangebot – ausdrücklich beauftragte GUI-Ergänzung
+
+Ein zusätzliches, nicht modales Hinweispanel „Neue Version verfügbar“ bietet „Jetzt aktualisieren“ und „Später“. Es erscheint erst bei vorbereitetem Update und erklärt Neustart sowie mögliche erneute Dateifreigabe. Im Ruhemodus und während Dateiauswahl bleibt es verborgen. Neue CSS-Regeln sind auf `.app-update` begrenzt; bestehende Kopfzeilen, Navigation, Inhalte und Abstände bleiben erhalten. Der Hinweis liegt oberhalb des bisherigen Abschaltbereichs des Alm-Einstiegs. Keine Screenshot-Baseline wird ersetzt.
