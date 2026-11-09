@@ -1,4 +1,14 @@
 export const assignmentKey = "smarthapti-media-assignments-v1";
+export const xrayAssignmentKey = "smarthapti-xray-assignment-v1";
+export function validImageFile(file) {
+  return (
+    file &&
+    typeof file.name === "string" &&
+    !/[\\/\x00-\x1f]/.test(file.name) &&
+    /\.(jpe?g|png|webp)$/i.test(file.name) &&
+    (!file.type || ["image/jpeg", "image/png", "image/webp"].includes(file.type))
+  );
+}
 export function validMediaName(name, kind) {
   return (
     typeof name === "string" &&
@@ -29,11 +39,11 @@ export function validateAssignments(value, media) {
   }
   return result;
 }
-export function settingsMarkup(manifest, files, esc, button) {
+export function settingsMarkup(manifest, files, esc, button, xray = {}) {
   const names = [
     ...new Set([...manifest.media.map((m) => m.fileName), ...files.keys()]),
   ];
-  return `<h1>Einstellungen</h1><ol class="setup-steps"><li><strong>Ordner verbinden:</strong> Interner Speicher → Documents → SMART auswählen. Danach ist keine Einzelauswahl mehr nötig.</li><li><strong>Film zuordnen:</strong> Unten bei jeder Karte „Aus verbundenen Dateien auswählen“ öffnen.</li><li><strong>Zuordnungen speichern</strong> drücken.</li></ol><p>Ordner: <strong>Internal storage/Documents/SMART</strong>. Nach einem Neustart Dateien bei Bedarf erneut freigeben; die gespeicherte Zuordnung bleibt erhalten.</p><div class="actions">${button("Medienordner verbinden", "choose-directory")}${button("Lokale Dateien auswählen", "choose-files")}</div><section class="panel connection-status"><strong>${files.size ? `${files.size} Mediendateien in dieser Sitzung verbunden` : "Noch keine lokalen Mediendateien verbunden"}</strong>${files.size ? `<details><summary>Gefundene Dateien anzeigen</summary><ul>${[...files.keys()].map((n) => `<li>${esc(n)}</li>`).join("")}</ul></details>` : "<p>Eine Dateinamenzuordnung allein ist noch keine Dateifreigabe. Wenn der Ordnerdialog nicht funktioniert: „Lokale Dateien auswählen“, dann im Android-Dialog „Dateien“ oder „Durchsuchen“ wählen und zu Documents/SMART gehen.</p>"}</section><div id="settings-status" aria-hidden="true"></div><form id="assignment-form"><button class="primary" type="submit">Zuordnungen speichern</button>${manifest.media
+  return `<h1>Einstellungen</h1><ol class="setup-steps"><li><strong>Ordner verbinden:</strong> Interner Speicher → Documents → SMART auswählen. Danach ist keine Einzelauswahl mehr nötig.</li><li><strong>Film zuordnen:</strong> Unten bei jeder Karte „Aus verbundenen Dateien auswählen“ öffnen.</li><li><strong>Zuordnungen speichern</strong> drücken.</li></ol><p>Ordner: <strong>Internal storage/Documents/SMART</strong>. Nach einem Neustart Dateien bei Bedarf erneut freigeben; die gespeicherte Zuordnung bleibt erhalten.</p><div class="actions">${button("Medienordner verbinden", "choose-directory")}${button("Lokale Dateien auswählen", "choose-files")}</div><section class="panel connection-status"><strong>${files.size ? `${files.size} lokale Dateien verbunden` : "Noch keine lokalen Mediendateien verbunden"}</strong>${files.size ? `<details><summary>Gefundene Dateien anzeigen</summary><ul>${[...files.keys()].map((n) => `<li>${esc(n)}</li>`).join("")}</ul></details>` : "<p>Eine Dateinamenzuordnung allein ist noch keine Dateifreigabe. Wenn der Ordnerdialog nicht funktioniert: „Lokale Dateien auswählen“, dann im Android-Dialog „Dateien“ oder „Durchsuchen“ wählen und zu Documents/SMART gehen.</p>"}</section><div id="settings-status" aria-hidden="true"></div><form id="assignment-form"><button class="primary" type="submit">Zuordnungen speichern</button>${manifest.media
     .slice()
     .sort(
       (a, b) =>
@@ -63,5 +73,5 @@ export function settingsMarkup(manifest, files, esc, button) {
     })
     .join(
       "",
-    )}</form><div class="actions">${button("Zuordnungen sichern", "export-assignments")}${button("Sicherung wiederherstellen", "import-assignments")}</div><p>Speicherung auf diesem Tablet für diese Website. Neue Builds und App-Neustarts erhalten die Zuordnung. Das Löschen der Browserdaten oder ein anderer Browser erfordern die Sicherung. Keine Medien werden übertragen.</p><input type="file" id="assignment-backup" accept="application/json,.json" hidden>`;
+    )}</form><div class="actions">${button("Zuordnungen sichern", "export-assignments")}${button("Sicherung wiederherstellen", "import-assignments")}</div><p>Speicherung auf diesem Tablet für diese Website. Neue Builds und App-Neustarts erhalten die Zuordnung. Das Löschen der Browserdaten oder ein anderer Browser erfordern die Sicherung. Keine Medien werden übertragen.</p><section class="panel xray-settings"><h2>Röntgenbild auswählen</h2><p>Nur ein fiktives oder ausdrücklich für Demonstrationszwecke freigegebenes JPG-, JPEG-, PNG- oder WebP-Bild aus <strong>Internal storage/Documents/SMART</strong> verwenden. Die Auswahl bleibt lokal auf diesem Gerät; nach einem Neustart kann eine erneute Freigabe nötig sein.</p><label class="xray-approval"><input id="xray-approval" type="checkbox" ${xray.approved ? "checked" : ""}> Ich bestätige, dass das ausgewählte Bild fiktiv oder ausdrücklich für Demonstrationszwecke freigegeben ist.</label><p id="xray-file-status" role="status">${xray.fileName ? `Gespeicherter Dateiname: ${esc(xray.fileName)}${xray.connected ? " · in dieser Sitzung verbunden" : " · Datei erneut auswählen"}` : "Noch kein lokales Demonstrationsbild ausgewählt."}</p>${files.keys().some((n) => /\.(jpe?g|png|webp)$/i.test(n)) ? `<label for="xray-connected-choice">Bild aus dem verbundenen SMART-Ordner</label><select id="xray-connected-choice"><option value="">Bild auswählen …</option>${[...files.keys()].filter((n) => /\.(jpe?g|png|webp)$/i.test(n)).map((n) => `<option value="${esc(n)}" ${xray.fileName === n ? "selected" : ""}>${esc(n)}</option>`).join("")}</select>${button("Aus verbundenem Ordner übernehmen", "use-xray-connected")}` : ""}${button("Lokales Röntgenbild auswählen", "choose-xray", 'class="primary"')}</section><input type="file" id="assignment-backup" accept="application/json,.json" hidden><input type="file" id="local-image" data-picker-kind="image" multiple hidden>`;
 }

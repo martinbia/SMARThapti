@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "FICTIONAL DEMO TEXT; not clinically validated",
+  "contents": [
+    {
+      "id": "operation-report-content",
+      "sections": [
+        {
+          "heading": "Demo-Dokument",
+          "text": "Diese vorbereitete Ansicht simuliert einen Operationsbericht. Sie enthält absichtlich keine klinischen Befunde, Operationsdetails oder medizinischen Anordnungen."
+        },
+        {
+          "heading": "Herkunft und Datenstand",
+          "text": "Fiktive EPIC-Ansicht ohne Verbindung zu EPIC oder einem Krankenhausserver. Datenstand: 27.10.2026."
+        }
+      ]
+    },
+    {
+      "id": "discharge-report-content",
+      "sections": [
+        {
+          "heading": "Demo-Dokument",
+          "text": "Diese vorbereitete Ansicht simuliert einen Austrittsbericht. Sie enthält absichtlich keine klinischen Befunde, Belastungsfreigaben, Therapieanordnungen oder Medikamentenangaben."
+        },
+        {
+          "heading": "Herkunft und Datenstand",
+          "text": "Fiktive EPIC-Ansicht ohne Verbindung zu EPIC oder einem Krankenhausserver. Datenstand: 02.11.2026."
+        }
+      ]
+    },
+    {
+      "id": "appointment-plan-content",
+      "sections": [
+        {
+          "heading": "Demo-Dokument",
+          "text": "Diese vorbereitete Ansicht simuliert einen Terminplan. Die App zeigt nur den vorhandenen fiktiven Physiotherapietermin; Uhrzeit und Ort sind nicht hinterlegt."
+        },
+        {
+          "heading": "Herkunft und Datenstand",
+          "text": "Fiktive EPIC-Ansicht ohne Verbindung zu EPIC oder einem Krankenhausserver. Datenstand: 02.11.2026."
+        }
+      ]
+    },
+    {
+      "id": "xray-content",
+      "sections": [
+        {
+          "heading": "Lokales Demonstrationsbild",
+          "text": "Es wird kein Röntgenbild mit der App ausgeliefert. Wähle in den Einstellungen nur ein fiktives oder ausdrücklich für Demonstrationszwecke freigegebenes Bild aus Documents/SMART."
+        },
+        {
+          "heading": "Herkunft und Datenstand",
+          "text": "Simulierte EPIC-Ansicht. Keine Verbindung zu EPIC oder einem Krankenhausserver. Das Bild wird lokal im Browser geöffnet und nicht hochgeladen oder zwischengespeichert."
+        }
+      ]
+    }
+  ]
+}

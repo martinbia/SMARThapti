@@ -88,4 +88,10 @@ Auf ausdrücklichen Nutzerwunsch die 850-CSS-Pixel-Obergrenze der App-Fläche au
 
 - Ein fiktiver Patient **Ernst** ist die einzige Zielgruppe. Kein Angehörigenmodus, keine zweite Timeline, keine Rollenumschaltung. Nur P-Karten und Patienten-Alma-Dialog sind aktiv; alte A-QRs und die bisherige Misch-PDF bleiben Archiv und dürfen nicht auf Patienteninhalte umgeleitet werden.
 - Patienten-Karten: sechs Basiskarten und sieben weitere Übungen, also **13 aktive Karten**, darunter **acht Übungsvideos**. Die lokale Medienablage, das bewusst bestätigte Speichern und alle klinischen Grenzen bleiben erhalten.
-- **GUI-Freeze:** Nur Entfernung des Perspektivenwechsels ist mit F17 ausdrücklich freigegeben. Die zuvor besprochene Zweispalten-Startseite (links Videos, rechts nächster Physiotermin und Berichte/Erklärungen) ist **Vorschlag V16, noch nicht implementierungsfreigegeben**.
+- **GUI-Freeze:** Unter F17 war die Zweispalten-Startseite noch Vorschlag V16. Der separate Nutzerauftrag F18 unten hebt diese Einschränkung nur für den ausdrücklich bezeichneten Bereich unter den QR-/Kartenauswahlbuttons und für die nötigen Patientenakten-/Einstellungsansichten auf.
+
+## F18 – Zweispaltiges Patientenmenü und lokale Patientenakte (09.11.2026)
+
+Der Nutzer beauftragt ein zweispaltiges Hauptmenü: links acht kompakte Videozeilen, rechts kommende Physiotherapietermine und Patientenakte. Die bestehende Kopfzeile, Überschrift, QR-/Kartenauswahlbuttons und Bergwiesenansicht bleiben visuell unverändert. Videozeilen öffnen direkt die vorhandene lokale Wiedergabe. Terminangaben bleiben datengetreu und brauchen für Timeline-Speicherung weiterhin eine Bestätigung.
+
+Die EPIC-Ansicht bleibt ausschliesslich eine lokale Simulation mit fiktiven Dokumenten und Daten in separaten JSON-Dateien. Für ein Röntgenbild wird kein Bild ins Repo aufgenommen. Die App speichert nur Dateiname/Freigabestatus einer ausdrücklich als Demo geeigneten lokalen Bilddatei; weder Bild noch Metadaten werden an EPIC, einen Server oder den Service-Worker-Cache übertragen.

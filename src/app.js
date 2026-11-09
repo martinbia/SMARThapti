@@ -5,7 +5,9 @@ import { types, resolveQR, visibleEvents, addEvent } from "./model.js";
 import { welcomeMarkup, animateWelcome } from "./welcome.js";
 import {
   assignmentKey,
+  xrayAssignmentKey,
   validMediaName,
+  validImageFile,
   validateAssignments,
   settingsMarkup,
 } from "./settings.js";
@@ -26,7 +28,10 @@ let manifest,
   dialogs,
   updateManager = null,
   catalog,
+  patientRecord,
+  patientRecordContents,
   assignments = {},
+  xrayAssignment = { fileName: "", approved: false },
   mediaDefaults = {},
   scenario = "discharge",
   keys = [],
@@ -43,6 +48,7 @@ let manifest,
   sleeping = false,
   loadError = false,
   storageOK = true;
+let imageZoom = 1;
 try {
   sleeping = sessionStorage.getItem("smarthapti-asleep") === "true";
 } catch {}
@@ -65,6 +71,13 @@ function save() {
 function supportedFile(name) {
   return /\.(mp4|webm|m4v|mp3|m4a|wav|ogg)$/i.test(name);
 }
+function supportedLocalFile(file) {
+  return supportedFile(file.name) || validImageFile(file);
+}
+function recordDate(value) {
+  const [year, month, day] = value.split("-");
+  return `${day}.${month}.${year}`;
+}
 function persistAssignments(value) {
   try {
     const next = validateAssignments(value, manifest.media);
@@ -81,6 +94,22 @@ function persistAssignments(value) {
   } catch (error) {
     message("Nicht gespeichert: " + error.message);
   }
+}
+function persistXrayFile(file) {
+  if (!validImageFile(file) || !file.size) {
+    message("Bitte eine gültige JPG-, JPEG-, PNG- oder WebP-Datei auswählen.");
+    return false;
+  }
+  const next = { fileName: file.name, approved: true };
+  try {
+    localStorage.setItem(xrayAssignmentKey, JSON.stringify({ version: 1, ...next }));
+  } catch {
+    message("Die Dateizuordnung konnte nicht dauerhaft gespeichert werden. Sie bleibt unverändert.");
+    return false;
+  }
+  xrayAssignment = next;
+  files.set(file.name, file);
+  return true;
 }
 function cleanup() {
   stopWelcome();
@@ -102,6 +131,7 @@ function cleanup() {
 function go(path) {
   selectionRequest++;
   pickerPending = false;
+  imageZoom = 1;
   if (location.hash === `#${path}`) render();
   else location.hash = path;
 }
@@ -167,6 +197,53 @@ function mediaMarkup(ids) {
     })
     .join("");
 }
+function patientVideoCards() {
+  return manifest.cards.filter(
+    (card) =>
+      card.role === "patient" &&
+      card.type === "exercise" &&
+      manifest.contents
+        .find((content) => content.id === card.contentId)
+        ?.mediaIds.some((mediaId) =>
+          manifest.media.some(
+            (media) => media.id === mediaId && media.kind === "video",
+          ),
+        ),
+  );
+}
+function homeDashboard() {
+  const appointmentEvents = manifest.timeline
+    .filter(
+      (event) =>
+        event.kind === "planned-candidate" &&
+        manifest.cards.some(
+          (card) => card.type === "appointment" && card.eventKey === event.eventKey,
+        ),
+    )
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const firstAppointment = appointmentEvents[0];
+  const dateAnchor = scenario === "physio" ? firstAppointment?.date : manifest.asOf;
+  const appointments = appointmentEvents.filter((event) => event.date >= dateAnchor);
+  const videos = patientVideoCards();
+  return `<section class="home-dashboard" aria-label="Videos, Termine und Patientenakte"><div class="home-video-column"><h2>Videos</h2><ul class="home-video-list">${videos
+    .map((card) => `<li>${button(card.printTitle || card.title, `video:${card.id}`, 'class="home-video-row"')}</li>`)
+    .join("")}</ul></div><div class="home-right-column"><section class="home-dashboard-section"><h2>Nächste Physiotherapietermine</h2>${appointments.length ? `<ul class="home-appointment-list">${appointments
+    .map((event) => {
+      const card = manifest.cards.find(
+        (entry) => entry.type === "appointment" && entry.eventKey === event.eventKey,
+      );
+      return card
+        ? `<li><button data-action="card:${esc(card.id)}" class="home-appointment-row"><strong>${esc(event.title)}</strong><span>${recordDate(event.date)}</span></button></li>`
+        : "";
+    })
+    .join("")}</ul>` : "<p>Kein zukünftiger Physiotherapietermin im gewählten Interviewszenario hinterlegt.</p>"}</section><section class="home-dashboard-section"><h2>Patientenakte</h2><ul class="home-record-list">${patientRecord.items
+    .map((item) => `<li>${button(item.title, `record:${item.id}`, 'class="home-record-row"')}</li>`)
+    .join("")}</ul></section></div></section><div class="home-menu-links">${button("Alma fragen", "dialog:" + dialogs.startNodes[role])}${button("Mein Weg", "timeline")}</div>`;
+}
+function recordSummary(item) {
+  const sourceItem = manifest.sources.find((sourceItem) => sourceItem.id === item.sourceId);
+  return `<p class="record-demo-source">Fiktive Demo · nicht klinisch geprüft · Herkunft: simulierte EPIC-Ansicht (${esc(sourceItem?.title || "Patientenakte")}) · Datenstand ${recordDate(item.dataDate)}</p>`;
+}
 async function localFile(m) {
   if (directory) {
     try {
@@ -222,6 +299,39 @@ async function mountMedia(token) {
     status.textContent = `Lokal verbunden: ${m.fileName}. Kein Upload.`;
   }
 }
+async function mountXray(token) {
+  const status = document.querySelector("#record-image-status");
+  const image = document.querySelector("#record-xray-image");
+  if (!xrayAssignment.approved || !xrayAssignment.fileName) return;
+  const file = directory
+    ? await directory
+        .getFileHandle(xrayAssignment.fileName)
+        .then((handle) => handle.getFile())
+        .catch(() => files.get(xrayAssignment.fileName) || null)
+    : files.get(xrayAssignment.fileName) || null;
+  if (token !== generation) return;
+  if (!file) {
+    status.textContent = `Die Bilddatei ${xrayAssignment.fileName} ist nicht verbunden. Bitte in den Einstellungen erneut aus Documents/SMART auswählen.`;
+    return;
+  }
+  if (!validImageFile(file) || !file.size) {
+    status.textContent = `Die Datei ${xrayAssignment.fileName} ist kein lesbares JPG-, JPEG-, PNG- oder WebP-Bild.`;
+    return;
+  }
+  const url = URL.createObjectURL(file);
+  urls.push(url);
+  image.addEventListener("load", () => {
+    if (token !== generation) return;
+    status.textContent = `Lokal geöffnet: ${xrayAssignment.fileName}. Keine Übertragung.`;
+    image.hidden = false;
+    image.closest(".record-image-viewer")?.classList.add("has-image");
+  }, { once: true });
+  image.addEventListener("error", () => {
+    if (token !== generation) return;
+    status.textContent = "Das ausgewählte Bild konnte nicht angezeigt werden. Bitte eine freigegebene JPG-, JPEG-, PNG- oder WebP-Datei erneut auswählen.";
+  }, { once: true });
+  image.src = url;
+}
 function render() {
   updateManager?.refresh();
   cleanup();
@@ -256,7 +366,7 @@ function render() {
   let body = "";
   let title = "Heute mit Alma";
   if (view === "home") {
-    body = `<h1 class="menu-heading">Was möchten Sie ansehen?</h1><div class="actions">${button("QR-Karte scannen", "scan", 'class="primary"')}${button("Karte auswählen", "cards")}</div>${cardButtons(manifest.cards.filter((c) => c.role === role && c.type === "exercise"))}<div class="actions">${button("Alma fragen", "dialog:" + dialogs.startNodes[role])}${button("Mein Weg", "timeline")}</div>`;
+    body = `<h1 class="menu-heading">Was möchten Sie ansehen?</h1><div class="actions">${button("QR-Karte scannen", "scan", 'class="primary"')}${button("Karte auswählen", "cards")}</div>${homeDashboard()}`;
   } else if (view === "cards") {
     title = "Meine Karten";
     body = `<h1>Meine Karten</h1><label>Kartentyp <select id="filter"><option value="all">Alle Karten</option>${Object.entries(
@@ -279,6 +389,15 @@ function render() {
     const content = manifest.contents.find((x) => x.id === c.contentId);
     title = c.printTitle || c.title;
     body = `<span class="tag">${esc(types[c.type])} · ${esc(c.id)}</span><h1>${esc(title)}</h1><p>${esc(content.shortText)}</p><p>${esc(content.detailText)}</p>${source(content)}${mediaMarkup(content.mediaIds)}${c.eventKey ? button(keys.includes(c.eventKey) ? "Eintrag bereits vorhanden – ansehen" : "Zur Timeline hinzufügen", keys.includes(c.eventKey) ? "timeline" : "confirm:" + c.id, 'class="primary"') : ""}`;
+  } else if (view === "video") {
+    const c = manifest.cards.find((card) => card.id === id && card.role === role && card.type === "exercise");
+    const content = manifest.contents.find((entry) => entry.id === c?.contentId);
+    if (!c || !content) {
+      go("home");
+      return;
+    }
+    title = c.printTitle || c.title;
+    body = `<h1>${esc(title)}</h1><p class="notice">Übungsfilm · Inhalt und persönliche Eignung nicht klinisch geprüft. Das Ansehen bestätigt keine durchgeführte Übung.</p>${mediaMarkup(content.mediaIds)}${button("Dateizuordnung in Einstellungen öffnen", "settings")}`;
   } else if (view === "dialog") {
     const node = dialogs.nodes.find((n) => n.id === id);
     if (!node) {
@@ -322,7 +441,34 @@ function render() {
     body = `<h1>QR-Karte scannen</h1><p>Halten Sie eine gedruckte Karte vor die Kamera. Der Scan öffnet Inhalte und speichert keinen Eintrag.</p><video id="camera" autoplay muted playsinline aria-label="Kameravorschau"></video><div class="actions">${button("Kamera wechseln", "switch-camera")}${button("Karte ohne Kamera wählen", "cards", 'class="primary"')}</div>`;
   } else if (view === "settings") {
     title = "Einstellungen";
-    body = settingsMarkup(manifest, files, esc, button);
+    body = settingsMarkup(manifest, files, esc, button, {
+      ...xrayAssignment,
+      connected: Boolean(xrayAssignment.fileName && files.has(xrayAssignment.fileName)),
+    });
+  } else if (view === "record") {
+    title = id ? "Patientenakte" : "Patientenakte";
+    if (!id) {
+      body = `<h1>Patientenakte</h1><p class="record-intro">Simulierte EPIC-Ansicht · alle Angaben fiktiv · nicht klinisch geprüft</p><ul class="record-list">${patientRecord.items
+        .map((item) => `<li>${button(item.title, `record:${item.id}`, 'class="record-row"')}${recordSummary(item)}</li>`)
+        .join("")}</ul>`;
+    } else {
+      const item = patientRecord.items.find((entry) => entry.id === id);
+      const content = patientRecordContents.contents.find((entry) => entry.id === item?.contentId);
+      if (!item || !content) {
+        go("record");
+        return;
+      }
+      title = item.title;
+      if (item.type === "image") {
+        body = `<h1>${esc(item.title)}</h1>${recordSummary(item)}<p class="notice">Fiktive Demoansicht. Das Bild wird ausschliesslich lokal angezeigt, nicht übertragen und nicht im App-Cache gespeichert.</p><div id="record-image-view" class="record-image-viewer"><p id="record-image-status" role="status">${xrayAssignment.approved ? (files.has(xrayAssignment.fileName) ? "Lokales Bild wird geöffnet …" : "Kein Bild verbunden. Wähle eine freigegebene Datei in den Einstellungen aus.") : "Noch kein fiktives oder ausdrücklich freigegebenes Demonstrationsbild ausgewählt."}</p><img id="record-xray-image" alt="Lokal ausgewähltes Röntgen-Demonstrationsbild" hidden></div><div class="record-image-controls">${button("Verkleinern", "image-zoom-out")}${button("Originalgrösse", "image-zoom-reset")}${button("Vergrössern", "image-zoom-in")}</div>${button("Bild in Einstellungen auswählen", "settings", 'class="primary"')}<section class="panel record-document" aria-label="Fiktive Bildinformation">${content.sections
+          .map((section) => `<h2>${esc(section.heading)}</h2><p>${esc(section.text)}</p>`)
+          .join("")}</section>`;
+      } else {
+        body = `<h1>${esc(item.title)}</h1>${recordSummary(item)}<section class="panel record-document" aria-label="Fiktives Beispieldokument">${content.sections
+          .map((section) => `<h2>${esc(section.heading)}</h2><p>${esc(section.text)}</p>`)
+          .join("")}</section><p class="notice">Nur vorbereitete fiktive Beispieldaten. Keine Verbindung zu EPIC, Krankenhausservern oder externen APIs.</p>`;
+      }
+    }
   } else if (view === "moderator") {
     title = "Moderatorbereich";
     body = `<h1>Demo vorbereiten</h1><p>Medien ausschliesslich lokal unter <strong>Internal storage/Documents/SMART</strong>. Auswahl erlaubt nur Lesen; kein Upload und keine Kopie in den App-Speicher.</p><div class="actions">${button("Medienordner verbinden", "choose-directory")}${button("Lokale Datei(en) auswählen", "choose-files")}</div><ul id="media-list">${manifest.media.map((m) => `<li>${esc(m.fileName)}: wird geprüft …</li>`).join("")}</ul><p>Nach App-Neustart Medien erneut verbinden. Ordner- und Dateifreigaben werden nicht dauerhaft gespeichert.</p><label>Interview-Szenario <select id="scenario"><option value="discharge" ${scenario === "discharge" ? "selected" : ""}>Austritt · ${esc(manifest.asOf)}</option><option value="physio" ${scenario === "physio" ? "selected" : ""}>Physiotermin · 10.11.2026</option></select></label><p>Alle Karten bleiben in beiden Szenarien erreichbar. Die Szene setzt nur den fiktiven Interviewzeitpunkt.</p>${button("Fiktive Einträge zurücksetzen", "reset")}<p class="notice">Die bisherige Faltkarten-PDF enthält historische Angehörigenkarten und ist nicht mehr für aktuelle Patienteninterviews vorgesehen. Die Patienten-QR-Codes sind weiterhin in den Einstellungen verfügbar.</p>`;
@@ -330,13 +476,16 @@ function render() {
     go("home");
     return;
   }
-  root.innerHTML = `<header>${button(view === "home" ? "← Bergwiese" : "← Zum Menü", view === "home" ? "welcome" : "home", 'class="back-navigation"')}<strong class="role-line">Für ${esc(persona().displayName.split(" ")[0])}</strong>${button("⚙︎", "settings", 'class="settings-button" aria-label="Einstellungen" title="Einstellungen"')}</header><main id="main" tabindex="-1" aria-label="${esc(title)}">${body}<div id="status" role="status" aria-live="polite"></div>${!storageOK ? '<p class="notice">Lokaler Speicher nicht verfügbar. Einträge bleiben nur während dieser Sitzung erhalten.</p>' : ""}</main><footer>Fiktive Interview-Demo · keine medizinische Anweisung · nicht klinisch geprüft<div class="actions">${button("Mein Weg", "timeline")}${button("Demo vorbereiten", "moderator")}${button("Alle Karten", "cards")}</div><small>Nur fiktive Patientendaten verwenden.</small></footer><input id="local-files" type="file" multiple hidden><input id="local-directory" type="file" webkitdirectory directory multiple hidden>`;
+  const backTarget = view === "home" ? "welcome" : view === "record" && id ? "record" : "home";
+  const backLabel = view === "home" ? "← Bergwiese" : view === "record" && id ? "← Patientenakte" : "← Zum Menü";
+  root.innerHTML = `<header>${button(backLabel, backTarget, 'class="back-navigation"')}<strong class="role-line">Für ${esc(persona().displayName.split(" ")[0])}</strong>${button("⚙︎", "settings", 'class="settings-button" aria-label="Einstellungen" title="Einstellungen"')}</header><main id="main" tabindex="-1" aria-label="${esc(title)}">${body}<div id="status" role="status" aria-live="polite"></div>${!storageOK ? '<p class="notice">Lokaler Speicher nicht verfügbar. Einträge bleiben nur während dieser Sitzung erhalten.</p>' : ""}</main><footer>Fiktive Interview-Demo · keine medizinische Anweisung · nicht klinisch geprüft<div class="actions">${button("Mein Weg", "timeline")}${button("Demo vorbereiten", "moderator")}${button("Alle Karten", "cards")}</div><small>Nur fiktive Patientendaten verwenden.</small></footer><input id="local-files" type="file" multiple hidden><input id="local-directory" type="file" webkitdirectory directory multiple hidden>`;
   document.title = `${title} · SMARThapti`;
   appendPowerButton();
   document.querySelector("#main").focus({ preventScroll: true });
   window.scrollTo(0, 0);
   if (view === "scan") startCamera(token);
   mountMedia(token);
+  if (view === "record" && id === "xray") mountXray(token);
   if (view === "moderator") updateMediaStatus(token);
   document.querySelectorAll(".assignment-choice").forEach((select) =>
     select.addEventListener("change", () => {
@@ -386,8 +535,23 @@ function render() {
       "Interview-Szenario eingestellt. Vorhandene Einträge bleiben erhalten.",
     );
   });
-  for (const id of ["local-files", "local-directory"]) {
+  document.querySelector("#xray-approval")?.addEventListener("change", (e) => {
+    if (!xrayAssignment.fileName) return;
+    const next = { ...xrayAssignment, approved: e.target.checked };
+    try {
+      localStorage.setItem(
+        xrayAssignmentKey,
+        JSON.stringify({ version: 1, ...next }),
+      );
+      xrayAssignment = next;
+    } catch {
+      e.target.checked = xrayAssignment.approved;
+      message("Freigabestatus konnte nicht gespeichert werden.");
+    }
+  });
+  for (const id of ["local-files", "local-directory", "local-image"]) {
     const input = document.getElementById(id);
+    if (!input) continue;
     input.addEventListener("change", (e) => {
       if (
         sleeping ||
@@ -403,9 +567,24 @@ function render() {
         );
         return;
       }
+      if (id === "local-image") {
+        if (!document.querySelector("#xray-approval")?.checked) {
+          message("Bitte zuerst bestätigen, dass nur ein fiktives oder ausdrücklich freigegebenes Bild verwendet wird.");
+          return;
+        }
+        const image = chosen.find(validImageFile);
+        if (!image) {
+          message("Bitte eine JPG-, JPEG-, PNG- oder WebP-Bilddatei auswählen.");
+          return;
+        }
+        if (!persistXrayFile(image)) return;
+        render();
+        message(`Lokales Demonstrationsbild verbunden: ${image.name}. Kein Upload.`);
+        return;
+      }
       const selected = chosen.filter(
         (f) =>
-          supportedFile(f.name) &&
+          (id === "local-directory" ? supportedLocalFile(f) : supportedFile(f.name)) &&
           (id !== "local-directory" ||
             !f.webkitRelativePath ||
             f.webkitRelativePath.split("/").length === 2),
@@ -417,7 +596,7 @@ function render() {
       for (const file of selected) files.set(file.name, file);
       render();
       message(
-        `${selected.length} Mediendateien lokal verbunden. Jetzt unten pro Karte auswählen und „Zuordnungen speichern“ drücken.`,
+        `${selected.length} lokale Dateien verbunden. Jetzt unten Filme pro Karte zuordnen und „Zuordnungen speichern“ drücken.`,
       );
     });
     input.addEventListener("cancel", () => {
@@ -586,6 +765,12 @@ root.addEventListener("click", async (e) => {
   else if (name === "card") {
     const card = manifest.cards.find((c) => c.id === id);
     if (card) openCard(card);
+  } else if (name === "video") go("video/" + id);
+  else if (name === "record") go(id ? "record/" + id : "record");
+  else if (name.startsWith("image-zoom-")) {
+    imageZoom = name === "image-zoom-in" ? Math.min(4, imageZoom + 0.25) : name === "image-zoom-out" ? Math.max(1, imageZoom - 0.25) : 1;
+    const image = document.querySelector("#record-xray-image");
+    if (image) image.style.transform = `scale(${imageZoom})`;
   } else if (name === "dialog") go("dialog/" + id);
   else if (name === "confirm") go("confirm/" + id);
   else if (name === "add") {
@@ -617,6 +802,50 @@ root.addEventListener("click", async (e) => {
   } else if (name === "switch-camera") {
     facing = facing === "user" ? "environment" : "user";
     render();
+  } else if (name === "use-xray-connected" || name === "choose-xray") {
+    if (!document.querySelector("#xray-approval")?.checked) {
+      message("Bitte bestätigen, dass das Bild fiktiv oder ausdrücklich für Demonstrationszwecke freigegeben ist.");
+      return;
+    }
+    const saveXray = (file) => {
+      if (!persistXrayFile(file)) return false;
+      render();
+      message(`Lokales Demonstrationsbild verbunden: ${file.name}. Kein Upload.`);
+      return true;
+    };
+    if (name === "use-xray-connected") {
+      const file = files.get(document.querySelector("#xray-connected-choice")?.value);
+      if (file) saveXray(file);
+      else message("Bitte zuerst ein Bild aus dem verbundenen Ordner auswählen.");
+      return;
+    }
+    const request = ++selectionRequest;
+    pickerPending = true;
+    updateManager?.refresh();
+    const active = () => !sleeping && request === selectionRequest;
+    if (!window.showOpenFilePicker) {
+      const input = document.querySelector("#local-image");
+      input.dataset.request = String(request);
+      input.value = "";
+      input.click();
+      return;
+    }
+    try {
+      const [handle] = await window.showOpenFilePicker({
+        id: "smarthapti-xray-image",
+        startIn: directory || "documents",
+        multiple: false,
+      });
+      if (!active()) return;
+      const file = await handle.getFile();
+      if (!active()) return;
+      pickerPending = false;
+      saveXray(file);
+    } catch (error) {
+      if (!active()) return;
+      pickerPending = false;
+      message(error.name === "AbortError" ? "Auswahl abgebrochen. Die bisherige Zuordnung bleibt erhalten." : "Bild konnte nicht gelesen werden. Bitte im Dateimanager erneut aus Documents/SMART auswählen.");
+    }
   } else if (name === "choose-files" || name === "choose-directory") {
     const request = ++selectionRequest;
     pickerPending = true;
@@ -656,7 +885,7 @@ root.addEventListener("click", async (e) => {
         if (!active()) return;
         const selected = [];
         for await (const entry of picked.values())
-          if (entry.kind === "file" && supportedFile(entry.name))
+          if (entry.kind === "file" && (supportedFile(entry.name) || /\.(jpe?g|png|webp)$/i.test(entry.name)))
             selected.push(await entry.getFile());
         if (!active()) return;
         directory = picked;
@@ -671,12 +900,12 @@ root.addEventListener("click", async (e) => {
         );
         if (!active()) return;
         for (const file of selected)
-          if (supportedFile(file.name)) files.set(file.name, file);
+          if (supportedLocalFile(file)) files.set(file.name, file);
       }
       pickerPending = false;
       render();
       message(
-        `${files.size} Mediendateien lokal verbunden. Keine zusätzliche Einzelauswahl nötig. Unten zuordnen und speichern.`,
+        `${files.size} lokale Dateien verbunden. Keine zusätzliche Einzelauswahl nötig. Filme unten zuordnen und speichern.`,
       );
     } catch (error) {
       if (!active()) return;
@@ -718,9 +947,11 @@ try {
     fetch(base + "content/demo_manifest.json"),
     fetch(base + "content/demo_dialogs.json"),
     fetch(base + "content/exercise_catalog.json"),
+    fetch(base + "content/patient_record.json"),
+    fetch(base + "content/patient_record_contents.json"),
   ]);
   if (responses.some((r) => !r.ok)) throw Error("Inhalte fehlen");
-  [manifest, dialogs, catalog] = await Promise.all(
+  [manifest, dialogs, catalog, patientRecord, patientRecordContents] = await Promise.all(
     responses.map((r) => r.json()),
   );
   for (const key of ["cards", "contents", "media"])
@@ -737,6 +968,19 @@ try {
     const saved = localStorage.getItem(assignmentKey);
     if (saved)
       assignments = validateAssignments(JSON.parse(saved), manifest.media);
+  } catch {
+    storageOK = false;
+  }
+  try {
+    const savedXray = JSON.parse(localStorage.getItem(xrayAssignmentKey) || "null");
+    if (
+      savedXray?.version === 1 &&
+      typeof savedXray.fileName === "string" &&
+      savedXray.fileName.length < 256 &&
+      !/[\\/\x00-\x1f]/.test(savedXray.fileName) &&
+      /\.(jpe?g|png|webp)$/i.test(savedXray.fileName) &&
+      typeof savedXray.approved === "boolean"
+    ) xrayAssignment = { fileName: savedXray.fileName, approved: savedXray.approved };
   } catch {
     storageOK = false;
   }

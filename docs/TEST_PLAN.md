@@ -77,6 +77,17 @@ Die obige Tabelle dokumentiert den ursprünglichen Planungsstand. In der Cloud w
 
 Alle realen Tablet-Tests bleiben offen. Automatisierte Browserprüfungen sind keine klinische Freigabe.
 
+## Patientenmenü und Patientenakte (F18, 09.11.2026)
+
+- **T48:** Screenshotvergleich bei 800×1100 CSS-Pixeln: Kopfzeile, Überschrift und QR-/Kartenauswahlbuttons stimmen bis einschliesslich ihrer bisherigen Fläche pixelgleich mit dem Ausgangsbuild überein. Für nicht betroffene Ansichten werden Vorher-/Nachher-Screenshots verglichen.
+- **T49:** Menü zeigt alle acht Videos je einmal und je Zeile; Layout am Tabletviewport hat links ungefähr 55 % und rechts 45 %, kein horizontaler Überlauf. Wähle ein Video und prüfe direkte Playerroute; fehlende Datei zeigt lokalen Dateiauswahl-Fallback; Zurück stoppt Media; keine Timelineänderung.
+- **T50:** Terminliste ist chronologisch und verwendet nur Termin-/Szenariodaten aus dem Manifest. Der Termin öffnet die bestehende Kartendetailansicht; weder Auswahl noch Bestätigungsdialog schreibt vor „Hinzufügen“ einen Timeline-Eintrag.
+- **T51:** Operationsbericht, Austrittsbericht und Terminplan öffnen getrennte vorbereitete Inhalte; jeder Eintrag ist fiktiv, nennt simulierte Herkunft und Datenstand und enthält keine erfundenen klinischen Anweisungen.
+- **T52:** Nur nach Freigabebestätigung lässt sich JPG/JPEG/PNG/WebP lokal auswählen. Prüfe Desktop-Dateidialog, Android Documents/SMART, Ordnerwiederverwendung, Dateitypfehler, Zuordnung über Neustart und Rechteverlust-Fallback. Anzeige nutzt Blob-URL, Zoom/Scroll und Zurück; kein HTTP-/Service-Worker-Medienabruf.
+- **T53:** Regression: Kamera/QR, Alma-Dialog/MP3, Timeline-Bestätigung und Deduplizierung, Video/MP3-Zuordnung und -Wiedergabe, Abschalten/Ruhemodus und Updateangebot bleiben verfügbar.
+
+Screenshots der betroffenen Ansichten und der pixelgleichen oberen Menüfläche werden im PR abgelegt. Die Android-Dateiauswahl, realer X-Ray-Viewport mit sichtbaren Systemleisten sowie echtes Gerät bleiben bis zur Hardwareprüfung offen.
+
 ## Ergänzende Einstiegstests vom 09.11.2026
 
 T29 (F17): Bergwiese ohne Menü beim Erstaufruf, Kamera nach Freigabe; nur aktive Patienten-QRs öffnen Inhalte. Historische A-QRs bleiben inaktiv; Touch und Enter öffnen das Menü. T30: 3 s Einblenden, fünf Vorführungen à 2,4 s, 3 s Ausblenden, 10 s ausschliesslich Hintergrundbild, Wiederholung und Timer-Ende bei Navigation. T31 (F17): Kopfzeile „Für Ernst“ einzeilig, kein manueller Perspektivenwechsel, reduzierte Bewegungseinstellung ohne Handbewegung. Browserautomation prüft diese Abläufe; Darstellung, Einwilligung, Kamerafokus und Systemleisten auf dem realen Android-Tablet bleiben offen.

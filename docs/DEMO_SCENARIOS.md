@@ -26,4 +26,4 @@ Alma steht neben dem Hochformat-Tablet. Ernst erhält ein **Patienten-Häftchen*
 
 Nur fiktive Angaben. Kein reales Therapiehandeln beurteilen. Medienstatus und QR-Frontkamera vorab auf echtem Tablet prüfen. Bei Scanfehler Touch-Alternative anbieten. Nach jedem Interview Demo-Zustand zurücksetzen, keine Interviewdaten in das öffentliche Repo stellen.
 
-Die früheren Szenen für Angehörige sind durch F17 **aufgehoben** und nur über die Git-Historie nachvollziehbar. Ein zweispaltiges Hauptmenü mit Video-Liste links und Termin-/Berichtsspalte rechts ist ein **separater, noch nicht freigegebener GUI-Vorschlag V16**.
+Die früheren Szenen für Angehörige sind durch F17 **aufgehoben** und nur über die Git-Historie nachvollziehbar. Der gesonderte Auftrag F18 genehmigt das zweispaltige Hauptmenü ausschliesslich unterhalb der bisherigen QR-/Kartenauswahl sowie die passende lokale Patientenakte.
