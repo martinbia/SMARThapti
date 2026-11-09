@@ -1,3 +1,5 @@
+> **HISTORISCHER IMPLEMENTIERUNGSAUFTRAG.** Seit dem Nutzerbeschluss F17 vom 09.11.2026 ist SMARThapti ausschliesslich für Patienten. Angaben über Angehörige, Rollenwechsel oder A-Karten in diesem älteren Auftrag sind überholt. Aktuelle Grundlagen: AGENTS.md, docs/DECISIONS.md und docs/CONCEPT.md. **Nicht erneut ausführen.**
+
 # Codex-Auftrag – SMARThapti: erster funktionsfähiger PWA-Draft
 
 **Dies ist mein ausdrücklicher Implementierungsauftrag.** Arbeite im bestehenden GitHub-Repository `martinbia/SMARThapti`. Die aktuelle Dokumentation v0.1 ist die Grundlage. Erstelle jetzt die **erste auf dem Android-Tablet testbare PWA**; keine weitere Varianten- oder Konzeptphase.

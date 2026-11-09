@@ -23,14 +23,14 @@
 | T06 | Rückkamerawechsel + Berechtigungsablehnung | Kamerawechsel bzw. sofort funktionierende Touch-Auswahl | offen |
 | T07 | schwaches Licht, kleines/unscharfes QR | Verständlicher Zustand; Touch als Alternative; keine Endlosschleife | offen |
 | T08 | ungültiger/andersformatiger QR | Neutrale Fehlermeldung, erneuter Scan möglich | offen |
-| T09 | Rolle Patient/Angehörige wechseln | Passende Startkarten und Inhalte, private Anliegen nicht versehentlich geteilt | offen |
+| T09 | Patient ohne Rollenwechsel | Keine Angehörigenansicht und keine Wechsel-Buttons; alle P-Karten bleiben erreichbar | offen |
 | T10 | Karte manuell wählen | Gleicher Karteninhalt wie QR-Scan | offen |
 | T11 | Übungskarte vor jeglichem Meilenstein öffnen | Übungsansicht/Medien-Fallback erreichbar, kein Freigabe-Gate | offen |
 | T12 | lokales MP4 aus `Documents/SMART` abspielen; Zurück/Home | Bild/Ton stoppen sofort; kein Hintergrundvideo, kein Server-Download | offen |
 | T13 | lokale Alma-MP3 aus `Documents/SMART` abspielen; Antwortbuttons/Zurück | Richtiger Folgeknoten, Player endet bei Navigation, kein Server-Download | offen |
 | T14 | Mediendatei im lokalen Ordner fehlt/umbenannt/ungültig | Kein kaputter Player, verständlicher Dateihinweis und Textalternative | offen |
 | T15 | Termin scannen, **Abbrechen** | Timeline unverändert | offen |
-| T16 | Termin scannen, **Hinzufügen**, wiederholen | Genau ein Event mit gleichem Eventkey; keine Doppelung über Rollen-Karte | offen |
+| T16 | Patiententermin scannen, **Hinzufügen**, wiederholen | Genau ein Event mit gleichem Eventkey; keine Doppelung bei wiederholtem P-QR | offen |
 | T17 | Meilenstein bestätigen / ohne Bestätigung verlassen | Nur bewusst bestätigte Selbstangabe erscheint als solche | offen |
 | T18 | Video anschauen und beenden | **Keine** neue „Übung durchgeführt“-Markierung | offen |
 | T19 | Timeline/Langtext/Datum und Quellen | Allgemeine, persönliche Demo-Quelle und eigene Angabe visuell unterscheidbar; fiktive Daten erkennbar | offen |
@@ -55,7 +55,7 @@
 
 ## Interview-Usability (Forschungsziel, nicht klinische Wirksamkeit)
 
-Je Szene S1–S6 beobachten: eigenständige Aufgabenerfüllung, Irrtümer beim Scannen/Bestätigen, Aufwand gegenüber Papier, Wert von Übungs- und Unterstützungsvideos, Quellenverständnis, empfundene Autonomie/Belastung. Ergebnisse getrennt nach Patienten- und Angehörigenrolle zusammenfassen. Keine echten Interviewrohdaten in GitHub.
+Je Szene S1–S6 beobachten: eigenständige Aufgabenerfüllung, Irrtümer beim Scannen/Bestätigen, Aufwand gegenüber Papier, Wert von Übungs- und Unterstützungsvideos, Quellenverständnis, empfundene Autonomie/Belastung. Ergebnisse ausschliesslich für die Patientenperspektive zusammenfassen. Keine echten Interviewrohdaten in GitHub.
 
 ## Dokumentationsformat je Test
 
@@ -92,3 +92,13 @@ Positionsanpassung auf Nutzerwunsch: Abschalten im Menü und allen Unteransichte
 T39: Native Verzeichnisauswahl ohne Directory-API liest unterstützte SMART-Dateien ein und füllt Zuordnungslisten ohne zweiten Picker. T40: Verbergen/Wiederanzeigen während des Ordnerdialogs erhält das Ergebnis; unterstützter Dateipicker verwendet den verbundenen Ordner und keinen Galerie-MIME-Filter. Automatisiert mit echten Browser-Dateielementen sowie simulierten File-System-Handles prüfen; tatsächlicher Android-Dokumentenanbieter bleibt am Gerät zu testen.
 
 T41: Zwei reale Service-Worker-Versionen ausliefern: Erstinstallation ohne Hinweis; Update wird vorbereitet und angeboten; keine Aktivierung ohne Zustimmung; Später hält Sitzung; nach Neustart erneut anbieten; akzeptiertes Update stoppt Kamera, lädt neue Version und behält Filmzuordnungen. T42: Offline-Check ohne Unterbrechung, vorbereitetes Update im Ruhemodus verborgen, nach Wecken sichtbar. Reale installierte Android-PWA und mehrere Tabs am Tablet weiter prüfen. Unbeteiligte GUI gegen Arbeitsbaseline vergleichen; keine freigegebenen Baselines ändern.
+
+## Patientenfokus-Regressionsprüfungen (F17, 09.11.2026)
+
+- **T43:** Ein fiktiver Patient, sechs Basiskarten und sieben zusätzliche P-Übungskarten, nur P-Alma-Knoten. Keine A-Karten oder A-Medien in aktiven JSON-Daten.
+- **T44:** Das Menü hat keinen Perspektivwechsel; alle acht Patienten-Übungsvideos sowie die 13 P-Karten bleiben auswählbar.
+- **T45:** Historische A-QRs werden als inaktiv erkannt und öffnen keine Angehörigenansicht. Keine Umleitung auf eine P-Karte.
+- **T46:** Alte lokal gespeicherte Angehörigen-Ereignisse werden nicht in der Patienten-Timeline angezeigt; P-Termine und P-Meilensteine behalten ihre bewusste Bestätigung, Idempotenz und lokale Speicherung.
+- **T47:** Der alte gemischte Druckbogen ist nicht als aktueller Patientendruckbogen verlinkt; neue P-QR-Karten bleiben verfügbar.
+
+Automatisierte Browserregressionen und echte Android-Tabletprüfung getrennt dokumentieren. **Kein Tablet-Test oder klinische Freigabe behaupten, solange nicht erfolgt.**

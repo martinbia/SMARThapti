@@ -15,3 +15,7 @@ Die zwei Informationskarten `P-INF-003` und `A-INF-003` verweisen auf die vorber
 ## Sieben zusätzliche lokale Übungsfilme (09.11.2026)
 
 `P-EX-101` bis `P-EX-107` ergänzen die bisherigen elf Karten. Zuordnung und exakte Dateinamen: `content/exercise_catalog.json`. Die neuen SVGs sind in den App-Einstellungen herunterladbar. QR-Inhalt bleibt `SH1:<CARD-ID>`; Filmzuordnung kann auf dem Tablet geändert werden, ohne den Code zu ändern. Reproduzierbare Erzeugung nur dieser zusätzlichen SVGs: `node scripts/generate-exercise-qr.mjs`. Die bestehende Karten-PDF und die ursprünglichen elf SVGs bleiben unverändert.
+
+## F17: Patienten-QRs (09.11.2026)
+
+Die aktuelle PWA kennt nur sechs Basis-P-Karten und sieben zusätzliche P-EX-101 bis P-EX-107. Historische A-SVG-Dateien bleiben im Repository, sind aber **nicht mehr aktiv**. Für neue Patienteninterviews ausschliesslich P-Karten ausgeben.

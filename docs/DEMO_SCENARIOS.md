@@ -1,71 +1,29 @@
-# Fiktive Daten und Interviewszenen
+# Fiktive Interviewszenen – nur Patienten
 
-**Status:** ENTWURF v0.1, 08.11.2026. **V:** konkrete Figuren, Zeitpunkte, Szenen und Interviewabfolge. **F:** nur fiktive Daten und keine medizinischen Anordnungen.
+**Status:** ENTWURF v0.2, 09.11.2026, F17. Keine Angehörigenperspektive mehr.
 
-## Fiktiver Beispielfall (V)
+## Fiktiver Fall und Interview-Set-up
 
-- **Ernst Baumann, 79:** fiktiver Patient, schätzt Unabhängigkeit, möchte wieder seinen Alltag gestalten und mit Anna zum Markt gehen.
-- **Anna Küng, 72:** fiktive Partnerin; unterstützt im Alltag, möchte Ernsts Entscheidungen respektieren, hat Fragen zu geeigneter Hilfe und benötigt auch eigene Erholung.
-- **Wohnsituation:** gemeinsam in einer Wohnung, fünf Stufen am Eingang. Keine reale Adresse oder Telefonnummer.
-- **26.10.2026:** Sturz (fiktiv); **27.10.:** Operation (fiktiver Bericht E02); **02.11.:** Austritt nach Hause mit Demo-Austrittsheft und Karten (E06); **06.11.:** eingefrorenes Interview-„Heute“; **10.11.:** angenommener Physiotermin (E07) mit neuen Karten.
-- Eine medizinische Detailanordnung wird **absichtlich nicht ausgefüllt**. Keine Belastungsfreigabe, Wiederholungszahl, konkrete Übungsausführung oder Medikation ableiten.
-- Ein persönliches Ziel (z. B. Frühstück, gemeinsamer Marktbesuch) ist **Wunsch**, keine zugesagte Heilungsstufe.
+Ernst Baumann (79, fiktiv) ist nach einer fiktiven Hüftfraktur-Operation wieder zu Hause. OP-Bericht E02 (27.10.2026), Austritt E06 (02.11.2026), geplante Physiotherapie E07 (10.11.2026) sind **nur fiktive Beispieldaten**. Keine konkreten Belastungsfreigaben, Übungsdosierungen oder medizinischen Anweisungen erfinden.
 
-**Herkunft:** fiktive SMARTcoach-Journey v0.2 als Erzählrahmen; qualitativ inspirierende, nicht veröffentlichte Personas/Versorgungspfade. Keine Originalfälle oder Interviewprotokoll-Ausschnitte importieren.
+Alma steht neben dem Hochformat-Tablet. Ernst erhält ein **Patienten-Häftchen** und **nur P-Karten**, keine A-Karten. Videos/MP3 liegen nur nach technischer Freigabe unter Internal storage/Documents/SMART. Auch ohne Smartphone und Video ist das Papier sinnvoll. Die frühere Figur Anna bleibt historischer Ausgangskontext, nicht eigenständige Zielperson der PWA.
 
-## Interview-Set-up
+## Sechs Interviewszenen (Vorschlag)
 
-Alma sitzt sichtbar beim aufgestellten Tablet im Hochformat. Auf dem Tisch liegen **zwei getrennte Papier-Häftchen**, Patienten- und Angehörigen-Karten/Schlüsselanhänger. Interviewperson wählt passende Perspektive; Moderator erklärt, dass alle Namen und medizinischen Unterlagen fiktiv und Medien gegebenenfalls reine Technikdemos sind. Keine Teilnahmevoraussetzung „eigenes Smartphone“.
+**S1 – Austritt:** Ernst liest P-INF-001 im Häftchen, scannt den QR oder öffnet die Karte per Touch, prüft Quellen und Stand. Papier alleine verständlich?
 
-**F – Medienvorbereitung:** Falls MP4-/MP3-Medien verwendet werden, legt die Moderatorperson diese **lokal** unter `Internal storage/Documents/SMART` auf dem Tablet ab und verbindet den Ordner über die PWA mit ausdrücklicher Android-Freigabe. Dateien bleiben auf dem Tablet und werden nicht von GitHub Pages heruntergeladen. Verfügbare Dateinamen/Freigaben vor S2–S4 prüfen; fehlende Dateien ergeben den beschrifteten Text-Fallback. **V:** der Vorgang gehört in den Moderatorbereich U9.
+**S2 – Videos:** Ernst sieht alle acht Übungskarten (P-EX-001 und P-EX-101 bis P-EX-107), öffnet ein lokales Video oder den klar beschrifteten Fehl-/Freigabehinweis, stoppt und geht zurück. Kein Erledigt-Status nach Videoansicht.
 
-## Sechs kurze Szenen (V)
+**S3 – Berichte:** Ernst öffnet P-INF-002 und die einfache Erklärung zum fiktiven Operationsbericht. Verständlich und auffindbar?
 
-### S1 – „Zu Hause: Welche Informationen habe ich bekommen?“ (Patient)
+**S4 – Alma:** Ernst scannt P-INF-003 oder nutzt „Alma fragen“, hört optional ALMA_P_START.mp3 und wählt vorbereitete Antwortbuttons. Kein KI-Dialog, Ton stoppt beim Verlassen.
 
-**Ausgang:** Patient liest Austritts-Häftchen, hält Anhänger oder `P-INF-001` vor Frontkamera.  
-**Aktion:** QR erkennen -> Kurzerklärung -> „Quelle / Stand“ -> zurück. Touch-Alternative zeigen, falls nötig.  
-**Beobachten:** Ist Papier allein verständlich? Wird digitale Vertiefung als zusätzlicher Nutzen erkannt? Findet man die Quelle?
+**S5 – Physiotermin:** Ernst scannt P-APT-001, liest den fiktiven Termin und fügt ihn nur nach expliziter Bestätigung hinzu. Wiederholungen erzeugen keinen zweiten Eintrag.
 
-### S2 – „Kann ich mir meine Übung noch einmal zeigen lassen?“ (Patient)
+**S6 – Mein Weg:** Ernst betrachtet seine Timeline, bestätigt oder verwirft den selbst berichteten Meilenstein P-MIL-001. Keine Ranglisten und keine festgelegte Genesungsfrist.
 
-**Ausgang:** Karte `P-EX-001`.  
-**Aktion:** Übungsbereich unabhängig von Meilenstein öffnen -> **vorhandenes, fachlich freigegebenes Video** oder klarer **Techniktest-/fehlender-Medien-Hinweis** -> Pause/Stop -> Zurück.  
-**Beobachten:** Ist Videozugriff auffindbar? Wird das Video **nicht** als Beleg einer erledigten Übung verstanden?
+## Moderation und Grenzen
 
-### S3 – „Wie kann ich helfen, ohne alles zu übernehmen?“ (Angehörige)
+Nur fiktive Angaben. Kein reales Therapiehandeln beurteilen. Medienstatus und QR-Frontkamera vorab auf echtem Tablet prüfen. Bei Scanfehler Touch-Alternative anbieten. Nach jedem Interview Demo-Zustand zurücksetzen, keine Interviewdaten in das öffentliche Repo stellen.
 
-**Ausgang:** Rollenwechsel zu Anna, Häftchen plus `A-INF-001`.  
-**Aktion:** kurzes Unterstützungsvideo (oder markierter Test-Slot), vorbereiteter Alma-Dialog, Auswahl „Was können wir bei Physio fragen?“.  
-**Zusätzlich (V):** `A-INF-003` führt per QR direkt zum Dialogstart und dem lokalen MP3-Slot `ALMA_A_START.mp3`.
-**Beobachten:** Fühlt sich Anna eigenständig adressiert statt nur als Hilfsperson?
-
-### S4 – „Auch ich brauche einmal eine Pause“ (Angehörige)
-
-**Ausgang:** `A-INF-002` bzw. `A-MIL-001`.  
-**Aktion:** Entlastungsvideo/-text; Meilenstein „Pause eingeplant“ bewusst bestätigen oder abbrechen.  
-**Beobachten:** Werden eigene Bedürfnisse ernst genommen? Wird ohne Leistungsdruck formuliert? Kein ungefragtes Teilen mit Ernst.
-
-### S5 – „Der nächste Physiotherapietermin“ (beide Perspektiven)
-
-**Ausgang:** `P-APT-001` oder `A-APT-001`, beide auf denselben fiktiven 10.11.-Termin bezogen.  
-**Aktion:** Termin nur nach „Hinzufügen“ in Timeline; gleiche Karte erneut scannen; kein doppelter Eintrag; neue Physio-Karten am 10.11. in zweitem Interviewzustand simuliert.  
-**Beobachten:** Versteht man den Unterschied zwischen Ansehen und Speichern?
-
-### S6 – „Mein persönlicher Weg“ (Patient und Angehörige)
-
-**Ausgang:** Timeline zeigt fiktiven Verlauf.  
-**Aktion:** `P-MIL-001` öffnen -> individuellen Alltagsschritt nach Bestätigung als **selbst berichtet** eintragen; ohne Bestätigung unverändert.  
-**Beobachten:** Wirkt der Meilenstein als persönliche Orientierung, ohne feste Genesungsfrist oder Bewertung?
-
-## Moderationsregeln
-
-- Keine Übungen am Interviewgerät „vormachen lassen“ als medizinischer Test.
-- Rückfragen neutral: „Was würden Sie hier erwarten?“, „Was ist verständlich?“, „Würden Sie das Papier allein nutzen?“, „Was würden Sie bei einem Video kontrollieren wollen?“
-- Scheitert Frontkamera-Erkennung, Fehler **erfassen** und ohne Schuldzuweisung Touch-Alternative nutzen.
-- Vor jeder neuen Testperson lokalen Demo-Zustand **explizit zurücksetzen**; keine heimliche Aufzeichnung.
-- Interview-Notizen und Einwilligungen **nicht** ins öffentliche Repository hochladen.
-
-## Beobachtungskriterien
-
-Papiernützlichkeit; Erkennbarkeit von Videozugängen; Verständlichkeit der Quellen; Unterscheidung von Patient/Angehörige; QR-Scan-Aufwand; Nachvollziehbarkeit von „Ansehen“ vs. „Speichern“; Respekt von Autonomie/Entlastung; Bedienbarkeit bei sichtbaren Android-Systemleisten.
+Die früheren Szenen für Angehörige sind durch F17 **aufgehoben** und nur über die Git-Historie nachvollziehbar. Ein zweispaltiges Hauptmenü mit Video-Liste links und Termin-/Berichtsspalte rechts ist ein **separater, noch nicht freigegebener GUI-Vorschlag V16**.
