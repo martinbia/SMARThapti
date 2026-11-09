@@ -295,7 +295,7 @@ test("welcome exercise QR opens the local video directly and attempts audible pl
   }
 });
 
-test("saved local media folder handle survives reload and can be re-granted without remapping", async ({ page }) => {
+test("OPFS test-directory handle can be loaded after reload with a simulated permission grant", async ({ page }) => {
   await page.addInitScript(() => {
     if (localStorage.getItem("__test-media-permission") === null)
       localStorage.setItem("__test-media-permission", "prompt");
@@ -353,7 +353,7 @@ test("saved local media folder handle survives reload and can be re-granted with
 
   await page.reload();
   await expect(page.locator('[data-action="reconnect-media"]')).toBeVisible();
-  await expect(page.locator('[data-media-access="M-P-EX-101"]')).toContainText("Zugriff erneut freigeben");
+  await expect(page.locator('[data-media-access="M-P-EX-101"]')).toContainText("Berechtigung erforderlich");
   await click(page, "reconnect-media");
   await expect(page.locator('[data-media-access="M-P-EX-101"]')).toHaveText("Verbunden und lesbar");
   await expect(page.locator('[data-id="M-P-EX-101"]')).toHaveValue(customName);
@@ -368,11 +368,11 @@ test("saved local media folder handle survives reload and can be re-granted with
     await smart.removeEntry(name);
   }, customName);
   await page.reload();
-  await expect(page.locator('[data-media-access="M-P-EX-101"]')).toContainText("Datei fehlt oder wurde umbenannt");
+  await expect(page.locator('[data-media-access="M-P-EX-101"]')).toContainText("Datei nicht gefunden oder umbenannt");
   await expect(page.locator('[data-id="M-P-EX-101"]')).toHaveValue(customName);
 });
 
-test("individually selected FileSystemFileHandle restores its mapped media after reload", async ({ page }) => {
+test("OPFS test-file handle restores its mapped media after reload", async ({ page }) => {
   await page.goto("./#settings");
   const supported = await page.evaluate(() => Boolean(navigator.storage?.getDirectory && window.FileSystemFileHandle));
   test.skip(!supported, "This browser does not support persistent FileSystemHandles/OPFS");
@@ -393,6 +393,64 @@ test("individually selected FileSystemFileHandle restores its mapped media after
   await expect(page.locator('[data-media-access="M-P-EX-101"]')).toHaveText("Verbunden und lesbar");
   await expect(page.locator('[data-id="M-P-EX-101"]')).toHaveValue(filename);
   await expect(page.locator('[data-media-access="M-P-EX-102"]')).toContainText("Zuordnung gespeichert");
+});
+
+test("HTML folder picker fallback keeps custom mappings and reconnects every media file with one folder selection", async ({ page }) => {
+  const { mkdtempSync, rmSync, unlinkSync, writeFileSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const dir = mkdtempSync(tmpdir() + "/smarthapti-input-folder-");
+  const customName = "My locally renamed walking.mp4";
+  const names = [...m.media.map((item) => item.fileName), customName];
+  for (const name of new Set(names)) writeFileSync(`${dir}/${name}`, Buffer.from("local test bytes"));
+  try {
+    await page.context().addInitScript(() => {
+      window.showDirectoryPicker = undefined;
+      window.showOpenFilePicker = undefined;
+      Object.defineProperty(navigator, "clipboard", {
+        configurable: true,
+        value: { writeText: async (text) => { window.copiedMediaDiagnostic = text; } },
+      });
+    });
+    await page.goto("./#settings");
+    await click(page, "choose-directory");
+    await page.locator("#local-directory").setInputFiles(dir);
+    await expect(page.locator("#status")).toContainText("keinen dauerhaften Handle");
+    await page.locator('[data-id="M-P-EX-101"]').fill(customName);
+    await page.locator('#assignment-form button[type="submit"]').click();
+
+    // A fresh page in the same browser profile loses the input FileList but retains origin storage.
+    const browserContext = page.context();
+    await page.close();
+    const restarted = await browserContext.newPage();
+    await restarted.goto("./#settings");
+    await expect(restarted.locator('[data-id="M-P-EX-101"]')).toHaveValue(customName);
+    await expect(restarted.locator('[data-action="choose-directory"]')).toBeVisible();
+    await expect(restarted.locator('[data-media-access="M-P-EX-101"]')).toContainText("Zuordnung gespeichert");
+
+    // A single re-selection of the folder repopulates all mappings by filename.
+    await click(restarted, "choose-directory");
+    await restarted.locator("#local-directory").setInputFiles(dir);
+    await expect(restarted.locator('[data-id="M-P-EX-101"]')).toHaveValue(customName);
+    for (const item of m.media)
+      await expect(restarted.locator(`[data-media-access="${item.id}"]`)).toHaveText("Verbunden und lesbar");
+
+    unlinkSync(`${dir}/P_EX_001.mp4`);
+    await click(restarted, "choose-directory");
+    await restarted.locator("#local-directory").setInputFiles(dir);
+    await expect(restarted.locator('[data-media-access="M-P-EX-001"]')).toContainText("Datei nicht gefunden oder umbenannt");
+    await expect(restarted.locator('[data-media-access="M-P-EX-101"]')).toHaveText("Verbunden und lesbar");
+    await expect(restarted.locator('[data-id="M-P-EX-101"]')).toHaveValue(customName);
+
+    await restarted.locator(".media-diagnostics summary").click();
+    await click(restarted, "copy-media-diagnostics");
+    const diagnostic = await restarted.evaluate(() => window.copiedMediaDiagnostic);
+    expect(diagnostic).toContain("showDirectoryPicker: false");
+    expect(diagnostic).toContain("HTML-Dateiauswahl");
+    expect(diagnostic).toContain(`Gespeicherte Medienzuordnungen: ${m.media.length}/${m.media.length}`);
+    expect(diagnostic).not.toContain(dir);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test("home appointment opens its existing details and still requires explicit timeline confirmation", async ({ page }) => {

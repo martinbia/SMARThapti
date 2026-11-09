@@ -50,6 +50,12 @@ let manifest,
   permissionRequired = false,
   handleStoreAvailable = true,
   handleStoreError = "",
+  handleLoadState = "nicht geprüft",
+  handleRecordCount = 0,
+  directoryPermissionState = "nicht geprüft",
+  filePermissionCounts = { granted: 0, prompt: 0, denied: 0, unsupported: 0 },
+  lastPickerMode = "",
+  lastHandleError = "",
   pickerPending = false,
   selectionRequest = 0,
   files = new Map(),
@@ -96,32 +102,47 @@ function mediaFileNames() {
 }
 async function readDirectoryFiles(handle) {
   const found = new Map();
+  const needsPermission = new Set();
   try {
     for await (const entry of handle.values()) {
       if (entry.kind === "file" && (supportedFile(entry.name) || /\.(jpe?g|png|webp)$/i.test(entry.name))) {
         try {
           const file = await entry.getFile();
           if (supportedLocalFile(file)) found.set(file.name, file);
-        } catch {}
+        } catch (error) {
+          if (["NotAllowedError", "SecurityError"].includes(error?.name))
+            needsPermission.add(entry.name);
+        }
       }
     }
-    missingFiles = new Set(mediaFileNames().filter((name) => !found.has(name)));
-  } catch {
+    permissionMissingFiles = needsPermission;
+    permissionRequired = needsPermission.size > 0;
+    missingFiles = new Set(mediaFileNames().filter((name) => !found.has(name) && !needsPermission.has(name)));
+  } catch (error) {
     permissionRequired = true;
+    lastHandleError = error?.name || "DirectoryReadError";
+    permissionMissingFiles = new Set(mediaFileNames());
+    missingFiles.clear();
     return found;
   }
   return found;
 }
 async function restoreMediaHandles() {
+  handleLoadState = "wird geladen";
+  filePermissionCounts = { granted: 0, prompt: 0, denied: 0, unsupported: 0 };
   try {
     permissionMissingFiles = new Set();
     const records = await loadMediaHandles();
+    handleLoadState = "geladen";
+    handleRecordCount = records.length;
+    lastHandleError = "";
     storedDirectory = records.find((record) => record.id === "directory")?.handle || null;
     storedFileHandles = new Map(records
       .filter((record) => record.id?.startsWith("file:") && record.handle)
       .map((record) => [record.name || record.id.slice(5), record.handle]));
     if (storedDirectory) {
       const permission = await queryReadPermission(storedDirectory);
+      directoryPermissionState = permission;
       if (permission === "granted") {
         directory = storedDirectory;
         permissionRequired = false;
@@ -130,17 +151,21 @@ async function restoreMediaHandles() {
       }
       permissionRequired = true;
       permissionMissingFiles = new Set(mediaFileNames());
-    }
+    } else directoryPermissionState = "kein Ordner-Handle gespeichert";
     let anyPermissionNeeded = false;
     for (const [name, handle] of storedFileHandles) {
       const permission = await queryReadPermission(handle);
+      filePermissionCounts[permission] = (filePermissionCounts[permission] || 0) + 1;
       if (permission === "granted") {
         try {
           const file = await handle.getFile();
           if (file.name === name && supportedLocalFile(file)) files.set(name, file);
           else missingFiles.add(name);
-        } catch {
-          missingFiles.add(name);
+        } catch (error) {
+          if (["NotAllowedError", "SecurityError"].includes(error?.name)) {
+            permissionMissingFiles.add(name);
+            permissionRequired = true;
+          } else missingFiles.add(name);
         }
       } else {
         anyPermissionNeeded = true;
@@ -150,7 +175,9 @@ async function restoreMediaHandles() {
     permissionRequired ||= anyPermissionNeeded;
   } catch (error) {
     handleStoreAvailable = false;
-    handleStoreError = error?.message || "IndexedDB nicht verfügbar";
+    handleLoadState = "Fehler";
+    lastHandleError = error?.name || "IndexedDBError";
+    handleStoreError = lastHandleError;
   }
 }
 function mediaAccessStatuses() {
@@ -159,15 +186,72 @@ function mediaAccessStatuses() {
     name: media.fileName,
     state: (() => {
       const file = files.get(media.fileName);
+      const mappingState = Object.hasOwn(assignments, media.id)
+        ? "Zuordnung gespeichert"
+        : "Standarddateiname";
       return file && file.size > 0 && file.name === media.fileName && validMediaName(file.name, media.kind)
         ? "Verbunden und lesbar"
-        : missingFiles.has(media.fileName)
-          ? "Datei fehlt oder wurde umbenannt"
-          : permissionMissingFiles.has(media.fileName)
-            ? "Zuordnung gespeichert · Zugriff erneut freigeben"
-            : "Zuordnung gespeichert · Datei noch nicht verbunden";
+        : permissionMissingFiles.has(media.fileName)
+          ? `${mappingState} · Berechtigung erforderlich`
+          : missingFiles.has(media.fileName)
+            ? `${mappingState} · Datei nicht gefunden oder umbenannt`
+            : `${mappingState} · Datei noch nicht verbunden`;
     })(),
   }));
+}
+function persistPickerMode(mode) {
+  lastPickerMode = mode;
+  try {
+    localStorage.setItem("smarthapti-media-picker-mode-v1", mode);
+  } catch {
+    lastHandleError = "PickerModeStorageError";
+  }
+}
+function mediaDiagnostics() {
+  const videoNames = new Set(manifest.media.filter((m) => m.kind === "video").map((m) => m.fileName));
+  return {
+    browser: navigator.userAgent,
+    secureContext: Boolean(window.isSecureContext),
+    showDirectoryPicker: typeof window.showDirectoryPicker === "function",
+    showOpenFilePicker: typeof window.showOpenFilePicker === "function",
+    webkitdirectory: "webkitdirectory" in document.createElement("input"),
+    fileInput: "files" in document.createElement("input"),
+    indexedDB: Boolean(window.indexedDB),
+    handleLoadState,
+    savedHandleCount: handleRecordCount,
+    directoryHandleLoaded: Boolean(storedDirectory),
+    directoryPermission: directoryPermissionState,
+    fileHandlePermissions: filePermissionCounts,
+    savedAssignmentCount: Object.keys(assignments).length,
+    mediaMappingCount: manifest.media.length,
+    readableVideoCount: [...videoNames].filter((name) => {
+      const file = files.get(name);
+      return file && file.size > 0 && validMediaName(file.name, "video");
+    }).length,
+    lastPickerMode: lastPickerMode || "keine Auswahl erfasst",
+    lastHandleError,
+  };
+}
+function formatMediaDiagnostics() {
+  const d = mediaDiagnostics();
+  return [
+    `Browser: ${d.browser}`,
+    `Sicherer Kontext: ${d.secureContext}`,
+    `showDirectoryPicker: ${d.showDirectoryPicker}`,
+    `showOpenFilePicker: ${d.showOpenFilePicker}`,
+    `webkitdirectory: ${d.webkitdirectory}`,
+    `HTML-Dateiauswahl: ${d.fileInput}`,
+    `IndexedDB verfügbar: ${d.indexedDB}`,
+    `Handle-Ladevorgang: ${d.handleLoadState}`,
+    `Gespeicherte Handles: ${d.savedHandleCount}`,
+    `Ordner-Handle geladen: ${d.directoryHandleLoaded}`,
+    `Ordnerberechtigung: ${d.directoryPermission}`,
+    `Datei-Handle-Berechtigungen: ${JSON.stringify(d.fileHandlePermissions)}`,
+    `Gespeicherte Medienzuordnungen: ${d.savedAssignmentCount}/${d.mediaMappingCount}`,
+    `Lesbare Videos: ${d.readableVideoCount}`,
+    `Letzte Auswahlmethode: ${d.lastPickerMode}`,
+    `Letzter technischer Fehler: ${d.lastHandleError || "keiner"}`,
+  ].join("\n");
 }
 function recordDate(value) {
   const [year, month, day] = value.split("-");
@@ -618,6 +702,10 @@ function render() {
       reconnect: Boolean((storedDirectory || storedFileHandles.size) && permissionRequired),
       handleStoreAvailable,
       handleStoreError,
+      directoryPickerAvailable: typeof window.showDirectoryPicker === "function",
+      durableFolderSharingUnavailable: typeof window.showDirectoryPicker !== "function" || !handleStoreAvailable,
+      requiresDirectoryReselect: !storedDirectory && storedFileHandles.size === 0 && Boolean(lastPickerMode || Object.keys(assignments).length),
+      diagnostics: mediaDiagnostics(),
     });
   } else if (view === "record") {
     title = id ? "Patientenakte" : "Patientenakte";
@@ -645,7 +733,7 @@ function render() {
     }
   } else if (view === "moderator") {
     title = "Moderatorbereich";
-    body = `<h1>Demo vorbereiten</h1><p>Medien ausschliesslich lokal unter <strong>Internal storage/Documents/SMART</strong>. Auswahl erlaubt nur Lesen; kein Upload und keine Kopie in den App-Speicher.</p><div class="actions">${button("Medienordner verbinden", "choose-directory")}${button("Lokale Datei(en) auswählen", "choose-files")}</div><ul id="media-list">${manifest.media.map((m) => `<li>${esc(m.fileName)}: wird geprüft …</li>`).join("")}</ul><p>Nach App-Neustart Medien erneut verbinden. Ordner- und Dateifreigaben werden nicht dauerhaft gespeichert.</p><label>Interview-Szenario <select id="scenario"><option value="discharge" ${scenario === "discharge" ? "selected" : ""}>Austritt · ${esc(manifest.asOf)}</option><option value="physio" ${scenario === "physio" ? "selected" : ""}>Physiotermin · 10.11.2026</option></select></label><p>Alle Karten bleiben in beiden Szenarien erreichbar. Die Szene setzt nur den fiktiven Interviewzeitpunkt.</p>${button("Fiktive Einträge zurücksetzen", "reset")}<p class="notice">Die bisherige Faltkarten-PDF enthält historische Angehörigenkarten und ist nicht mehr für aktuelle Patienteninterviews vorgesehen. Die Patienten-QR-Codes sind weiterhin in den Einstellungen verfügbar.</p>`;
+    body = `<h1>Demo vorbereiten</h1><p>Medien ausschliesslich lokal unter <strong>Internal storage/Documents/SMART</strong>. Auswahl erlaubt nur Lesen; kein Upload und keine Kopie in den App-Speicher.</p><div class="actions">${button("Medienordner verbinden", "choose-directory")}${button("Lokale Datei(en) auswählen", "choose-files")}</div><ul id="media-list">${manifest.media.map((m) => `<li>${esc(m.fileName)}: wird geprüft …</li>`).join("")}</ul><p>Zuordnungen bleiben nach einem Neustart erhalten. Je nach Android-/Chrome-Dateiauswahl muss der Ordner erneut freigegeben werden; einzelne Filme müssen dann nicht neu zugeordnet werden.</p><label>Interview-Szenario <select id="scenario"><option value="discharge" ${scenario === "discharge" ? "selected" : ""}>Austritt · ${esc(manifest.asOf)}</option><option value="physio" ${scenario === "physio" ? "selected" : ""}>Physiotermin · 10.11.2026</option></select></label><p>Alle Karten bleiben in beiden Szenarien erreichbar. Die Szene setzt nur den fiktiven Interviewzeitpunkt.</p>${button("Fiktive Einträge zurücksetzen", "reset")}<p class="notice">Die bisherige Faltkarten-PDF enthält historische Angehörigenkarten und ist nicht mehr für aktuelle Patienteninterviews vorgesehen. Die Patienten-QR-Codes sind weiterhin in den Einstellungen verfügbar.</p>`;
   } else {
     go("home");
     return;
@@ -768,6 +856,10 @@ function render() {
         files = new Map();
         permissionRequired = false;
         permissionMissingFiles.clear();
+        persistPickerMode("webkitdirectory-HTML-Dateiauswahl (keine dauerhaften Handles)");
+        directoryPermissionState = "kein dauerhafter Handle aus HTML-Dateiauswahl";
+      } else {
+        persistPickerMode("HTML-Dateiauswahl (keine dauerhaften Handles)");
       }
       for (const file of selected) files.set(file.name, file);
       if (id === "local-directory")
@@ -775,7 +867,9 @@ function render() {
       else for (const file of selected) missingFiles.delete(file.name);
       render();
       message(
-        `${selected.length} lokale Dateien verbunden. Jetzt unten Filme pro Karte zuordnen und „Zuordnungen speichern“ drücken.`,
+        id === "local-directory"
+          ? `${selected.length} lokale Dateien verbunden. Diese HTML-Ordnerauswahl speichert keinen dauerhaften Handle. Nach einem vollständigen Neustart genügt es, den SMART-Ordner einmal neu auszuwählen; die gespeicherten Videozuordnungen bleiben erhalten.`
+          : `${selected.length} lokale Dateien verbunden. Jetzt unten Filme pro Karte zuordnen und „Zuordnungen speichern“ drücken.`,
       );
     });
     input.addEventListener("cancel", () => {
@@ -908,6 +1002,16 @@ root.addEventListener("click", async (e) => {
     setSleeping(true);
     return;
   }
+  if (name === "copy-media-diagnostics") {
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error("ClipboardUnavailable");
+      await navigator.clipboard.writeText(formatMediaDiagnostics());
+      message("Diagnose kopiert. Sie enthält keine Medieninhalte oder Dateipfade.");
+    } catch {
+      message("Diagnose konnte nicht kopiert werden. Öffne den Diagnosebereich und prüfe, ob Clipboard-Zugriff erlaubt ist.");
+    }
+    return;
+  }
   if (name === "export-assignments") {
     const blob = new Blob(
       [
@@ -1038,7 +1142,8 @@ root.addEventListener("click", async (e) => {
         handleStoreError = "";
       } catch (error) {
         handleStoreAvailable = false;
-        handleStoreError = error?.message || "Bild-Handle konnte nicht dauerhaft gespeichert werden";
+        handleStoreError = error?.name || "Bild-Handle konnte nicht dauerhaft gespeichert werden";
+        lastHandleError = handleStoreError;
       }
     } catch (error) {
       if (!active()) return;
@@ -1068,7 +1173,7 @@ root.addEventListener("click", async (e) => {
     if (!permissionRequired) await restoreMediaHandles();
     render();
     if (permissionRequired)
-      message("Android hat die Freigabe nicht erteilt. Tippe auf „Medienordner verbinden“ und wähle Documents/SMART erneut aus.");
+      message("Die gespeicherte Freigabe ist noch nicht verfügbar. Wähle einmal Documents/SMART neu aus; vorhandene Videozuordnungen bleiben erhalten.");
     else
       message(`${files.size} lokale Dateien wieder verbunden. Zuordnungen wurden beibehalten.`);
   } else if (name === "choose-files" || name === "choose-directory") {
@@ -1115,6 +1220,7 @@ root.addEventListener("click", async (e) => {
         if (!active()) return;
         directory = picked;
         storedDirectory = picked;
+        persistPickerMode("showDirectoryPicker");
         files = new Map(selected.map((file) => [file.name, file]));
         missingFiles = new Set(mediaFileNames().filter((fileName) => !files.has(fileName)));
         permissionRequired = false;
@@ -1123,9 +1229,14 @@ root.addEventListener("click", async (e) => {
           await saveDirectoryHandle(picked);
           handleStoreAvailable = true;
           handleStoreError = "";
+          handleLoadState = "Ordner-Handle in IndexedDB gespeichert";
+          handleRecordCount = storedFileHandles.size + 1;
+          directoryPermissionState = "granted";
+          lastHandleError = "";
         } catch (error) {
           handleStoreAvailable = false;
-          handleStoreError = error?.message || "Handle konnte nicht dauerhaft gespeichert werden";
+          handleStoreError = error?.name || "Handle konnte nicht dauerhaft gespeichert werden";
+          lastHandleError = handleStoreError;
         }
       } else {
         const handles = await window.showOpenFilePicker({
@@ -1136,6 +1247,7 @@ root.addEventListener("click", async (e) => {
           handles.map((handle) => handle.getFile()),
         );
         if (!active()) return;
+        persistPickerMode("showOpenFilePicker");
         for (const file of selected) {
           if (supportedLocalFile(file)) files.set(file.name, file);
           missingFiles.delete(file.name);
@@ -1146,9 +1258,13 @@ root.addEventListener("click", async (e) => {
           handleStoreAvailable = true;
           handleStoreError = "";
           for (const handle of handles) storedFileHandles.set(handle.name, handle);
+          handleLoadState = "Datei-Handles in IndexedDB gespeichert";
+          handleRecordCount = storedFileHandles.size + Number(Boolean(storedDirectory));
+          lastHandleError = "";
         } catch (error) {
           handleStoreAvailable = false;
-          handleStoreError = error?.message || "Datei-Handles konnten nicht dauerhaft gespeichert werden";
+          handleStoreError = error?.name || "Datei-Handles konnten nicht dauerhaft gespeichert werden";
+          lastHandleError = handleStoreError;
         }
       }
       pickerPending = false;
@@ -1213,6 +1329,11 @@ try {
   mediaDefaults = Object.fromEntries(
     manifest.media.map((m) => [m.id, m.fileName]),
   );
+  try {
+    lastPickerMode = localStorage.getItem("smarthapti-media-picker-mode-v1") || "";
+  } catch {
+    lastPickerMode = "LocalStorage nicht lesbar";
+  }
   try {
     const saved = localStorage.getItem(assignmentKey);
     if (saved)
