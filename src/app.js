@@ -11,6 +11,7 @@ import {
 } from "./settings.js";
 const base = import.meta.env.BASE_URL;
 const root = document.querySelector("#app");
+const role = "patient"; // Festgelegt: SMARThapti hat keine Angehörigenperspektive.
 const esc = (value) =>
   String(value ?? "").replace(
     /[&<>"']/g,
@@ -27,7 +28,6 @@ let manifest,
   catalog,
   assignments = {},
   mediaDefaults = {},
-  role = "patient",
   scenario = "discharge",
   keys = [],
   directory = null,
@@ -256,7 +256,7 @@ function render() {
   let body = "";
   let title = "Heute mit Alma";
   if (view === "home") {
-    body = `<h1 class="menu-heading">Was möchten Sie ansehen?</h1><div class="actions">${button("QR-Karte scannen", "scan", 'class="primary"')}${button("Karte auswählen", "cards")}</div>${cardButtons(manifest.cards.filter((c) => c.role === role && (role === "patient" ? c.type === "exercise" && c.id !== "P-EX-001" : ["A-INF-001", "A-INF-002"].includes(c.id))))}<div class="actions">${button("Alma fragen", "dialog:" + dialogs.startNodes[role])}${button("Mein Weg", "timeline")}</div>`;
+    body = `<h1 class="menu-heading">Was möchten Sie ansehen?</h1><div class="actions">${button("QR-Karte scannen", "scan", 'class="primary"')}${button("Karte auswählen", "cards")}</div>${cardButtons(manifest.cards.filter((c) => c.role === role && c.type === "exercise"))}<div class="actions">${button("Alma fragen", "dialog:" + dialogs.startNodes[role])}${button("Mein Weg", "timeline")}</div>`;
   } else if (view === "cards") {
     title = "Meine Karten";
     body = `<h1>Meine Karten</h1><label>Kartentyp <select id="filter"><option value="all">Alle Karten</option>${Object.entries(
@@ -273,8 +273,7 @@ function render() {
       return;
     }
     if (c.role !== role) {
-      role = c.role;
-      render();
+      go("home");
       return;
     }
     const content = manifest.contents.find((x) => x.id === c.contentId);
@@ -287,8 +286,7 @@ function render() {
       return;
     }
     if (node.role !== role) {
-      role = node.role;
-      render();
+      go("home");
       return;
     }
     title = "Alma fragen";
@@ -327,12 +325,12 @@ function render() {
     body = settingsMarkup(manifest, files, esc, button);
   } else if (view === "moderator") {
     title = "Moderatorbereich";
-    body = `<h1>Demo vorbereiten</h1><p>Medien ausschliesslich lokal unter <strong>Internal storage/Documents/SMART</strong>. Auswahl erlaubt nur Lesen; kein Upload und keine Kopie in den App-Speicher.</p><div class="actions">${button("Medienordner verbinden", "choose-directory")}${button("Lokale Datei(en) auswählen", "choose-files")}</div><ul id="media-list">${manifest.media.map((m) => `<li>${esc(m.fileName)}: wird geprüft …</li>`).join("")}</ul><p>Nach App-Neustart Medien erneut verbinden. Ordner- und Dateifreigaben werden nicht dauerhaft gespeichert.</p><label>Interview-Szenario <select id="scenario"><option value="discharge" ${scenario === "discharge" ? "selected" : ""}>Austritt · ${esc(manifest.asOf)}</option><option value="physio" ${scenario === "physio" ? "selected" : ""}>Physiotermin · 10.11.2026</option></select></label><p>Alle Karten bleiben in beiden Szenarien erreichbar. Die Szene setzt nur den fiktiven Interviewzeitpunkt.</p>${button("Fiktive Einträge zurücksetzen", "reset")}<div class="actions"><a class="button" href="${base}print/SMARThapti_Faltkarten_A4.pdf">Bestehende Faltkarten (PDF)</a></div>`;
+    body = `<h1>Demo vorbereiten</h1><p>Medien ausschliesslich lokal unter <strong>Internal storage/Documents/SMART</strong>. Auswahl erlaubt nur Lesen; kein Upload und keine Kopie in den App-Speicher.</p><div class="actions">${button("Medienordner verbinden", "choose-directory")}${button("Lokale Datei(en) auswählen", "choose-files")}</div><ul id="media-list">${manifest.media.map((m) => `<li>${esc(m.fileName)}: wird geprüft …</li>`).join("")}</ul><p>Nach App-Neustart Medien erneut verbinden. Ordner- und Dateifreigaben werden nicht dauerhaft gespeichert.</p><label>Interview-Szenario <select id="scenario"><option value="discharge" ${scenario === "discharge" ? "selected" : ""}>Austritt · ${esc(manifest.asOf)}</option><option value="physio" ${scenario === "physio" ? "selected" : ""}>Physiotermin · 10.11.2026</option></select></label><p>Alle Karten bleiben in beiden Szenarien erreichbar. Die Szene setzt nur den fiktiven Interviewzeitpunkt.</p>${button("Fiktive Einträge zurücksetzen", "reset")}<p class="notice">Die bisherige Faltkarten-PDF enthält historische Angehörigenkarten und ist nicht mehr für aktuelle Patienteninterviews vorgesehen. Die Patienten-QR-Codes sind weiterhin in den Einstellungen verfügbar.</p>`;
   } else {
     go("home");
     return;
   }
-  root.innerHTML = `<header>${button(view === "home" ? "← Bergwiese" : "← Zum Menü", view === "home" ? "welcome" : "home", 'class="back-navigation"')}<strong class="role-line">Für ${esc(persona().displayName.split(" ")[0])}</strong>${button("⚙︎", "settings", 'class="settings-button" aria-label="Einstellungen" title="Einstellungen"')}</header><main id="main" tabindex="-1" aria-label="${esc(title)}">${body}<div id="status" role="status" aria-live="polite"></div>${!storageOK ? '<p class="notice">Lokaler Speicher nicht verfügbar. Einträge bleiben nur während dieser Sitzung erhalten.</p>' : ""}</main><footer>Fiktive Interview-Demo · keine medizinische Anweisung · nicht klinisch geprüft<div class="actions">${button("Mein Weg", "timeline")}${button("Demo vorbereiten", "moderator")}${button("Alle Karten", "cards")}</div><details class="perspective-options"><summary>Andere Perspektive ohne QR-Code</summary><p>Normalerweise wählt Ihre QR-Karte die passende Perspektive.</p>${button(role === "patient" ? "Zu Anna wechseln" : "Zu Ernst wechseln", "role")}</details><small>Perspektivwechsel ist keine Authentifizierung. Nur fiktive Daten verwenden.</small></footer><input id="local-files" type="file" multiple hidden><input id="local-directory" type="file" webkitdirectory directory multiple hidden>`;
+  root.innerHTML = `<header>${button(view === "home" ? "← Bergwiese" : "← Zum Menü", view === "home" ? "welcome" : "home", 'class="back-navigation"')}<strong class="role-line">Für ${esc(persona().displayName.split(" ")[0])}</strong>${button("⚙︎", "settings", 'class="settings-button" aria-label="Einstellungen" title="Einstellungen"')}</header><main id="main" tabindex="-1" aria-label="${esc(title)}">${body}<div id="status" role="status" aria-live="polite"></div>${!storageOK ? '<p class="notice">Lokaler Speicher nicht verfügbar. Einträge bleiben nur während dieser Sitzung erhalten.</p>' : ""}</main><footer>Fiktive Interview-Demo · keine medizinische Anweisung · nicht klinisch geprüft<div class="actions">${button("Mein Weg", "timeline")}${button("Demo vorbereiten", "moderator")}${button("Alle Karten", "cards")}</div><small>Nur fiktive Patientendaten verwenden.</small></footer><input id="local-files" type="file" multiple hidden><input id="local-directory" type="file" webkitdirectory directory multiple hidden>`;
   document.title = `${title} · SMARThapti`;
   appendPowerButton();
   document.querySelector("#main").focus({ preventScroll: true });
@@ -502,7 +500,9 @@ async function startCamera(token) {
             return;
           }
           message(
-            "Diese Karte kenne ich noch nicht. Bitte eine SMARThapti-Karte verwenden oder per Touch auswählen.",
+            qr.data.startsWith("SH1:A-")
+              ? "Diese Angehörigenkarte stammt aus einer früheren Demoversion. Bitte eine Patientenkarte verwenden oder per Touch auswählen."
+              : "Diese Karte kenne ich noch nicht. Bitte eine SMARThapti-Karte verwenden oder per Touch auswählen.",
           );
         }
       }
@@ -521,7 +521,7 @@ async function startCamera(token) {
   }
 }
 function openCard(card) {
-  role = card.role;
+  if (!card || card.role !== role) return;
   const content = manifest.contents.find((c) => c.id === card.contentId);
   go(
     content.dialogNodeId ? "dialog/" + content.dialogNodeId : "card/" + card.id,
@@ -583,10 +583,7 @@ root.addEventListener("click", async (e) => {
     ].includes(name)
   )
     go(name);
-  else if (name === "role") {
-    role = role === "patient" ? "relative" : "patient";
-    go("home");
-  } else if (name === "card") {
+  else if (name === "card") {
     const card = manifest.cards.find((c) => c.id === id);
     if (card) openCard(card);
   } else if (name === "dialog") go("dialog/" + id);
@@ -728,6 +725,11 @@ try {
   );
   for (const key of ["cards", "contents", "media"])
     manifest[key].push(...catalog[key]);
+  // Lokale Einträge aus der früheren Zwei-Perspektiven-Demo nicht übernehmen.
+  const activeKeys = new Set(manifest.timeline.filter((e) => e.requiresConfirmation).map((e) => e.eventKey));
+  const previousCount = keys.length;
+  keys = keys.filter((key) => activeKeys.has(key));
+  if (keys.length !== previousCount) save();
   mediaDefaults = Object.fromEntries(
     manifest.media.map((m) => [m.id, m.fileName]),
   );

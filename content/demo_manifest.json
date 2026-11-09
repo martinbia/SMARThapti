@@ -1,6 +1,6 @@
 {
-  "schemaVersion": "0.1.0",
-  "status": "PROPOSAL - fictional editorial test data, not clinically validated",
+  "schemaVersion": "0.2.0",
+  "status": "PATIENT-ONLY DEMO 2026-11-09; all data fictional and not clinically validated",
   "asOf": "2026-11-06",
   "medicalDisclaimer": "Interview-Demo. Alle Personen und Unterlagen sind fiktiv. Keine medizinische Anweisung.",
   "sourceKinds": {
@@ -16,14 +16,6 @@
       "age": 79,
       "fictional": true,
       "personalGoal": "Meinen Alltag wieder selbst gestalten; irgendwann zusammen zum Markt gehen."
-    },
-    {
-      "id": "anna",
-      "role": "relative",
-      "displayName": "Anna Kueng",
-      "age": 72,
-      "fictional": true,
-      "personalGoal": "Ernst unterstuetzen, seine Entscheidungen respektieren und selbst Pausen einplanen."
     }
   ],
   "sources": [
@@ -74,24 +66,6 @@
       "fileName": "P_EX_001.mp4"
     },
     {
-      "id": "M-A-INF-001",
-      "kind": "video",
-      "purpose": "daily-support",
-      "status": "not-provided-or-clinically-reviewed",
-      "transcriptOrFallback": "Hier kann ein vorbereitetes, fachlich geprueftes Video zur Unterstuetzung im Alltag gezeigt werden.",
-      "storage": "tablet-local",
-      "fileName": "A_HELP_001.mp4"
-    },
-    {
-      "id": "M-A-INF-002",
-      "kind": "video",
-      "purpose": "respite",
-      "status": "not-provided",
-      "transcriptOrFallback": "Hier kann ein kurzes Video ueber die eigene Entlastung von Angehoerigen gezeigt werden.",
-      "storage": "tablet-local",
-      "fileName": "A_REST_001.mp4"
-    },
-    {
       "id": "M-ALMA-P",
       "kind": "audio",
       "purpose": "dialog",
@@ -99,15 +73,6 @@
       "transcriptOrFallback": "Hallo, Ernst. Moechten Sie Ihre Karten, ein Video oder Ihren Weg ansehen?",
       "storage": "tablet-local",
       "fileName": "ALMA_P_START.mp3"
-    },
-    {
-      "id": "M-ALMA-A",
-      "kind": "audio",
-      "purpose": "dialog",
-      "status": "not-provided",
-      "transcriptOrFallback": "Hallo, Anna. Moechten Sie Informationen zur Begleitung oder zu Ihrer eigenen Entlastung?",
-      "storage": "tablet-local",
-      "fileName": "ALMA_A_START.mp3"
     }
   ],
   "contents": [
@@ -184,66 +149,6 @@
       "mediaIds": []
     },
     {
-      "id": "C-A-HELP",
-      "role": "relative",
-      "title": "Unterstuetzen ohne zu uebernehmen",
-      "shortText": "Ernsts Eigenstaendigkeit respektieren.",
-      "detailText": "Nicht alles muss Anna selbst loesen. Konkrete Unterstuetzung und Sicherheit sollten mit dem Behandlungsteam besprochen werden.",
-      "sourceIds": [
-        "R01"
-      ],
-      "sourceKind": "general",
-      "sourceDate": "2026-11-08",
-      "reviewed": false,
-      "mediaIds": [
-        "M-A-INF-001"
-      ]
-    },
-    {
-      "id": "C-A-REST",
-      "role": "relative",
-      "title": "Auch an mich denken",
-      "shortText": "Eigene Pausen und Unterstuetzung sind wichtig.",
-      "detailText": "Angehoerige duerfen Hilfe suchen und Zeit fuer eigene Interessen einplanen. Diese Perspektive ist eigenstaendig.",
-      "sourceIds": [
-        "R01"
-      ],
-      "sourceKind": "general",
-      "sourceDate": "2026-11-08",
-      "reviewed": false,
-      "mediaIds": [
-        "M-A-INF-002"
-      ]
-    },
-    {
-      "id": "C-A-APT",
-      "role": "relative",
-      "title": "Fragen fuer die Physiotherapie",
-      "shortText": "Fiktiver Termin: 10.11.2026.",
-      "detailText": "Anna kann Fragen zur Unterstuetzung notieren. Der Termin entspricht demselben Ereignis wie auf Ernsts Karte.",
-      "sourceIds": [
-        "E07"
-      ],
-      "sourceKind": "personal-demo",
-      "sourceDate": "2026-11-02",
-      "reviewed": false,
-      "mediaIds": []
-    },
-    {
-      "id": "C-A-MIL",
-      "role": "relative",
-      "title": "Eine Pause fuer mich",
-      "shortText": "Meine eigene Entlastung bewusst wahrnehmen.",
-      "detailText": "Fiktive Selbstangabe: Ich habe eine Pause fuer mich eingeplant. Dies ist kein Leistungsnachweis.",
-      "sourceIds": [
-        "S01"
-      ],
-      "sourceKind": "self-report",
-      "sourceDate": "2026-11-10",
-      "reviewed": false,
-      "mediaIds": []
-    },
-    {
       "id": "C-P-ALMA",
       "role": "patient",
       "title": "Alma fragen",
@@ -259,23 +164,6 @@
         "M-ALMA-P"
       ],
       "dialogNodeId": "ALMA-P-START"
-    },
-    {
-      "id": "C-A-ALMA",
-      "role": "relative",
-      "title": "Alma für Angehörige",
-      "shortText": "Vorbereitete Unterstützungsgespräche mit Alma.",
-      "detailText": "Anna kann aus vorbereiteten Themen wählen, darunter Unterstützung und eigene Entlastung. Kein Gespräch wird generiert; MP3 bleibt optional.",
-      "sourceIds": [
-        "R01"
-      ],
-      "sourceKind": "general",
-      "sourceDate": "2026-11-08",
-      "reviewed": false,
-      "mediaIds": [
-        "M-ALMA-A"
-      ],
-      "dialogNodeId": "ALMA-A-START"
     }
   ],
   "cards": [
@@ -345,58 +233,6 @@
       "printTitle": "Mein Alltagsschritt"
     },
     {
-      "id": "A-INF-001",
-      "role": "relative",
-      "type": "information",
-      "phase": "discharge",
-      "issuedOn": "2026-11-02",
-      "title": "Gut unterstuetzen",
-      "icon": "heart-handshake",
-      "qrPayload": "SH1:A-INF-001",
-      "contentId": "C-A-HELP",
-      "eventKey": null,
-      "printTitle": "Unterstützung im Alltag"
-    },
-    {
-      "id": "A-INF-002",
-      "role": "relative",
-      "type": "information",
-      "phase": "discharge",
-      "issuedOn": "2026-11-02",
-      "title": "Eigene Entlastung",
-      "icon": "coffee",
-      "qrPayload": "SH1:A-INF-002",
-      "contentId": "C-A-REST",
-      "eventKey": null,
-      "printTitle": "Auch an mich denken"
-    },
-    {
-      "id": "A-APT-001",
-      "role": "relative",
-      "type": "appointment",
-      "phase": "discharge",
-      "issuedOn": "2026-11-02",
-      "title": "Fragen fuer Physio",
-      "icon": "calendar",
-      "qrPayload": "SH1:A-APT-001",
-      "contentId": "C-A-APT",
-      "eventKey": "J10",
-      "printTitle": "Fragen für die Physio"
-    },
-    {
-      "id": "A-MIL-001",
-      "role": "relative",
-      "type": "milestone",
-      "phase": "physio",
-      "issuedOn": "2026-11-10",
-      "title": "Meine Auszeit",
-      "icon": "sun",
-      "qrPayload": "SH1:A-MIL-001",
-      "contentId": "C-A-MIL",
-      "eventKey": "J-MIL-A-001",
-      "printTitle": "Meine Auszeit"
-    },
-    {
       "id": "P-INF-003",
       "role": "patient",
       "type": "information",
@@ -407,19 +243,6 @@
       "icon": "message-circle",
       "qrPayload": "SH1:P-INF-003",
       "contentId": "C-P-ALMA",
-      "eventKey": null
-    },
-    {
-      "id": "A-INF-003",
-      "role": "relative",
-      "type": "information",
-      "phase": "discharge",
-      "issuedOn": "2026-11-02",
-      "title": "Alma für Angehörige",
-      "printTitle": "Alma für Angehörige",
-      "icon": "message-circle",
-      "qrPayload": "SH1:A-INF-003",
-      "contentId": "C-A-ALMA",
       "eventKey": null
     }
   ],
@@ -481,19 +304,6 @@
       "fictional": true,
       "requiresConfirmation": true,
       "visibility": "patient"
-    },
-    {
-      "eventKey": "J-MIL-A-001",
-      "date": "2026-11-10",
-      "title": "Eine Pause eingeplant",
-      "kind": "self-report-candidate",
-      "sourceKind": "self-report",
-      "sourceIds": [
-        "S01"
-      ],
-      "fictional": true,
-      "requiresConfirmation": true,
-      "visibility": "relative"
     }
   ],
   "mediaStorage": {

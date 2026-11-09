@@ -5,7 +5,8 @@ import jsQR from "jsqr";
 import { resolveQR, visibleEvents, addEvent } from "../src/model.js";
 const m = JSON.parse(readFileSync("content/demo_manifest.json"));
 const dialogs = JSON.parse(readFileSync("content/demo_dialogs.json"));
-const index = JSON.parse(readFileSync("print/CARD_INDEX.json"));
+const historicalIndex = JSON.parse(readFileSync("print/CARD_INDEX.json"));
+const index = { ...historicalIndex, cards: historicalIndex.cards.filter((c) => c.cardId.startsWith("P-")) };
 const exerciseCatalog = JSON.parse(
   readFileSync("content/exercise_catalog.json"),
 );
@@ -19,17 +20,18 @@ index.cards.push(
   })),
 );
 const click = async (page, action) => {
-  if (
-    action === "role" &&
-    !(await page.locator('[data-action="role"]').isVisible())
-  )
-    await page.locator(".perspective-options summary").click();
   await page.locator(`[data-action="${action}"]`).first().click();
 };
 
-test("manifest references, eighteen cards and event identity", () => {
-  expect(m.cards).toHaveLength(18);
-  expect(new Set(m.cards.map((c) => c.id)).size).toBe(18);
+test("patient-only manifest, thirteen cards and event identity", () => {
+  expect(m.personas).toHaveLength(1);
+  expect(m.personas[0].role).toBe("patient");
+  expect(m.cards).toHaveLength(13);
+  expect(new Set(m.cards.map((c) => c.id)).size).toBe(13);
+  expect(m.cards.every((c) => c.role === "patient")).toBe(true);
+  expect(m.contents.every((c) => c.role === "patient")).toBe(true);
+  expect(dialogs.nodes.every((n) => n.role === "patient")).toBe(true);
+  expect(resolveQR(m, "SH1:A-INF-001")).toBeNull();
   for (const c of m.cards) {
     expect(resolveQR(m, c.qrPayload)).toEqual(c);
     expect(c.qrPayload).toBe(`SH1:${c.id}`);
@@ -71,7 +73,6 @@ for (const entry of index.cards)
       jsQR(new Uint8ClampedArray(png.data), png.width, png.height)?.data,
     ).toBe(entry.payload);
     await page.goto("./#home");
-    if (entry.cardId.startsWith("A-")) await click(page, "role");
     await click(page, "cards");
     await click(page, "card:" + entry.cardId);
     const card = m.cards.find((c) => c.id === entry.cardId),
@@ -89,7 +90,7 @@ for (const entry of index.cards)
         : content.detailText,
     );
   });
-test("cancel, explicit confirmation, shared appointment, persistence and private milestone", async ({
+test("patient appointment and personal milestone require confirmation, deduplicate and persist", async ({
   page,
 }) => {
   await page.goto("./#card/P-APT-001");
@@ -101,19 +102,13 @@ test("cancel, explicit confirmation, shared appointment, persistence and private
   await click(page, "confirm:P-APT-001");
   await click(page, "add:P-APT-001");
   await expect(page.locator(".timeline li")).toHaveCount(4);
-  await click(page, "role");
-  await page.goto("./#card/A-APT-001");
+  await page.goto("./#card/P-APT-001");
   await expect(page.locator("main")).toContainText("Eintrag bereits vorhanden");
-  await click(page, "timeline");
-  await expect(page.locator(".timeline li")).toHaveCount(4);
-  await page.goto("./#card/A-MIL-001");
-  await click(page, "confirm:A-MIL-001");
-  await click(page, "add:A-MIL-001");
+  await page.goto("./#card/P-MIL-001");
+  await click(page, "confirm:P-MIL-001");
+  await click(page, "add:P-MIL-001");
   await expect(page.locator(".timeline li")).toHaveCount(5);
   await page.reload();
-  await expect(page.locator(".timeline li")).toHaveCount(4); // reload defaults to patient, private event hidden
-  await click(page, "role");
-  await click(page, "timeline");
   await expect(page.locator(".timeline li")).toHaveCount(5);
   await click(page, "moderator");
   page.once("dialog", (d) => d.accept());
@@ -365,7 +360,7 @@ test("actual local MP4 and MP3 playback stops and revokes blobs on navigation", 
     await expect
       .poll(() => page.locator("audio").evaluate((p) => p.currentTime))
       .toBeGreaterThan(0);
-    await click(page, "role");
+    await click(page, "cards");
     await expect
       .poll(() =>
         page.evaluate(
@@ -408,8 +403,7 @@ test("landscape welcome opens a compact menu by touch and keyboard", async ({
     32,
   );
   await expect(page.locator('[data-action="role"]')).toBeHidden();
-  await click(page, "role");
-  await expect(page.locator(".role-line")).toHaveText("Für Anna");
+  await expect(page.locator('[data-action="role"], .perspective-options')).toHaveCount(0);
   await click(page, "welcome");
   await expect(page.locator(".welcome-open")).toBeVisible();
 });
@@ -470,11 +464,11 @@ test("reduced motion keeps the instruction readable without moving the hand", as
   ).toBe(0);
 });
 
-test("QR codes on the welcome screen automatically switch between Anna and Ernst", async ({
+test("patient QR opens from welcome; retired relative QR does not change the target group", async ({
   page,
 }) => {
   const anna = readFileSync(
-    index.cards.find((c) => c.cardId === "A-INF-001").qrFile,
+    historicalIndex.cards.find((c) => c.cardId === "A-INF-001").qrFile,
     "utf8",
   );
   const ernst = readFileSync(
@@ -510,11 +504,12 @@ test("QR codes on the welcome screen automatically switch between Anna and Ernst
     { svg: anna },
   );
   await page.goto("./");
-  await expect(page).toHaveURL(/#card\/A-INF-001/);
-  await expect(page.locator(".role-line")).toHaveText("Für Anna");
+  await expect(page).toHaveURL(/#welcome$/);
+  await expect(page.locator("#status")).toContainText("früheren Demoversion");
   await page.evaluate((svg) => {
     window.cameraSvg = svg;
   }, ernst);
+  await page.goto("./#home");
   await page.goto("./#welcome");
   await expect(page).toHaveURL(/#card\/P-INF-001/);
   await expect(page.locator(".role-line")).toHaveText("Für Ernst");
