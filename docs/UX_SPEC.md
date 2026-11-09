@@ -86,3 +86,7 @@ Einstellungen führen jetzt in drei Schritten durch Ordnerfreigabe → Film pro 
 ## Updateangebot – ausdrücklich beauftragte GUI-Ergänzung
 
 Ein zusätzliches, nicht modales Hinweispanel „Neue Version verfügbar“ bietet „Jetzt aktualisieren“ und „Später“. Es erscheint erst bei vorbereitetem Update und erklärt Neustart sowie mögliche erneute Dateifreigabe. Im Ruhemodus und während Dateiauswahl bleibt es verborgen. Neue CSS-Regeln sind auf `.app-update` begrenzt; bestehende Kopfzeilen, Navigation, Inhalte und Abstände bleiben erhalten. Der Hinweis liegt oberhalb des bisherigen Abschaltbereichs des Alm-Einstiegs. Keine Screenshot-Baseline wird ersetzt.
+
+## Verfügbare Tabletbreite (ausdrücklicher Nutzerauftrag)
+
+Die feste 850-CSS-Pixel-Begrenzung der App-Fläche entfällt. Menü und Unteransichten nutzen die verfügbare Breite im Hoch- und Querformat; bestehende Rand-/Safe-Area-Abstände bleiben erhalten. Keine weitere Änderung an Navigation, Anordnung, Schrift oder Farben.
