@@ -203,6 +203,153 @@ select {
     transition: background 0.15s;
   }
 }
+
+/* The requested two-column redesign is limited to the home area below its
+   existing heading and QR/card choice buttons. */
+.home-dashboard {
+  display: grid;
+  grid-template-columns: minmax(0, 1.22fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 18px;
+  margin-top: 20px;
+}
+.home-dashboard h2 {
+  margin: 0 0 10px;
+  font-size: 1.15rem;
+  line-height: 1.25;
+}
+.home-video-column,
+.home-right-column,
+.home-dashboard-section {
+  min-width: 0;
+}
+.home-video-list,
+.home-appointment-list,
+.home-record-list,
+.record-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.home-video-list li,
+.home-appointment-list li,
+.home-record-list li,
+.record-list li {
+  margin: 0 0 8px;
+}
+.home-video-row,
+.home-appointment-row,
+.home-record-row,
+.record-row {
+  display: flex;
+  width: 100%;
+  min-height: 56px;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  padding: 10px 14px;
+  border-radius: 12px;
+  overflow-wrap: anywhere;
+}
+.home-video-row {
+  line-height: 1.25;
+}
+.home-right-column {
+  display: grid;
+  gap: 18px;
+}
+.home-appointment-row {
+  display: grid;
+  gap: 2px;
+}
+.home-appointment-row span,
+.record-demo-source {
+  color: #52655f;
+  font-size: 0.88rem;
+}
+.home-dashboard-section > p {
+  margin: 0;
+}
+.home-menu-links {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+.home-menu-links > * {
+  flex: 1 1 180px;
+}
+.record-intro {
+  margin-top: -6px;
+}
+.record-list {
+  max-width: 100%;
+}
+.record-row {
+  justify-content: space-between;
+  font-weight: 650;
+}
+.record-demo-source {
+  margin: 4px 10px 16px;
+}
+.record-document {
+  margin-top: 16px;
+}
+.record-document h2 {
+  font-size: 1.15rem;
+}
+.record-image-viewer {
+  min-height: 140px;
+  max-height: 66dvh;
+  overflow: auto;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  border: 1px solid #d2ded6;
+  border-radius: 14px;
+  background: #fff;
+}
+.record-image-viewer.has-image {
+  min-height: 34dvh;
+}
+.record-image-viewer img {
+  display: block;
+  max-width: 100%;
+  max-height: 64dvh;
+  object-fit: contain;
+  transform-origin: center center;
+}
+.record-image-viewer img[hidden] {
+  display: none;
+}
+.record-image-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 12px 0;
+}
+.record-image-controls button {
+  flex: 1 1 130px;
+}
+.xray-approval {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.xray-approval input {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  margin: 3px 0 0;
+}
+.xray-settings #xray-file-status {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 600px) {
+  .home-dashboard {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 /* Programmatic focus announces the new view without drawing a box around it. */
 main:focus {
   outline: none;

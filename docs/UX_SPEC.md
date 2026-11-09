@@ -5,7 +5,7 @@
 ## Geräte- und Gestaltungsregeln
 
 - **F:** Tablet hochkant, separat vor Alma abgestützt. Android-Statusleiste **oben** sowie System-Navigationsbereich **unten** beanspruchen reale Pixel. Keine Vollbild-Annahme. Mit tatsächlich verfügbarem Viewport (z. B. `100dvh` mit Fallback), Safe-Areas und realem Gerät prüfen.
-- **V:** Ruhiges, kontrastreiches Layout mit grossen Buttons; mindestens ca. 44 CSS-px Touch-Ziel, gut lesbare Schrift; tatsächliche Zielgrössen im Interview überprüfen. Kein enger Mehrspaltenaufbau.
+- **V:** Ruhiges, kontrastreiches Layout mit grossen Buttons; mindestens ca. 44 CSS-px Touch-Ziel, gut lesbare Schrift; tatsächliche Zielgrössen im Interview überprüfen. Das Hauptmenü verwendet am Tablet gemäss F18 zwei Spalten, passt auf schmaleren Viewports in eine Spalte.
 - **V:** Nur **eine** kompakte app-interne Titel-/Zurückzeile auf Unterseiten, kein doppelter Kopf „SMARThapti“; Inhalt (vor allem Video und QR-Vorschau) erhält die meiste Höhe.
 - **F:** Bedienung ohne Login, eigenes Smartphone, gesprochene Eingabe oder Kenntnis medizinischer Fachwörter. Jede Ansicht führt klar zurück.
 - **F:** Keine Fortschrittsrangliste, kein Erfolgszwang, kein rotes „Versagen“-Feedback.
@@ -15,7 +15,7 @@
 | Kennung | Ansicht | Inhalt und wichtigste Aktionen |
 | --- | --- | --- |
 | U0 | Bergwiesen-Einstieg | Landschaft mit Kühen, Kamera nach Freigabe im Hintergrund; 3 s Einblendung, fünf Kartenvorführungen à 2,4 s, 3 s Ausblendung, 10 s Bildruhe. Tippen/Enter öffnet das Menü. |
-| U1 | Patienten-Hauptmenü | Nur Ernst: alle acht Patienten-Übungsvideos, Karten, Mein Weg und Alma direkt erreichbar; kein Perspektivwechsel. Zweispaltiges Layout bleibt V16. |
+| U1 | Patienten-Hauptmenü | Nur Ernst: links alle acht Patienten-Übungsvideos, rechts kommende Physiotherapietermine und Patientenakte; Karten, Mein Weg und Alma bleiben erreichbar. Zweispaltenlayout ist mit F18 ausdrücklich beauftragt. |
 | U2 | QR scannen | Live-Kamera, Positionierungshinweis, Kamerawechsel, „Karte ohne Kamera wählen“, Schliessen |
 | U3 | Kartenübersicht | Nach Rolle und Typ sortierbare grosse Karten mit Bildsymbol; manuelle Auswahl öffnet denselben Detailinhalt wie QR |
 | U4 | Kartendetail | Kurztitel, kleine Kernaussage, Quelle/Stand, Vertiefungsbuttons, je nach Typ „Video“ / „Termin vormerken“ / „Eintrag vorschlagen“ |
@@ -94,4 +94,14 @@ Die feste 850-CSS-Pixel-Begrenzung der App-Fläche entfällt. Menü und Unterans
 
 - Ein fiktiver Patient **Ernst** ist die einzige Zielgruppe. Kein Angehörigenmodus, keine zweite Timeline, keine Rollenumschaltung. Nur P-Karten und Patienten-Alma-Dialog sind aktiv; alte A-QRs und die bisherige Misch-PDF bleiben Archiv und dürfen nicht auf Patienteninhalte umgeleitet werden.
 - Patienten-Karten: sechs Basiskarten und sieben weitere Übungen, also **13 aktive Karten**, darunter **acht Übungsvideos**. Die lokale Medienablage, das bewusst bestätigte Speichern und alle klinischen Grenzen bleiben erhalten.
-- **GUI-Freeze:** Nur Entfernung des Perspektivenwechsels ist mit F17 ausdrücklich freigegeben. Die zuvor besprochene Zweispalten-Startseite (links Videos, rechts nächster Physiotermin und Berichte/Erklärungen) ist **Vorschlag V16, noch nicht implementierungsfreigegeben**.
+- **GUI-Freeze:** F17 erhielt den Bestandsschutz. Der separate Auftrag F18 gibt nur den Bereich unterhalb der bestehenden Menüauswahl sowie die nötigen Patientenakten-/Einstellungsansichten zur Änderung frei.
+
+## Ausdrücklich beauftragte Patientenübersicht und Patientenakte (09.11.2026)
+
+F18 beauftragt ausschliesslich die Gestaltung unterhalb der bestehenden Überschrift und den Buttons „QR-Karte scannen“ und „Karte auswählen“. Kopfzeile, Überschrift, diese beiden Buttons, ihre Positionen und der Bergwiesen-Einstieg bleiben visuell unverändert. Darunter stehen links acht kompakte Videozeilen; rechts folgen der nächste fiktive Physiotherapietermin und anklickbare Patientenakten-Einträge. Videos öffnen direkt ihren Player. Alma und „Mein Weg“ bleiben unterhalb des Dashboards erreichbar.
+
+Der Termin zeigt nur Felder, die in den Demodaten existieren. Aktuell ist das Datum 10.11.2026 hinterlegt; eine Uhrzeit und ein Ort sind nicht vorhanden. In der Austrittsszene wird das Szenariodatum aus `manifest.asOf`, in der Physioszene das Datum des vorhandenen Termins verwendet.
+
+Die Patientenakte simuliert EPIC lokal mit vorbereiteten, fiktiven Texten aus `content/patient_record.json` und `content/patient_record_contents.json`. Jeder Eintrag nennt die simulierte Herkunft und den Datenstand. Es gibt keine Serververbindung. Die Bildansicht nimmt nur eine in den Einstellungen ausdrücklich als fiktiv oder für Demonstrationen freigegebene lokale JPG-/JPEG-/PNG-/WebP-Datei an; gespeichert wird nur der Dateiname und der Freigabestatus. Nach einem Neustart kann die Datei erneut ausgewählt werden. Keine Bilddatei wird ausgeliefert, hochgeladen oder in den Service-Worker-Cache aufgenommen.
+
+Screenshots der neuen Patientenübersicht und der Patientenakte liegen unter `docs/screenshots/`; die Röntgenbildansicht ist mit ihrem sicheren Leerzustand dargestellt, da kein Demobild im Repository liegt. Nicht betroffene Ansichten sind im PR gegen den Arbeitsstand visuell zu vergleichen; vorhandene freigegebene Baselines werden nicht verändert.

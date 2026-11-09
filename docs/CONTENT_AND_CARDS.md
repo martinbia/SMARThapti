@@ -101,3 +101,11 @@ Standardzuordnung: P-EX-101 Gehen mit Teilbelastung; 102 Hüftflexion im Stehen;
 ## F17 – aktueller Kartenbestand ab 09.11.2026
 
 **13 aktive Patienten-Karten:** sechs P-Basiskarten aus `content/demo_manifest.json` und sieben P-Übungskarten aus `content/exercise_catalog.json`. Acht Patienten-Übungsvideos bleiben per Touch/QR erreichbar. Keine Angehörigen-Medien, -Dialoge oder -Ereignisse im aktiven Manifest. Historische A-QRs und die alte Misch-PDF werden nicht gelöscht, aber nicht mehr verwendet. Ein Video angesehen bedeutet **nicht** durchgeführt.
+
+## F18 – zweispaltige Patientenübersicht und Akten-Demodaten (09.11.2026)
+
+Das Hauptmenü liest die acht Videozeilen aus den aktiven Patienten-Übungskarten in `demo_manifest.json` und `exercise_catalog.json`. Ihre Medienstammdaten und Dateinamen bleiben unverändert. Das existierende fiktive Physiotherapieereignis `J10` am 10.11.2026 ist die einzige derzeitige Terminzeile; weder Uhrzeit noch Ort sind hinterlegt. Die Szene `discharge` vergleicht mit `manifest.asOf`, die Szene `physio` mit dem vorhandenen J10-Datum. Der Karte-/Detail-/Bestätigungsweg bleibt unverändert.
+
+Die Patientenakte trennt Metadaten (`patient_record.json`) von vorgefertigten Berichtstexten (`patient_record_contents.json`). Enthalten sind Operationsbericht, Austrittsbericht, Terminplan und der lokale Röntgenbildplatzhalter. Alle Texte sind fiktiv und absichtlich ohne klinische Befunde, medizinische Anordnungen, Belastungsfreigaben, Dosierungen oder Übungen. Als Herkunft erscheint eine simulierte EPIC-Ansicht; es gibt keine EPIC- oder Krankenhausserver-Verbindung.
+
+Das Röntgenbild wird nicht als Beispieldatei im Repo oder Pages abgelegt. Die Interviewführung muss in den Einstellungen bestätigen, dass das lokal ausgewählte Bild fiktiv oder ausdrücklich für Demonstrationszwecke freigegeben ist. Unterstützte Endungen: `.jpg`, `.jpeg`, `.png`, `.webp`. LocalStorage hält nur Dateiname und Freigabestatus; nach App-Neustart ist das Android-Datei-Grant erneut zu erteilen. Das Bild wird per sitzungsgebundener Blob-URL angezeigt und beim Navigieren freigegeben.

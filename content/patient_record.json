@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "FICTIONAL PATIENT RECORD DEMO; no real EPIC or hospital connection",
+  "patientId": "ernst",
+  "items": [
+    {
+      "id": "operation-report",
+      "title": "Operationsbericht",
+      "type": "report",
+      "sourceId": "E02",
+      "dataDate": "2026-10-27",
+      "contentId": "operation-report-content",
+      "fictional": true
+    },
+    {
+      "id": "discharge-report",
+      "title": "Austrittsbericht",
+      "type": "report",
+      "sourceId": "E06",
+      "dataDate": "2026-11-02",
+      "contentId": "discharge-report-content",
+      "fictional": true
+    },
+    {
+      "id": "appointment-plan",
+      "title": "Terminplan",
+      "type": "report",
+      "sourceId": "E07",
+      "dataDate": "2026-11-02",
+      "contentId": "appointment-plan-content",
+      "fictional": true
+    },
+    {
+      "id": "xray",
+      "title": "Röntgenbild",
+      "type": "image",
+      "sourceId": "E02",
+      "dataDate": "2026-10-27",
+      "contentId": "xray-content",
+      "fictional": true,
+      "localOnly": true
+    }
+  ]
+}

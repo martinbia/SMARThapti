@@ -64,8 +64,16 @@ FS-26: Verbundener Ordner füllt die Dateizuordnung unmittelbar. Dateiliste und 
 
 FS-27: Bei Online-Start, Online-Ereignis, Wiederaufnahme und regelmässig während Nutzung auf Updates prüfen. Nur vollständig installierte Updates anbieten. Zustimmung aktiviert und lädt neu; Später unterbricht die Sitzung nicht. Offline/Fehler erhält vorhandene Version. Kein Hinweis bei Erstinstallation, Ruhemodus oder Dateiauswahl. Filmzuordnungen/Demo-Einträge überleben Aktivierung; auf Sitzungs-/Dateifreigabeverlust hinweisen.
 
+## F18 – Patientenübersicht, Termine und lokale Patientenakte (09.11.2026)
+
+- **FS-28:** Nur der Hauptmenübereich unter der unveränderten Überschrift und den unveränderten QR-/Kartenauswahlbuttons wird zweispaltig gestaltet. Links erscheinen alle acht Patienten-Übungsvideos als je eine kompakte, anklickbare Zeile. Ein Antippen öffnet direkt die Playeransicht. Ein fehlendes Medium zeigt einen Hinweis und eine lokale Dateiauswahl. Die Videowiedergabe wird beim Verlassen beendet und verändert keinen Übungsstatus.
+- **FS-29:** Rechts zeigt die Übersicht anstehende Termine in chronologischer Reihenfolge, anhand des gewählten fiktiven Szenarios. Datum, Uhrzeit und Ort werden nur angezeigt, wenn sie im Datenmodell vorhanden sind. Der Termin öffnet die bestehende Detailansicht; der Timeline-Eintrag benötigt dort weiterhin eine ausdrückliche Bestätigung und bleibt duplikatgeschützt.
+- **FS-30:** Die Patientenakte ist eine lokale EPIC-Simulation mit getrennten Metadaten und Berichtsinhalten (`content/patient_record.json`, `content/patient_record_contents.json`). Alle Einträge zeigen fiktive Kennzeichnung, simulierte Herkunft, Datenstand und fehlende klinische Prüfung. Es gibt keine externe Verbindung.
+- **FS-31:** Ein Röntgenbild wird nur nach ausdrücklicher Bestätigung seiner Demo-Freigabe lokal ausgewählt. Unterstützt werden JPG, JPEG, PNG und WebP. LocalStorage enthält nur Version, Dateiname und Freigabestatus; die Datei bleibt ein sitzungsgebundenes Browser-Blob. Bei fehlendem Grant kann sie erneut aus dem lokalen Ordner ausgewählt werden. Es gibt keinen Upload, keine Kopie in App-Speicher und keinen Service-Worker-Mediencache.
+- **FS-32:** Das Röntgenbild erscheint in einer eigenen, scrollbar und per Touch-Buttons zoombar bedienbaren Ansicht mit Zurücknavigation. Ohne gültige lokale Datei erscheint ein verständlicher Fallback mit Link zu den Einstellungen.
+
 ## Aktueller Beschluss F17 – ausschliesslich Patient (09.11.2026)
 
 - Ein fiktiver Patient **Ernst** ist die einzige Zielgruppe. Kein Angehörigenmodus, keine zweite Timeline, keine Rollenumschaltung. Nur P-Karten und Patienten-Alma-Dialog sind aktiv; alte A-QRs und die bisherige Misch-PDF bleiben Archiv und dürfen nicht auf Patienteninhalte umgeleitet werden.
 - Patienten-Karten: sechs Basiskarten und sieben weitere Übungen, also **13 aktive Karten**, darunter **acht Übungsvideos**. Die lokale Medienablage, das bewusst bestätigte Speichern und alle klinischen Grenzen bleiben erhalten.
-- **GUI-Freeze:** Nur Entfernung des Perspektivenwechsels ist mit F17 ausdrücklich freigegeben. Die zuvor besprochene Zweispalten-Startseite (links Videos, rechts nächster Physiotermin und Berichte/Erklärungen) ist **Vorschlag V16, noch nicht implementierungsfreigegeben**.
+- **GUI-Freeze:** F17 erhielt den Bestandsschutz. Der separate Auftrag F18 gibt nur den Bereich unterhalb der bestehenden Menüauswahl sowie die nötigen Patientenakten-/Einstellungsansichten zur Änderung frei.

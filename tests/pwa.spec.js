@@ -10,6 +10,10 @@ const index = { ...historicalIndex, cards: historicalIndex.cards.filter((c) => c
 const exerciseCatalog = JSON.parse(
   readFileSync("content/exercise_catalog.json"),
 );
+const patientRecord = JSON.parse(readFileSync("content/patient_record.json"));
+const patientRecordContents = JSON.parse(
+  readFileSync("content/patient_record_contents.json"),
+);
 for (const key of ["media", "contents", "cards"])
   m[key].push(...exerciseCatalog[key]);
 index.cards.push(
@@ -119,10 +123,144 @@ test("patient appointment and personal milestone require confirmation, deduplica
 test("only patient media and exercise cards are shown in the menu", async ({ page }) => {
   await page.goto("./#home");
   await expect(page.locator('[data-action="role"], .perspective-options')).toHaveCount(0);
-  await expect(page.locator('[data-action^="card:P-EX-"]')).toHaveCount(8);
+  await expect(page.locator(".home-video-row")).toHaveCount(8);
+  await expect(page.locator('[data-action^="card:P-EX-"]')).toHaveCount(0);
   await expect(page.locator('[data-action^="card:A-"]')).toHaveCount(0);
   await click(page, "cards");
   await expect(page.locator("#card-list button")).toHaveCount(13);
+});
+
+test("patient home dashboard keeps the existing upper controls and opens each video directly", async ({ page }) => {
+  await page.goto("./#home");
+  await expect(page.locator(".menu-heading")).toHaveText("Was möchten Sie ansehen?");
+  await expect(page.locator('[data-action="scan"]')).toHaveText("QR-Karte scannen");
+  await expect(page.locator('[data-action="cards"]').first()).toHaveText("Karte auswählen");
+  await expect(page.locator(".home-video-row")).toHaveCount(8);
+  await expect(page.locator(".home-appointment-row")).toHaveCount(1);
+  await expect(page.locator(".home-appointment-row")).toContainText("10.11.2026");
+  await expect(page.locator(".home-record-row")).toHaveCount(4);
+  await expect(page.locator(".home-dashboard")).toHaveCSS("grid-template-columns", /\d+(?:\.\d+)?px \d+(?:\.\d+)?px/);
+  const widths = await page.locator(".home-dashboard").evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(" ").map(parseFloat));
+  expect(widths[0] / (widths[0] + widths[1])).toBeCloseTo(0.55, 1);
+  await page.locator('[data-action="video:P-EX-102"]').click();
+  await expect(page).toHaveURL(/#video\/P-EX-102$/);
+  await expect(page.locator("video")).toHaveCount(0);
+  await expect(page.locator(".media-status")).toContainText("Nicht verbunden");
+  await expect(page.locator("main")).toContainText("Hüftflexion im Stehen");
+  await expect(page.locator("main")).toContainText("nicht klinisch geprüft");
+  await page.setViewportSize({ width: 480, height: 850 });
+  await page.goto("./#home");
+  await expect(page.locator(".home-dashboard")).toHaveCSS("grid-template-columns", /^(\d+(?:\.\d+)?px)$/);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
+});
+
+test("home appointment opens its existing details and still requires explicit timeline confirmation", async ({ page }) => {
+  await page.goto("./#home");
+  await click(page, "card:P-APT-001");
+  await expect(page).toHaveURL(/#card\/P-APT-001$/);
+  await expect(page.locator("main")).toContainText("10.11.2026");
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("smarthapti-demo") || "{}").keys || [])).not.toContain("J10");
+  await click(page, "confirm:P-APT-001");
+  await expect(page.locator("main")).toContainText("Diesen Eintrag hinzufügen?");
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("smarthapti-demo") || "{}").keys || [])).not.toContain("J10");
+});
+
+test("patient record uses separate fictional content and never connects to EPIC", async ({ page }) => {
+  expect(patientRecord.items).toHaveLength(4);
+  expect(patientRecord.items.every((item) => item.fictional)).toBe(true);
+  expect(patientRecordContents.contents.map((content) => content.id)).toEqual(
+    patientRecord.items.map((item) => item.contentId),
+  );
+  await page.goto("./#record");
+  await expect(page.locator(".record-row")).toHaveCount(4);
+  for (const item of patientRecord.items.filter((entry) => entry.type === "report")) {
+    await click(page, "record:" + item.id);
+    await expect(page).toHaveURL(new RegExp(`#record/${item.id}$`));
+    await expect(page.locator("main")).toContainText(item.title);
+    await expect(page.locator("main")).toContainText("Fiktive EPIC-Ansicht ohne Verbindung");
+    await expect(page.locator("main")).toContainText("nicht klinisch geprüft");
+    await expect(page.locator("main")).toContainText("Demo-Dokument");
+    await click(page, "record");
+  }
+});
+
+test("x-ray selection stays local, persists its filename, and handles a lost file grant", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.showOpenFilePicker = undefined;
+  });
+  await page.goto("./#settings");
+  await expect(page.locator("#xray-file-status")).toContainText("Noch kein lokales");
+  const png = new PNG({ width: 2, height: 2 });
+  png.data.fill(180);
+  const uploadRequests = [];
+  page.on("request", (request) => {
+    if (request.method() !== "GET") uploadRequests.push(request.method() + " " + request.url());
+  });
+  await click(page, "choose-xray");
+  await expect(page.locator("#settings-status")).toContainText("Bitte bestätigen");
+  await page.locator("#xray-approval").check();
+  const chooser = page.waitForEvent("filechooser");
+  await click(page, "choose-xray");
+  await (await chooser).setFiles({
+    name: "Fiktives-Demo-Roentgenbild.png",
+    mimeType: "image/png",
+    buffer: PNG.sync.write(png),
+  });
+  await expect(page.locator("#xray-file-status")).toContainText("verbunden");
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("smarthapti-xray-assignment-v1")))).toEqual({
+    version: 1,
+    fileName: "Fiktives-Demo-Roentgenbild.png",
+    approved: true,
+  });
+  await page.goto("./#record/xray");
+  await expect(page.locator("#record-xray-image")).toBeVisible();
+  await expect(page.locator("#record-xray-image")).toHaveAttribute("src", /^blob:/);
+  await expect(page.locator("#record-image-status")).toContainText("Keine Übertragung");
+  await click(page, "image-zoom-in");
+  await expect(page.locator("#record-xray-image")).toHaveCSS("transform", "matrix(1.25, 0, 0, 1.25, 0, 0)");
+  await click(page, "image-zoom-reset");
+  await expect(page.locator("#record-xray-image")).toHaveCSS("transform", "matrix(1, 0, 0, 1, 0, 0)");
+  expect(uploadRequests).toEqual([]);
+  await page.reload();
+  await expect(page.locator("#record-image-status")).toContainText("nicht verbunden");
+  await expect(page.locator("#record-xray-image")).toBeHidden();
+  await click(page, "settings");
+  await expect(page.locator("#xray-file-status")).toContainText("Datei erneut auswählen");
+  await page.locator("#xray-approval").uncheck();
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("smarthapti-xray-assignment-v1")).approved)).toBe(false);
+  await page.reload();
+  await expect(page.locator("#xray-approval")).not.toBeChecked();
+  await expect(page.locator("#xray-file-status")).toContainText("Fiktives-Demo-Roentgenbild.png");
+});
+
+test("x-ray setting reuses a previously granted SMART folder", async ({ page }) => {
+  const png = new PNG({ width: 2, height: 2 });
+  png.data.fill(210);
+  await page.addInitScript((bytes) => {
+    const image = new File([Uint8Array.from(bytes)], "Roentgen-Freigabe.png", { type: "image/png" });
+    const folder = {
+      async *values() {
+        yield { kind: "file", name: image.name, getFile: async () => image };
+      },
+      async getFileHandle(name) {
+        if (name !== image.name) throw new DOMException("missing", "NotFoundError");
+        return { getFile: async () => image };
+      },
+    };
+    window.testSmartFolder = folder;
+    window.showDirectoryPicker = async () => folder;
+    window.showOpenFilePicker = undefined;
+  }, [...PNG.sync.write(png)]);
+  await page.goto("./#settings");
+  await click(page, "choose-directory");
+  await expect(page.locator("#xray-connected-choice option")).toHaveCount(2);
+  await page.locator("#xray-approval").check();
+  await page.locator("#xray-connected-choice").selectOption("Roentgen-Freigabe.png");
+  await click(page, "use-xray-connected");
+  await expect(page.locator("#xray-file-status")).toContainText("verbunden");
+  await page.goto("./#record/xray");
+  await expect(page.locator("#record-xray-image")).toBeVisible();
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("smarthapti-xray-assignment-v1")).fileName)).toBe("Roentgen-Freigabe.png");
 });
 test("camera denial and directory fallback keep touch selection usable", async ({
   page,
@@ -848,7 +986,7 @@ test("native folder fallback fills assignment choices without a second file sele
     await click(page, "choose-directory");
     await (await chooser).setFiles(dir);
     await expect(page.locator(".connection-status")).toContainText(
-      "1 Mediendateien",
+      "1 lokale Dateien",
     );
     const choice = page.locator(
       '.assignment-choice[data-target="assign-M-P-EX-101"]',
@@ -906,12 +1044,12 @@ test("folder results survive backgrounding and native file picker reopens the co
   await page.goto("./#settings");
   await click(page, "choose-directory");
   await expect(page.locator(".connection-status")).toContainText(
-    "1 Mediendateien",
+    "1 lokale Dateien",
   );
   await expect(page.locator(".assignment-choice").first()).toBeEnabled();
   await click(page, "choose-files");
   await expect(page.locator(".connection-status")).toContainText(
-    "2 Mediendateien",
+    "2 lokale Dateien",
   );
   expect(await page.evaluate(() => window.openedAtConnectedFolder)).toBe(true);
   expect(await page.evaluate(() => window.pickerHasMediaFilter)).toBe(false);
