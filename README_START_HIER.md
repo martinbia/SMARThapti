@@ -59,7 +59,7 @@ Nach ausdrücklichem Implementierungsauftrag im Cloud-Chat liegt jetzt ein funkt
 
 ## Einstellungen und zusätzliche Übungsfilme (09.11.2026)
 
-Das Zahnrad in der Kopfzeile öffnet die lokale Filmzuordnung. Sieben zusätzliche Übungskarten und ihre Dateinamen stehen in `content/exercise_catalog.json`; QR-SVGs sind in den Einstellungen herunterladbar. Gespeicherte Zuordnungen überstehen Neustarts und neue Builds derselben Website, Android-Dateifreigaben bleiben separat. Sicherungsexport/-import und Anleitung: `docs/IMPLEMENTATION.md`, Abschnitt „Lokale Filmzuordnung“.
+Das Zahnrad in der Kopfzeile öffnet die lokale Filmzuordnung. Sieben zusätzliche Übungskarten und ihre Dateinamen stehen in `content/exercise_catalog.json`; QR-SVGs sind in den Einstellungen herunterladbar. Medienzuordnungen und, sofern Android/Chrome es erlauben, Dateisystem-Handles überstehen Neustarts und neue Builds derselben Website. Details und Grenzen: `docs/IMPLEMENTATION.md`, Abschnitt „Lokale Filmzuordnung und Dateifreigabe“.
 
 ## Aktueller Beschluss F17 – ausschliesslich Patient (09.11.2026)
 
