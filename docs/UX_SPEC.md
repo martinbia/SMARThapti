@@ -14,7 +14,7 @@
 
 | Kennung | Ansicht | Inhalt und wichtigste Aktionen |
 | --- | --- | --- |
-| U0 | Rollenstart/Übersicht | „Für Ernst“ / „Für Anna“ (fiktive Demo); Hinweis „Demo, keine medizinische Anweisung“ |
+| U0 | Bergwiesen-Einstieg | Landschaft mit Kühen, Kamera nach Freigabe im Hintergrund; 3 s Einblendung, fünf Kartenvorführungen à 2,4 s, 3 s Ausblendung, 10 s Bildruhe. Tippen/Enter öffnet das Menü. |
 | U1-P | Patient – Heute | „Übungsvideo ansehen“, „Meine Karten“, „Mein Weg“, „Alma fragen“; zuletzt ausgehändigte Karte |
 | U1-A | Angehörige – Heute | „Unterstützungsvideo“, „Eigene Entlastung“, „Karten & Termine“, „Alma fragen“ |
 | U2 | QR scannen | Live-Kamera, Positionierungshinweis, Kamerawechsel, „Karte ohne Kamera wählen“, Schliessen |
@@ -40,7 +40,7 @@
 
 **Dialog via QR:** Die zusätzlichen Demo-Karten `P-INF-003` und `A-INF-003` sind Informationskarten mit `dialogNodeId`. Ihr Scan zeigt den zugehörigen vorbereiteten Alma-Dialog (U6), kein leerer allgemeiner Medienplayer. Bei fehlender MP3 bleibt der Textdialog vollständig bedienbar.
 
-**Rollenwechsel:** Immer sichtbar oder über leicht erreichbare Übersicht; ggf. laufenden Scanner/Player beenden; Angehörigeninhalte bleiben eigenständig. Private Angehörigennotizen dürfen nicht ungefragt in der Patientenperspektive auftauchen.
+**Rollenwechsel:** Primär automatisch durch die gescannte Kartenrolle, auch bereits vom Bergwiesen-Einstieg. Im Menü nur eine kompakte Zeile „Für Ernst/Anna“; manuell über „Andere Perspektive ohne QR-Code“ im Fussbereich; ggf. laufenden Scanner/Player beenden; Angehörigeninhalte bleiben eigenständig. Private Angehörigennotizen dürfen nicht ungefragt in der Patientenperspektive auftauchen.
 
 ## Fehler- und Randzustände (F)
 
@@ -66,3 +66,9 @@
 ## Noch zu validieren (O)
 
 Reale Tablet-Auflösung, Chrome/PWA-Standalone-Verhalten, Höhe der Android-Systemleisten, Frontkamera-Fokus auf Druckkarten, **Ordnerauswahl und Medienberechtigungen auf Android**, Ablesedistanz, Schriftgrösse und gewünschte Schnelligkeit der Dialoge. Zuerst am tatsächlichen Gerät testen, erst danach visuell feinjustieren.
+
+## Bergwiesen-Einstieg (Nutzerauftrag 09.11.2026)
+
+Die Hintergrundgrafik ist ein KI-generiertes Zentralschweizer Alpenmotiv, keine dokumentarische Ortsaufnahme. Sie gehört zur App-Shell. Die Kartenvorführung ist eine lokale SVG-/Browseranimation, kein Video. Nach jeweils fünf Bewegungen und dem Ausblenden bleiben für zehn Sekunden nur Landschaft und Kühe sichtbar; die gesamte Fläche bleibt als Menü-Taste per Touch und Tastatur zugänglich. Bei reduzierter Bewegungseinstellung wird die Karte statisch gezeigt. Die Kamera scannt weiterhin; bei verweigerter Freigabe bleibt Tippen zum Menü mit Touch-Kartenwahl möglich. Die App beansprucht nur den verfügbaren dynamischen Viewport, keinen Android-Vollbildmodus. Beim Verlassen werden Animations-Timer und Kamera beendet.
+
+**Kameraindikator (Nutzerauftrag 09.11.2026):** Ein kleiner roter Punkt oben rechts zeigt der Interviewführung, dass der Kamerastream läuft und die QR-Erkennung bereit ist. Er bleibt auch in den zehn Sekunden reiner Landschaft sichtbar. Beim Verlassen, Fehler oder Kameraende verschwindet er. Vor Freigabe bzw. bei Ablehnung wird er nicht angezeigt.

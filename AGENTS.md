@@ -20,7 +20,7 @@
 - EPIC ist nur eine spätere Integrationsperspektive, nicht Teil der PWA. Keine API-Keys, externen LLM-/Speech-Services, Spracherkennung oder versteckte Netzwerk-Uploads.
 - Angehörigenansicht eigenständig; eigene Sorgen nicht ungefragt in gemeinsamer Timeline zeigen. Perspektivwechsel ist **keine Authentifizierung**.
 - Technische Videos und MP3s dürfen keine unvalidierten Therapieanweisungen enthalten. Kein automatischer Schluss aus Videoansicht auf Übungsdurchführung.
-- **FESTGELEGT:** Alle Videos, MP3s und sonstigen Mediendateien ausschliesslich **lokal auf dem Android-Tablet** unter `Internal storage/Documents/SMART` bereitstellen. Keine Medien-Dateien in GitHub Pages, Repository, CDN oder auf einen Server hochladen.
+- **FESTGELEGT:** Alle Videos, MP3s und sonstigen Mediendateien ausschliesslich **lokal auf dem Android-Tablet** unter `Internal storage/Documents/SMART` bereitstellen. Keine Therapie-/Dialog-Mediendateien in GitHub Pages, Repository, CDN oder auf einen Server hochladen. **Explizite Ergänzung des Nutzers vom 09.11.2026:** Die dekorative Bergwiesen-Appgrafik darf mit der PWA ausgeliefert werden; die Karten-Handbewegung ist eine SVG-/Browseranimation. Diese Ausnahme erlaubt keine Veröffentlichung lokaler MP4-/MP3-Inhalte.
 
 ## 3. UX- und Zustandsregeln
 

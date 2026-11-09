@@ -17,7 +17,7 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
   if (event.request.method !== "GET" || url.origin !== self.location.origin)
     return;
-  // Only the exact application shell allowlist is cached. Never files, blobs or media.
+  // Cache only the app shell (including decorative artwork). Never selected files, blobs or therapy/dialog media.
   const path = url.pathname.slice(
     new URL("./", self.location.href).pathname.length,
   );

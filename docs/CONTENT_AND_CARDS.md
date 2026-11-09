@@ -81,3 +81,5 @@ Eine abgespielte MP3 stammt aus vorbereiteter Datei, nicht aus Laufzeit-TTS; Dia
 - `print/SMARThapti_Faltkarten_A4.pdf` enthält alle elf Karten auf **3 A4-Seiten**: links menschenlesbare Vorderseite, rechts QR-Rückseite, senkrechte Faltlinie und äussere Schnittkontur. Auf 100 %/Originalgrösse drucken und **mit den unbedruckten Seiten nach innen** falten.
 - `print/CARD_INDEX.json` bildet Karten-ID, exakt kodierten QR-Text und Medien-Dateiname ab. QR kodiert bewusst **nur** `SH1:<CARD-ID>`; Dateiname wird durch Manifest-Verknüpfung ermittelt. **Ein gewöhnlicher Smartphone-QR-Scanner öffnet dadurch keine Medien-URL.**
 - `P-INF-003` und `A-INF-003` sind **zusätzliche, als Vorschlag markierte** Alma-Zugriffskarten. Vor breitem Druck/Praxiseinsatz QR-Grösse, Kontrast und Lesbarkeit am realen Tablet prüfen.
+
+**Ergänzung 09.11.2026 (F16):** Das ausdrücklich beauftragte dekorative Bergwiesenbild gehört zur App-Shell und darf mit der PWA ausgeliefert werden. Die QR-Kartenanleitung wird mit SVG und Browseranimation umgesetzt. Therapie-/Dialog-MP4s und MP3s bleiben ausschliesslich lokal auf dem Tablet. QR-Karten wählen primär automatisch die passende Perspektive.

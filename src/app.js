@@ -1,6 +1,7 @@
 import jsQR from "jsqr";
 import "./style.css";
 import { types, resolveQR, visibleEvents, addEvent } from "./model.js";
+import { welcomeMarkup, animateWelcome } from "./welcome.js";
 const base = import.meta.env.BASE_URL;
 const root = document.querySelector("#app");
 const esc = (value) =>
@@ -25,6 +26,7 @@ let manifest,
   urls = [],
   generation = 0,
   facing = "user",
+  stopWelcome = () => {},
   storageOK = true;
 try {
   const saved = JSON.parse(localStorage.getItem("smarthapti-demo") || "{}");
@@ -43,6 +45,9 @@ function save() {
   }
 }
 function cleanup() {
+  stopWelcome();
+  stopWelcome = () => {};
+  document.querySelector("#camera-indicator")?.remove();
   generation++;
   cancelAnimationFrame(frame);
   stream?.getTracks().forEach((t) => t.stop());
@@ -152,11 +157,19 @@ async function mountMedia(token) {
 function render() {
   cleanup();
   const token = generation;
-  const [view = "home", id] = location.hash.slice(1).split("/");
+  const [view, id] = (location.hash.slice(1) || "welcome").split("/");
+  root.classList.toggle("welcome-mode", view === "welcome");
+  if (view === "welcome") {
+    root.innerHTML = welcomeMarkup(base);
+    document.title = "Willkommen bei Alma · SMARThapti";
+    stopWelcome = animateWelcome(root);
+    startCamera(token);
+    return;
+  }
   let body = "";
   let title = "Heute mit Alma";
   if (view === "home") {
-    body = `<section class="panel hero"><span class="eyebrow">🐮 Alma begleitet die Demo</span><h1>Für ${esc(persona().displayName.split(" ")[0])}</h1><p>${esc(persona().personalGoal)}</p><span class="tag">Fiktive ${scenario === "physio" ? "Physiotermin-Szene · 10.11.2026" : "Austrittsszene · " + manifest.asOf}</span></section><h2>Was möchten Sie ansehen?</h2><div class="actions">${button("QR-Karte scannen", "scan", 'class="primary"')}${button("Karte auswählen", "cards")}</div>${cardButtons(manifest.cards.filter((c) => c.role === role && (role === "patient" ? c.type === "exercise" : ["A-INF-001", "A-INF-002"].includes(c.id))))}<div class="actions">${button("Alma fragen", "dialog:" + dialogs.startNodes[role])}${button("Mein Weg", "timeline")}</div>`;
+    body = `<h1 class="menu-heading">Was möchten Sie ansehen?</h1><div class="actions">${button("QR-Karte scannen", "scan", 'class="primary"')}${button("Karte auswählen", "cards")}</div>${cardButtons(manifest.cards.filter((c) => c.role === role && (role === "patient" ? c.type === "exercise" : ["A-INF-001", "A-INF-002"].includes(c.id))))}<div class="actions">${button("Alma fragen", "dialog:" + dialogs.startNodes[role])}${button("Mein Weg", "timeline")}</div>`;
   } else if (view === "cards") {
     title = "Meine Karten";
     body = `<h1>Meine Karten</h1><label>Kartentyp <select id="filter"><option value="all">Alle Karten</option>${Object.entries(
@@ -229,7 +242,7 @@ function render() {
     go("home");
     return;
   }
-  root.innerHTML = `<header>${button(view === "home" ? "SMARThapti · Alma" : "← Übersicht", "home")}<strong>${role === "patient" ? "Patient · Ernst" : "Angehörige · Anna"}</strong>${button("Perspektive wechseln", "role")}</header><main id="main" tabindex="-1" aria-label="${esc(title)}">${body}<div id="status" role="status" aria-live="polite"></div>${!storageOK ? '<p class="notice">Lokaler Speicher nicht verfügbar. Einträge bleiben nur während dieser Sitzung erhalten.</p>' : ""}</main><footer>Fiktive Interview-Demo · keine medizinische Anweisung · nicht klinisch geprüft<div class="actions">${button("Mein Weg", "timeline")}${button("Demo vorbereiten", "moderator")}${button("Alle Karten", "cards")}</div><small>Perspektivwechsel ist keine Authentifizierung. Nur fiktive Daten verwenden.</small></footer><input id="local-files" type="file" accept=".mp4,.mp3,video/mp4,audio/mpeg" multiple hidden>`;
+  root.innerHTML = `<header>${button(view === "home" ? "← Bergwiese" : "← Menü", view === "home" ? "welcome" : "home")}<strong class="role-line">Für ${esc(persona().displayName.split(" ")[0])}</strong></header><main id="main" tabindex="-1" aria-label="${esc(title)}">${body}<div id="status" role="status" aria-live="polite"></div>${!storageOK ? '<p class="notice">Lokaler Speicher nicht verfügbar. Einträge bleiben nur während dieser Sitzung erhalten.</p>' : ""}</main><footer>Fiktive Interview-Demo · keine medizinische Anweisung · nicht klinisch geprüft<div class="actions">${button("Mein Weg", "timeline")}${button("Demo vorbereiten", "moderator")}${button("Alle Karten", "cards")}</div><details class="perspective-options"><summary>Andere Perspektive ohne QR-Code</summary><p>Normalerweise wählt Ihre QR-Karte die passende Perspektive.</p>${button(role === "patient" ? "Zu Anna wechseln" : "Zu Ernst wechseln", "role")}</details><small>Perspektivwechsel ist keine Authentifizierung. Nur fiktive Daten verwenden.</small></footer><input id="local-files" type="file" accept=".mp4,.mp3,video/mp4,audio/mpeg" multiple hidden>`;
   document.title = `${title} · SMARThapti`;
   document.querySelector("#main").focus({ preventScroll: true });
   window.scrollTo(0, 0);
@@ -289,6 +302,27 @@ async function startCamera(token) {
     video.srcObject = stream;
     await video.play();
     if (token !== generation) return;
+    const indicator = document.createElement("span");
+    indicator.id = "camera-indicator";
+    indicator.className = "camera-indicator";
+    indicator.setAttribute("role", "status");
+    indicator.setAttribute("aria-label", "Kamera aktiv – QR-Erkennung bereit");
+    indicator.title = "Kamera aktiv – QR-Erkennung bereit";
+    root.append(indicator);
+    stream.getVideoTracks().forEach((track) =>
+      track.addEventListener(
+        "ended",
+        () => {
+          if (token !== generation) return;
+          indicator.remove();
+          cancelAnimationFrame(frame);
+          message(
+            "Kamera beendet. Zum erneuten Scannen Kamera oder Bergwiese erneut öffnen.",
+          );
+        },
+        { once: true },
+      ),
+    );
     message(
       "Karte vor die Kamera halten. Alternativ: Karte ohne Kamera wählen.",
     );
@@ -321,10 +355,14 @@ async function startCamera(token) {
     };
     frame = requestAnimationFrame(tick);
   } catch {
-    if (token === generation)
+    if (token === generation) {
+      stream?.getTracks().forEach((track) => track.stop());
+      stream = null;
+      document.querySelector("#camera-indicator")?.remove();
       message(
         "Kamera nicht verfügbar oder Freigabe abgelehnt. Kamera wechseln oder Karte ohne Kamera wählen.",
       );
+    }
   }
 }
 function openCard(card) {
@@ -338,7 +376,9 @@ root.addEventListener("click", async (e) => {
   const action = e.target.closest("[data-action]")?.dataset.action;
   if (!action) return;
   const [name, id, index] = action.split(":");
-  if (["home", "cards", "timeline", "scan", "moderator"].includes(name))
+  if (
+    ["welcome", "home", "cards", "timeline", "scan", "moderator"].includes(name)
+  )
     go(name);
   else if (name === "role") {
     role = role === "patient" ? "relative" : "patient";
