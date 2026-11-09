@@ -41,8 +41,8 @@
 | T24 | Fehlender/falscher Ordner, geänderte Dateinamen oder falsche Endung | Korrekte Fehlermeldung; andere Funktionen und lokale vorhandene Medien bleiben nutzbar | offen |
 | T25 | PWA vollständig schliessen/neustarten; Verknüpfung erneut prüfen | Berechtigung falls zulässig weiterverwendet oder transparent erneut angefordert; Demo-Reset verändert lokale Dateien nicht | offen |
 | T26 | QR-SVGs (`assets/qr/`) und PDF mit echtem QR-Decoder prüfen | Alle **11 QR-Payloads** ergeben exakt `SH1:<CARD-ID>`; keine URL und keine medizinischen/personalen Angaben | statisch geprüft (PDF-Decoder 11/11), realer Tablet-Test offen |
-| T27 | Faltkarten-PDF mit 100 % auf A4 drucken, ausschneiden und falten | QR und Label liegen auf Aussenseiten, nicht gespiegelt/abgeschnitten; Frontkamera scannt mit realistischem Abstand | offen |
-| T28 | `P-INF-003`, `A-INF-003` scannen, MP3 vorhanden/fehlt | Beide öffnen den richtigen Alma-Dialog; nur lokale MP3, Text und Antwortbuttons auch ohne MP3 verfügbar | offen |
+| T27 (historisch) | Alte gemischte Faltkarten-PDF | Nicht mehr als aktuelle Patienten-Karten drucken; patientenreine Druckvorlage V17 offen | ersetzt durch F17 |
+| T28 (F17) | `P-INF-003` scannen, MP3 vorhanden/fehlt; historischen `A-INF-003` probieren | P-Dialog funktioniert mit lokaler MP3 oder nur Text; alte A-Karte wird nicht geöffnet | offen |
 
 ## Reale Hardwareprüfung – früh durchführen (F)
 
@@ -70,10 +70,10 @@ Die obige Tabelle dokumentiert den ursprünglichen Planungsstand. In der Cloud w
 | Bereich | Jetzt geprüft | Weiterhin nicht getestet |
 | --- | --- | --- |
 | T01–T04 | Build, Projektpfad, Manifest, Offline-App-Shell, drei CSS-Viewportgrössen | Live-Pages, Android-Installation, reale Systemleisten |
-| T05–T10, T26, T28 | Alle 11 SVG-QRs dekodiert, Touch-Ziele, synthetischer Kamerastream, Track-Stopp, Kameraverweigerung, Alma-Ziele | Gedruckte Codes mit realer Front-/Rückkamera; PDF nicht erneut dekodiert |
+| T05–T10, T26, T28 (historische Prüfung) | Damals 11 SVGs mit beiden Perspektiven getestet; neuer F17-Stand nutzt nur P-QRs | Neue Patient-only-Tests und echte Front-/Rückkameraprüfung offen |
 | T11–T20 | Unabhängiger Übungszugang, lokale MP4/MP3, Fehlerfallback, Stopp/Blob-Freigabe, Bestätigung/Abbruch, Duplikatschutz, Rollenprivatsphäre, Quellen und Reset | Reale Android-Codec-/Berechtigungs- und Screen-Lock-Zustände |
 | T21–T25 | Native Dateibindung über Browser-Automation, fehlende Ordner-API, kein Mediencache, Reset erhält Dateien | Android-Ordnerdialog, echte Berechtigungsablehnung/-entzug, Dateipfadprüfung am Gerät |
-| T27 | Bestehende Druckmaterialien unverändert | Physischer Ausdruck/Falten und Scan |
+| T27 (historisch) | Alte Misch-PDF unverändert archiviert | Für neue Patienteninterviews eine eigene P-Druckvorlage nötig |
 
 Alle realen Tablet-Tests bleiben offen. Automatisierte Browserprüfungen sind keine klinische Freigabe.
 
