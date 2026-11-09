@@ -373,3 +373,67 @@ header button {
   box-shadow: 0 0 0 1px #41232344;
   pointer-events: none;
 }
+/* The scrollable content ends above the persistent power control. */
+#app:not(.welcome-mode):not(.sleep-mode) {
+  height: 100vh;
+  height: 100dvh;
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow: hidden;
+}
+.power-off {
+  position: fixed;
+  z-index: 30;
+  right: calc(env(safe-area-inset-right, 0px) + 16px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+  min-height: 48px;
+  padding: 0.55rem 0.9rem;
+  border-color: #fff8;
+  background: #b9232c;
+  color: white;
+  box-shadow: 0 3px 16px #0003;
+}
+.power-off:hover {
+  background: #951c23;
+}
+body.sleep-mode,
+#app.sleep-mode {
+  margin: 0;
+  padding: 0;
+  max-width: none;
+  background: #000;
+}
+.wake-screen,
+.wake-screen:hover {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: #000;
+  color: #000;
+  cursor: default;
+}
+.wake-screen:focus-visible {
+  outline: none;
+}
+.welcome-mode .welcome-guide {
+  padding-bottom: max(92px, calc(env(safe-area-inset-bottom, 0px) + 84px));
+}
+
+.app-content {
+  height: calc(
+    100vh - max(84px, calc(env(safe-area-inset-bottom, 0px) + 76px))
+  );
+  height: calc(
+    100dvh - max(84px, calc(env(safe-area-inset-bottom, 0px) + 76px))
+  );
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: 24px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}

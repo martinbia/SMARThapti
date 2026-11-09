@@ -77,3 +77,9 @@ Zusätzlich automatisiert geprüft: echter Decoder mit Anna-/Ernst-Kamerabildern
 **Kameraindikator (Nutzerauftrag 09.11.2026):** Ein kleiner roter Punkt oben rechts zeigt der Interviewführung, dass der Kamerastream läuft und die QR-Erkennung bereit ist. Er bleibt auch in den zehn Sekunden reiner Landschaft sichtbar. Beim Verlassen, Fehler oder Kameraende verschwindet er. Vor Freigabe bzw. bei Ablehnung wird er nicht angezeigt.
 
 Verifikation dieser Ergänzung: Produktionsbuild erfolgreich, alle **24 Playwright-Tests** in Linux-System-Chromium bestanden; Hochformat-Ansichten zusätzlich visuell geprüft. Die früheren 19 Tests bleiben erhalten und sind um fünf Einstiegs-/Kamerapunktprüfungen ergänzt. Reale Android-Hardware weiterhin nicht getestet.
+
+## Abschaltknopf und schwarzer App-Ruhemodus (09.11.2026)
+
+Alle normalen Ansichten besitzen unten rechts „⏻ Abschalten“. Kamera, QR-Schleife, Medienwiedergabe, Blob-URLs und Animations-Timer werden unmittelbar beendet. Die schwarze App-Fläche lässt sich durch Antippen oder Tastatur wieder aktivieren; danach startet die Bergwiese im Normalbetrieb. Ein SessionStorage-Flag hält den Ruhemodus bei Sichtbarkeitswechsel, Navigation und Neuladen in derselben Browsersitzung aufrecht. Bestätigte Demo-Einträge und ausgewählte Dateien werden nicht gelöscht. Verspätete Kamerafreigaben werden anhand der bestehenden Generationsprüfung beendet. Der Kamerapunkt ist ausdrücklich auch im Menü-Scanner aktiv. Dies ist ein Ruhemodus der PWA-Fläche, kein Ausschalten der Tablet-Hardware oder des Android-Displays. Reale Android-Systemleisten und Kameraberechtigungen weiterhin am Gerät prüfen.
+
+Validierung der Abschaltfunktion: Produktionsbuild erfolgreich, **29/29 Browsertests bestanden** (24 bisherige plus fünf neue Prüfungen). Kleine Ansicht mit 360×640 CSS-Pixeln visuell geprüft; der scrollbare Inhalt endet oberhalb des fest erreichbaren Abschaltknopfs. Echte Android-Hardware weiterhin nicht getestet.
