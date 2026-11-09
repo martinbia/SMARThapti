@@ -246,6 +246,14 @@ test("portrait and landscape have no horizontal overflow and large controls", as
 test("actual local MP4 and MP3 playback stops and revokes blobs on navigation", async ({
   page,
 }) => {
+  await page.addInitScript(() => {
+    window.revoked = [];
+    const revoke = URL.revokeObjectURL;
+    URL.revokeObjectURL = (url) => {
+      window.revoked.push(url);
+      revoke(url);
+    };
+  });
   await page.goto("./#card/P-EX-001");
   const h264 = await page.evaluate(() =>
     document
@@ -310,14 +318,6 @@ test("actual local MP4 and MP3 playback stops and revokes blobs on navigation", 
       "sine=frequency=440:duration=2",
       dir + "/ALMA_P_START.mp3",
     ]);
-    await page.addInitScript(() => {
-      window.revoked = [];
-      const revoke = URL.revokeObjectURL;
-      URL.revokeObjectURL = (url) => {
-        window.revoked.push(url);
-        revoke(url);
-      };
-    });
     await page.goto("./#card/P-EX-001");
     await page
       .locator("#local-files")
