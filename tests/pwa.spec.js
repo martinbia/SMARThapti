@@ -116,6 +116,14 @@ test("patient appointment and personal milestone require confirmation, deduplica
   await click(page, "timeline");
   await expect(page.locator(".timeline li")).toHaveCount(3);
 });
+test("only patient media and exercise cards are shown in the menu", async ({ page }) => {
+  await page.goto("./#home");
+  await expect(page.locator('[data-action="role"], .perspective-options')).toHaveCount(0);
+  await expect(page.locator('[data-action^="card:P-EX-"]')).toHaveCount(8);
+  await expect(page.locator('[data-action^="card:A-"]')).toHaveCount(0);
+  await click(page, "cards");
+  await expect(page.locator("#card-list button")).toHaveCount(13);
+});
 test("camera denial and directory fallback keep touch selection usable", async ({
   page,
 }) => {
@@ -504,7 +512,8 @@ test("patient QR opens from welcome; retired relative QR does not change the tar
     { svg: anna },
   );
   await page.goto("./");
-  await expect(page).toHaveURL(/#welcome$/);
+  await expect(page.locator(".welcome-open")).toBeVisible();
+  await expect(page).not.toHaveURL(/#card\/A-INF-001/);
   await expect(page.locator("#status")).toContainText("früheren Demoversion");
   await page.evaluate((svg) => {
     window.cameraSvg = svg;
