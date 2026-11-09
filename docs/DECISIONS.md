@@ -79,3 +79,7 @@ Nutzerrückmeldung: Galerie statt SMART-Dateien sowie leere Filmzuordnung. Umset
 ## F19 – Updates anbieten bei Internetverbindung
 
 Expliziter Nutzerauftrag: Bei Verbindung nach Updates suchen und eine neue Version zum Laden anbieten. Umsetzung: Standard-Service-Worker-Updateprüfung mit vollständig vorbereiteter App-Shell, Zustimmung vor Aktivierung und Neustart; „Später“ hält die laufende Version. Sichtbare Ergänzung ausschliesslich der neue Updatehinweis; übrige GUI unter Bestandsschutz. Gespeicherte Daten bleiben erhalten; lokaler Medienzugriff ggf. erneut freizugeben. Keine automatische Veröffentlichung oder PR-Übernahme.
+
+## F20 – App-Breite ohne feste Obergrenze
+
+Auf ausdrücklichen Nutzerwunsch die 850-CSS-Pixel-Obergrenze der App-Fläche aufheben. Volle verfügbare Tabletbreite bei erhaltenen Rand-/Safe-Area-Abständen; Hochformat bleibt der primäre Betriebsmodus.
