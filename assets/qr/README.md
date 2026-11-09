@@ -11,3 +11,7 @@ Zuordnung: `print/CARD_INDEX.json`. Druckbares A4-Faltblatt: `print/SMARThapti_F
 **Wichtig:** SVGs und Papier sind keine Medien. Die Video-/MP3-Dateien müssen separat **lokal** in `Internal storage/Documents/SMART` des Android-Tablets liegen; weder QR-Code noch GitHub Pages liefern die Medien aus. Das öffentliche Repository enthält keine Mediendateien.
 
 Die zwei Informationskarten `P-INF-003` und `A-INF-003` verweisen auf die vorbereiteten Alma-Dialoge samt optionaler MP3. Dieser zusätzliche Papier-Einstieg ist ein **Vorschlag**, nicht ein neues Sprach- oder KI-System.
+
+## Sieben zusätzliche lokale Übungsfilme (09.11.2026)
+
+`P-EX-101` bis `P-EX-107` ergänzen die bisherigen elf Karten. Zuordnung und exakte Dateinamen: `content/exercise_catalog.json`. Die neuen SVGs sind in den App-Einstellungen herunterladbar. QR-Inhalt bleibt `SH1:<CARD-ID>`; Filmzuordnung kann auf dem Tablet geändert werden, ohne den Code zu ändern. Reproduzierbare Erzeugung nur dieser zusätzlichen SVGs: `node scripts/generate-exercise-qr.mjs`. Die bestehende Karten-PDF und die ursprünglichen elf SVGs bleiben unverändert.

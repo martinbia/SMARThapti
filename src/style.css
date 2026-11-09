@@ -437,3 +437,56 @@ body.sleep-mode,
   overflow-y: auto;
   scrollbar-gutter: stable;
 }
+header {
+  gap: 8px;
+}
+header .back-navigation {
+  min-height: 56px;
+  padding: 0.6rem 0.85rem;
+  border: 2px solid #23675b;
+  background: #e2ece2;
+  color: #163f35;
+  font-size: 1rem;
+  font-weight: 700;
+}
+header .role-line {
+  margin-left: auto;
+  font-size: 1rem;
+}
+header .settings-button {
+  flex-shrink: 0;
+  width: 48px;
+  padding: 0;
+  font-size: 1.4rem;
+  color: #52655f;
+}
+.media-assignment {
+  width: 100%;
+  min-height: 52px;
+  padding: 0.6rem;
+  border: 1px solid #819b91;
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+@media (max-width: 480px) {
+  header .back-navigation {
+    font-size: 0.85rem;
+    padding: 0.5rem;
+  }
+  header .role-line {
+    font-size: 0.9rem;
+  }
+}
+.assignment-choice {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+}
+header .settings-button {
+  font-size: 1.15rem;
+}
+#settings-status:not(:empty) {
+  padding: 12px 0;
+  color: #23675b;
+  font-weight: 600;
+}

@@ -1,0 +1,269 @@
+{
+  "version": 1,
+  "status": "User-provided local filenames; not clinically reviewed",
+  "media": [
+    {
+      "id": "M-P-EX-101",
+      "kind": "video",
+      "purpose": "exercise",
+      "storage": "tablet-local",
+      "fileName": "GehenMitTeilbelastung_video_720p.mp4",
+      "status": "not-clinically-reviewed",
+      "transcriptOrFallback": "Vom Nutzer benannter Übungsfilm. Inhalt und persönliche Eignung sind nicht klinisch geprüft. Keine Übungsanweisung in dieser Demo."
+    },
+    {
+      "id": "M-P-EX-102",
+      "kind": "video",
+      "purpose": "exercise",
+      "storage": "tablet-local",
+      "fileName": "Hueftflexion im Stehen mitohneUnterstuetzung _Fingerspitzen - Knie heben_video_1280x720.mp4",
+      "status": "not-clinically-reviewed",
+      "transcriptOrFallback": "Vom Nutzer benannter Übungsfilm. Inhalt und persönliche Eignung sind nicht klinisch geprüft. Keine Übungsanweisung in dieser Demo."
+    },
+    {
+      "id": "M-P-EX-103",
+      "kind": "video",
+      "purpose": "exercise",
+      "storage": "tablet-local",
+      "fileName": "Kniebeugen_Squats_video_720p.mp4",
+      "status": "not-clinically-reviewed",
+      "transcriptOrFallback": "Vom Nutzer benannter Übungsfilm. Inhalt und persönliche Eignung sind nicht klinisch geprüft. Keine Übungsanweisung in dieser Demo."
+    },
+    {
+      "id": "M-P-EX-104",
+      "kind": "video",
+      "purpose": "exercise",
+      "storage": "tablet-local",
+      "fileName": "TandemstandUnterstuetzungflaeche_video_1280x720.mp4",
+      "status": "not-clinically-reviewed",
+      "transcriptOrFallback": "Vom Nutzer benannter Übungsfilm. Inhalt und persönliche Eignung sind nicht klinisch geprüft. Keine Übungsanweisung in dieser Demo."
+    },
+    {
+      "id": "M-P-EX-105",
+      "kind": "video",
+      "purpose": "exercise",
+      "storage": "tablet-local",
+      "fileName": "Treppensteigen_Kruecken_video_720p.mp4",
+      "status": "not-clinically-reviewed",
+      "transcriptOrFallback": "Vom Nutzer benannter Übungsfilm. Inhalt und persönliche Eignung sind nicht klinisch geprüft. Keine Übungsanweisung in dieser Demo."
+    },
+    {
+      "id": "M-P-EX-106",
+      "kind": "video",
+      "purpose": "exercise",
+      "storage": "tablet-local",
+      "fileName": "Treppensteigen_mit_Teilbelastung_video_720p.mp4",
+      "status": "not-clinically-reviewed",
+      "transcriptOrFallback": "Vom Nutzer benannter Übungsfilm. Inhalt und persönliche Eignung sind nicht klinisch geprüft. Keine Übungsanweisung in dieser Demo."
+    },
+    {
+      "id": "M-P-EX-107",
+      "kind": "video",
+      "purpose": "exercise",
+      "storage": "tablet-local",
+      "fileName": "Wadenheber mit festhalten - beien gestreckt_video_720p.mp4",
+      "status": "not-clinically-reviewed",
+      "transcriptOrFallback": "Vom Nutzer benannter Übungsfilm. Inhalt und persönliche Eignung sind nicht klinisch geprüft. Keine Übungsanweisung in dieser Demo."
+    }
+  ],
+  "contents": [
+    {
+      "id": "C-P-EX-101",
+      "role": "patient",
+      "title": "Gehen mit Teilbelastung",
+      "shortText": "Lokal vorhandener Film – nicht klinisch geprüft.",
+      "detailText": "Nur gemäss einem individuell geprüften Therapieplan verwenden. Die App zeigt den zugeordneten Film und beurteilt keine persönliche Freigabe.",
+      "sourceIds": [
+        "R01"
+      ],
+      "sourceKind": "general",
+      "sourceDate": "2026-11-09",
+      "reviewed": false,
+      "mediaIds": [
+        "M-P-EX-101"
+      ]
+    },
+    {
+      "id": "C-P-EX-102",
+      "role": "patient",
+      "title": "Hüftflexion im Stehen",
+      "shortText": "Lokal vorhandener Film – nicht klinisch geprüft.",
+      "detailText": "Nur gemäss einem individuell geprüften Therapieplan verwenden. Die App zeigt den zugeordneten Film und beurteilt keine persönliche Freigabe.",
+      "sourceIds": [
+        "R01"
+      ],
+      "sourceKind": "general",
+      "sourceDate": "2026-11-09",
+      "reviewed": false,
+      "mediaIds": [
+        "M-P-EX-102"
+      ]
+    },
+    {
+      "id": "C-P-EX-103",
+      "role": "patient",
+      "title": "Kniebeugen / Squats",
+      "shortText": "Lokal vorhandener Film – nicht klinisch geprüft.",
+      "detailText": "Nur gemäss einem individuell geprüften Therapieplan verwenden. Die App zeigt den zugeordneten Film und beurteilt keine persönliche Freigabe.",
+      "sourceIds": [
+        "R01"
+      ],
+      "sourceKind": "general",
+      "sourceDate": "2026-11-09",
+      "reviewed": false,
+      "mediaIds": [
+        "M-P-EX-103"
+      ]
+    },
+    {
+      "id": "C-P-EX-104",
+      "role": "patient",
+      "title": "Tandemstand",
+      "shortText": "Lokal vorhandener Film – nicht klinisch geprüft.",
+      "detailText": "Nur gemäss einem individuell geprüften Therapieplan verwenden. Die App zeigt den zugeordneten Film und beurteilt keine persönliche Freigabe.",
+      "sourceIds": [
+        "R01"
+      ],
+      "sourceKind": "general",
+      "sourceDate": "2026-11-09",
+      "reviewed": false,
+      "mediaIds": [
+        "M-P-EX-104"
+      ]
+    },
+    {
+      "id": "C-P-EX-105",
+      "role": "patient",
+      "title": "Treppensteigen mit Krücken",
+      "shortText": "Lokal vorhandener Film – nicht klinisch geprüft.",
+      "detailText": "Nur gemäss einem individuell geprüften Therapieplan verwenden. Die App zeigt den zugeordneten Film und beurteilt keine persönliche Freigabe.",
+      "sourceIds": [
+        "R01"
+      ],
+      "sourceKind": "general",
+      "sourceDate": "2026-11-09",
+      "reviewed": false,
+      "mediaIds": [
+        "M-P-EX-105"
+      ]
+    },
+    {
+      "id": "C-P-EX-106",
+      "role": "patient",
+      "title": "Treppensteigen mit Teilbelastung",
+      "shortText": "Lokal vorhandener Film – nicht klinisch geprüft.",
+      "detailText": "Nur gemäss einem individuell geprüften Therapieplan verwenden. Die App zeigt den zugeordneten Film und beurteilt keine persönliche Freigabe.",
+      "sourceIds": [
+        "R01"
+      ],
+      "sourceKind": "general",
+      "sourceDate": "2026-11-09",
+      "reviewed": false,
+      "mediaIds": [
+        "M-P-EX-106"
+      ]
+    },
+    {
+      "id": "C-P-EX-107",
+      "role": "patient",
+      "title": "Wadenheber mit Festhalten",
+      "shortText": "Lokal vorhandener Film – nicht klinisch geprüft.",
+      "detailText": "Nur gemäss einem individuell geprüften Therapieplan verwenden. Die App zeigt den zugeordneten Film und beurteilt keine persönliche Freigabe.",
+      "sourceIds": [
+        "R01"
+      ],
+      "sourceKind": "general",
+      "sourceDate": "2026-11-09",
+      "reviewed": false,
+      "mediaIds": [
+        "M-P-EX-107"
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "id": "P-EX-101",
+      "role": "patient",
+      "type": "exercise",
+      "phase": "physio",
+      "title": "Gehen mit Teilbelastung",
+      "printTitle": "Gehen mit Teilbelastung",
+      "qrPayload": "SH1:P-EX-101",
+      "contentId": "C-P-EX-101",
+      "eventKey": null,
+      "qrFile": "assets/qr/P-EX-101__Uebungsfilm.svg"
+    },
+    {
+      "id": "P-EX-102",
+      "role": "patient",
+      "type": "exercise",
+      "phase": "physio",
+      "title": "Hüftflexion im Stehen",
+      "printTitle": "Hüftflexion im Stehen",
+      "qrPayload": "SH1:P-EX-102",
+      "contentId": "C-P-EX-102",
+      "eventKey": null,
+      "qrFile": "assets/qr/P-EX-102__Uebungsfilm.svg"
+    },
+    {
+      "id": "P-EX-103",
+      "role": "patient",
+      "type": "exercise",
+      "phase": "physio",
+      "title": "Kniebeugen / Squats",
+      "printTitle": "Kniebeugen / Squats",
+      "qrPayload": "SH1:P-EX-103",
+      "contentId": "C-P-EX-103",
+      "eventKey": null,
+      "qrFile": "assets/qr/P-EX-103__Uebungsfilm.svg"
+    },
+    {
+      "id": "P-EX-104",
+      "role": "patient",
+      "type": "exercise",
+      "phase": "physio",
+      "title": "Tandemstand",
+      "printTitle": "Tandemstand",
+      "qrPayload": "SH1:P-EX-104",
+      "contentId": "C-P-EX-104",
+      "eventKey": null,
+      "qrFile": "assets/qr/P-EX-104__Uebungsfilm.svg"
+    },
+    {
+      "id": "P-EX-105",
+      "role": "patient",
+      "type": "exercise",
+      "phase": "physio",
+      "title": "Treppensteigen mit Krücken",
+      "printTitle": "Treppensteigen mit Krücken",
+      "qrPayload": "SH1:P-EX-105",
+      "contentId": "C-P-EX-105",
+      "eventKey": null,
+      "qrFile": "assets/qr/P-EX-105__Uebungsfilm.svg"
+    },
+    {
+      "id": "P-EX-106",
+      "role": "patient",
+      "type": "exercise",
+      "phase": "physio",
+      "title": "Treppensteigen mit Teilbelastung",
+      "printTitle": "Treppensteigen mit Teilbelastung",
+      "qrPayload": "SH1:P-EX-106",
+      "contentId": "C-P-EX-106",
+      "eventKey": null,
+      "qrFile": "assets/qr/P-EX-106__Uebungsfilm.svg"
+    },
+    {
+      "id": "P-EX-107",
+      "role": "patient",
+      "type": "exercise",
+      "phase": "physio",
+      "title": "Wadenheber mit Festhalten",
+      "printTitle": "Wadenheber mit Festhalten",
+      "qrPayload": "SH1:P-EX-107",
+      "contentId": "C-P-EX-107",
+      "eventKey": null,
+      "qrFile": "assets/qr/P-EX-107__Uebungsfilm.svg"
+    }
+  ]
+}

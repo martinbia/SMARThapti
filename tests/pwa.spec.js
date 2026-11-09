@@ -6,6 +6,18 @@ import { resolveQR, visibleEvents, addEvent } from "../src/model.js";
 const m = JSON.parse(readFileSync("content/demo_manifest.json"));
 const dialogs = JSON.parse(readFileSync("content/demo_dialogs.json"));
 const index = JSON.parse(readFileSync("print/CARD_INDEX.json"));
+const exerciseCatalog = JSON.parse(
+  readFileSync("content/exercise_catalog.json"),
+);
+for (const key of ["media", "contents", "cards"])
+  m[key].push(...exerciseCatalog[key]);
+index.cards.push(
+  ...exerciseCatalog.cards.map((c) => ({
+    cardId: c.id,
+    payload: c.qrPayload,
+    qrFile: c.qrFile,
+  })),
+);
 const click = async (page, action) => {
   if (
     action === "role" &&
@@ -15,9 +27,9 @@ const click = async (page, action) => {
   await page.locator(`[data-action="${action}"]`).first().click();
 };
 
-test("manifest references, eleven existing cards and event identity", () => {
-  expect(m.cards).toHaveLength(11);
-  expect(new Set(m.cards.map((c) => c.id)).size).toBe(11);
+test("manifest references, eighteen cards and event identity", () => {
+  expect(m.cards).toHaveLength(18);
+  expect(new Set(m.cards.map((c) => c.id)).size).toBe(18);
   for (const c of m.cards) {
     expect(resolveQR(m, c.qrPayload)).toEqual(c);
     expect(c.qrPayload).toBe(`SH1:${c.id}`);
@@ -34,7 +46,7 @@ test("manifest references, eleven existing cards and event identity", () => {
   }
   for (const media of m.media) {
     expect(media.storage).toBe("tablet-local");
-    expect(media.fileName).toMatch(/^[\w-]+\.(mp4|mp3)$/);
+    expect(media.fileName).toMatch(/^[^/\\]+\.(mp4|mp3)$/);
   }
   for (const node of dialogs.nodes) {
     expect(m.media.some((x) => x.id === node.audioMediaId)).toBeTruthy();
@@ -122,7 +134,7 @@ test("camera denial and directory fallback keep touch selection usable", async (
   await expect(page.locator("#status")).toContainText("Kamera nicht verfügbar");
   await expect(page.locator("#camera-indicator")).toHaveCount(0);
   await click(page, "cards");
-  await expect(page.locator("#card-list button")).toHaveCount(6);
+  await expect(page.locator("#card-list button")).toHaveCount(13);
   await click(page, "moderator");
   await click(page, "choose-directory");
   await expect(page.locator("#status")).toContainText(
@@ -229,7 +241,7 @@ test("production PWA shell, offline text and no media caching", async ({
   await page.reload();
   await click(page, "home");
   await click(page, "cards");
-  await expect(page.locator("#card-list button")).toHaveCount(6);
+  await expect(page.locator("#card-list button")).toHaveCount(13);
 });
 test("portrait and landscape have no horizontal overflow and large controls", async ({
   page,
@@ -738,4 +750,71 @@ test("power button also works when content loading fails", async ({ page }) => {
   await expect(page.locator(".wake-screen")).toBeVisible();
   await click(page, "wake");
   await expect(page.locator("h1")).toContainText("konnte nicht geladen");
+});
+
+test("settings persist exact local filenames across reload and demo reset", async ({
+  page,
+}) => {
+  await page.goto("./#home");
+  await click(page, "settings");
+  await expect(page.locator("h1")).toHaveText("Einstellungen");
+  const name = "Mein eigener Film mit Leerzeichen.mp4";
+  await page.locator("#local-files").setInputFiles({
+    name,
+    mimeType: "video/mp4",
+    buffer: Buffer.from("invalid media"),
+  });
+  const field = page.locator('[data-id="M-P-EX-101"]');
+  await page
+    .locator('.assignment-choice[data-target="assign-M-P-EX-101"]')
+    .selectOption(name);
+  await page.locator('#assignment-form button[type="submit"]').click();
+  await expect(page.locator("#status")).toContainText("dauerhaft");
+  await page.goto("./#card/P-EX-101");
+  await expect(page.locator(".media-status")).toContainText(name);
+  await page.reload();
+  await expect(page.locator(".media-status")).toContainText("Nicht verbunden");
+  await expect(page.locator(".media-status")).toContainText(name);
+  await click(page, "settings");
+  await expect(field).toHaveValue(name);
+  await click(page, "moderator");
+  page.once("dialog", (d) => d.accept());
+  await click(page, "reset");
+  await click(page, "settings");
+  await expect(field).toHaveValue(name);
+  await field.fill("https://example.org/film.mp4");
+  await page.locator('#assignment-form button[type="submit"]').click();
+  await expect(page.locator("#status")).toContainText("Nicht gespeichert");
+  expect(
+    await page.evaluate(
+      () =>
+        JSON.parse(localStorage.getItem("smarthapti-media-assignments-v1"))
+          .assignments["M-P-EX-101"],
+    ),
+  ).toBe(name);
+});
+
+test("assignment backup export and restore keep card identities stable", async ({
+  page,
+}) => {
+  await page.goto("./#settings");
+  const download = page.waitForEvent("download");
+  await click(page, "export-assignments");
+  const data = JSON.parse(readFileSync(await (await download).path(), "utf8"));
+  expect(data.version).toBe(1);
+  expect(data.assignments["M-P-EX-101"]).toBe(
+    "GehenMitTeilbelastung_video_720p.mp4",
+  );
+  data.assignments["M-P-EX-101"] = "Ersatzfilm.mp4";
+  await page.locator("#assignment-backup").setInputFiles({
+    name: "backup.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(data)),
+  });
+  await expect(page.locator('[data-id="M-P-EX-101"]')).toHaveValue(
+    "Ersatzfilm.mp4",
+  );
+  await page.goto("./#card/P-EX-101");
+  await expect(page.locator("main")).toContainText("P-EX-101");
+  await expect(page.locator(".media-status")).toContainText("Ersatzfilm.mp4");
 });

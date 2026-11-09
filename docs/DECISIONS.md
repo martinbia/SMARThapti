@@ -67,3 +67,7 @@ Der Nutzer hat im Cloud-Chat die Ausführung von `CODEX_DRAFT_PROMPT.md` ausdrü
 ## F17 – App abschalten und wieder einschalten (Nutzerauftrag 09.11.2026)
 
 Jede normale Ansicht, einschliesslich Einstieg, Scanner und Ladefehler, besitzt einen roten „Abschalten“-Button. Er stoppt Kamera, Medien und Animation, entfernt den Kamerapunkt und zeigt eine vollständig schwarze App-Fläche. Erst Antippen oder Tastaturaktivierung weckt zur Bergwiese mit normalem QR-Betrieb. Der Ruhemodus bleibt bei Navigation, Sichtbarkeitswechsel und Neuladen in derselben Browsersitzung erhalten. Bestätigungen und ausgewählte lokale Dateien bleiben unberührt. Der rote Kamerapunkt gilt ausdrücklich auch für den über das Menü gestarteten Scanner. Die PWA steuert damit ihre App-Fläche; Hardware-Stromversorgung und Android-Systemleisten bleiben unter Kontrolle des Betriebssystems.
+
+## F18 – Filmzuordnung und Navigation (09.11.2026)
+
+Nutzerauftrag: grössere, deutlich sichtbare Navigation; dezentes Zahnrad für Einstellungen in der ersten Zeile. Sieben explizit benannte lokale Übungsfilme erhalten eigene Karten P-EX-101–107. Gespeicherte Zuordnungen verbinden stabile Medien-/Karten-IDs mit lokalen Dateinamen und überleben Neustarts sowie neue Builds bei gleicher Website. LocalStorage ist vom Demo-Reset getrennt; Export/Import als Sicherung. Android-Dateifreigaben bleiben separat erforderlich. Keine klinische Freigabe aus dem Vorliegen einer Datei ableiten.

@@ -56,3 +56,7 @@ Konzeptkanal entscheidet; dokumentierte Änderung im Repo ist Grundlage für Cod
 ## Implementierter PWA-Draft (08.11.2026)
 
 Nach ausdrücklichem Implementierungsauftrag im Cloud-Chat liegt jetzt ein funktionsfähiger PWA-Draft vor. Start, Funktionen, Testergebnisse, Grenzen und Pages-Aktivierung: [`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md). Der historische Erstcheck und die vorbereiteten Aufträge oben bleiben als Herkunft erhalten. Dieser Draft ersetzt keine Tablet- oder klinische Abnahme.
+
+## Einstellungen und zusätzliche Übungsfilme (09.11.2026)
+
+Das Zahnrad in der Kopfzeile öffnet die lokale Filmzuordnung. Sieben zusätzliche Übungskarten und ihre Dateinamen stehen in `content/exercise_catalog.json`; QR-SVGs sind in den Einstellungen herunterladbar. Gespeicherte Zuordnungen überstehen Neustarts und neue Builds derselben Website, Android-Dateifreigaben bleiben separat. Sicherungsexport/-import und Anleitung: `docs/IMPLEMENTATION.md`, Abschnitt „Lokale Filmzuordnung“.
