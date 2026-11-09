@@ -27,7 +27,12 @@ let manifest,
   generation = 0,
   facing = "user",
   stopWelcome = () => {},
+  sleeping = false,
+  loadError = false,
   storageOK = true;
+try {
+  sleeping = sessionStorage.getItem("smarthapti-asleep") === "true";
+} catch {}
 try {
   const saved = JSON.parse(localStorage.getItem("smarthapti-demo") || "{}");
   keys = Array.isArray(saved.keys)
@@ -64,6 +69,27 @@ function cleanup() {
 function go(path) {
   if (location.hash === `#${path}`) render();
   else location.hash = path;
+}
+function appendPowerButton() {
+  if (!root.classList.contains("welcome-mode")) {
+    const content = document.createElement("div");
+    content.className = "app-content";
+    content.append(...root.childNodes);
+    root.append(content);
+  }
+  root.insertAdjacentHTML(
+    "beforeend",
+    button("⏻ Abschalten", "power-off", 'class="power-off"'),
+  );
+}
+function setSleeping(value) {
+  sleeping = value;
+  try {
+    if (value) sessionStorage.setItem("smarthapti-asleep", "true");
+    else sessionStorage.removeItem("smarthapti-asleep");
+  } catch {}
+  if (!value) history.replaceState(null, "", "#welcome");
+  render();
 }
 function message(text) {
   const el = document.querySelector("#status");
@@ -158,9 +184,27 @@ function render() {
   cleanup();
   const token = generation;
   const [view, id] = (location.hash.slice(1) || "welcome").split("/");
-  root.classList.toggle("welcome-mode", view === "welcome");
+  root.classList.toggle("welcome-mode", !sleeping && view === "welcome");
+  root.classList.toggle("sleep-mode", sleeping);
+  document.body.classList.toggle("sleep-mode", sleeping);
+  if (sleeping) {
+    root.innerHTML =
+      '<main aria-label="App im Ruhemodus"><button class="wake-screen" data-action="wake" aria-label="App einschalten"></button></main>';
+    document.title = "Ruhemodus · SMARThapti";
+    root.querySelector(".wake-screen").focus({ preventScroll: true });
+    window.scrollTo(0, 0);
+    return;
+  }
+  if (!manifest || !dialogs) {
+    root.innerHTML = loadError
+      ? '<main><h1>Die Demo konnte nicht geladen werden.</h1><p>Bitte Verbindung prüfen und die Seite neu laden.</p><button data-action="reload">Erneut laden</button></main>'
+      : "<main><p>Alma lädt die Demo …</p></main>";
+    appendPowerButton();
+    return;
+  }
   if (view === "welcome") {
     root.innerHTML = welcomeMarkup(base);
+    appendPowerButton();
     document.title = "Willkommen bei Alma · SMARThapti";
     stopWelcome = animateWelcome(root);
     startCamera(token);
@@ -244,6 +288,7 @@ function render() {
   }
   root.innerHTML = `<header>${button(view === "home" ? "← Bergwiese" : "← Menü", view === "home" ? "welcome" : "home")}<strong class="role-line">Für ${esc(persona().displayName.split(" ")[0])}</strong></header><main id="main" tabindex="-1" aria-label="${esc(title)}">${body}<div id="status" role="status" aria-live="polite"></div>${!storageOK ? '<p class="notice">Lokaler Speicher nicht verfügbar. Einträge bleiben nur während dieser Sitzung erhalten.</p>' : ""}</main><footer>Fiktive Interview-Demo · keine medizinische Anweisung · nicht klinisch geprüft<div class="actions">${button("Mein Weg", "timeline")}${button("Demo vorbereiten", "moderator")}${button("Alle Karten", "cards")}</div><details class="perspective-options"><summary>Andere Perspektive ohne QR-Code</summary><p>Normalerweise wählt Ihre QR-Karte die passende Perspektive.</p>${button(role === "patient" ? "Zu Anna wechseln" : "Zu Ernst wechseln", "role")}</details><small>Perspektivwechsel ist keine Authentifizierung. Nur fiktive Daten verwenden.</small></footer><input id="local-files" type="file" accept=".mp4,.mp3,video/mp4,audio/mpeg" multiple hidden>`;
   document.title = `${title} · SMARThapti`;
+  appendPowerButton();
   document.querySelector("#main").focus({ preventScroll: true });
   window.scrollTo(0, 0);
   if (view === "scan") startCamera(token);
@@ -376,6 +421,18 @@ root.addEventListener("click", async (e) => {
   const action = e.target.closest("[data-action]")?.dataset.action;
   if (!action) return;
   const [name, id, index] = action.split(":");
+  if (sleeping) {
+    if (name === "wake") setSleeping(false);
+    return;
+  }
+  if (name === "power-off") {
+    setSleeping(true);
+    return;
+  }
+  if (name === "reload") {
+    location.reload();
+    return;
+  }
   if (
     ["welcome", "home", "cards", "timeline", "scan", "moderator"].includes(name)
   )
@@ -463,6 +520,7 @@ document.addEventListener("visibilitychange", () => {
   if (document.hidden) cleanup();
   else if (manifest) render();
 });
+render();
 try {
   const responses = await Promise.all([
     fetch(base + "content/demo_manifest.json"),
@@ -480,6 +538,6 @@ try {
         ),
       );
 } catch {
-  root.innerHTML =
-    '<main><h1>Die Demo konnte nicht geladen werden.</h1><p>Bitte Verbindung prüfen und die Seite neu laden. Nach einer vollständigen Erstladung kann die App-Shell offline verfügbar sein.</p><button onclick="location.reload()">Erneut laden</button></main>';
+  loadError = true;
+  render();
 }

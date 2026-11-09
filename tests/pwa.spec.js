@@ -560,3 +560,182 @@ test("red camera dot appears only when scanning is ready and clears on navigatio
   await expect(page.locator("#camera-indicator")).toHaveCount(0);
   expect(await page.evaluate(() => window.stopped)).toBe(2);
 });
+
+async function blankCamera(page, hold = false) {
+  await page.addInitScript(
+    ({ hold }) => {
+      window.cameraCalls = 0;
+      window.cameraStops = 0;
+      window.holdCamera = hold;
+      navigator.mediaDevices.getUserMedia = async () => {
+        window.cameraCalls++;
+        const canvas = document.createElement("canvas");
+        canvas.width = canvas.height = 320;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, 320, 320);
+        const stream = canvas.captureStream(10);
+        for (const track of stream.getTracks()) {
+          const stop = track.stop.bind(track);
+          track.stop = () => {
+            window.cameraStops++;
+            stop();
+          };
+        }
+        if (window.holdCamera)
+          await new Promise((resolve) => {
+            window.releaseCamera = resolve;
+          });
+        return stream;
+      };
+    },
+    { hold },
+  );
+}
+
+test("power button is available on every view; sleeping stays black until activated", async ({
+  page,
+}) => {
+  await blankCamera(page);
+  for (const route of [
+    "welcome",
+    "home",
+    "cards",
+    "card/P-INF-001",
+    "card/P-EX-001",
+    "dialog/ALMA-P-START",
+    "confirm/P-APT-001",
+    "timeline",
+    "scan",
+    "moderator",
+  ]) {
+    await page.goto("./#" + route);
+    await expect(page.locator('[data-action="power-off"]')).toBeVisible();
+    await click(page, "power-off");
+    await expect(page.locator(".wake-screen")).toBeVisible();
+    expect(
+      await page
+        .locator(".wake-screen")
+        .evaluate((el) => getComputedStyle(el).backgroundColor),
+    ).toBe("rgb(0, 0, 0)");
+    await expect(
+      page.locator("video,audio,#camera-indicator,.power-off,.welcome-guide"),
+    ).toHaveCount(0);
+    await page.evaluate(() =>
+      document.dispatchEvent(new Event("visibilitychange")),
+    );
+    await expect(page.locator(".wake-screen")).toBeVisible();
+    await click(page, "wake");
+    await expect(page).toHaveURL(/#welcome$/);
+    await expect(page.locator(".welcome-open")).toBeVisible();
+  }
+});
+
+test("menu scanner shows the red camera dot; sleep stops the camera and survives reload", async ({
+  page,
+}) => {
+  await blankCamera(page);
+  await page.goto("./#home");
+  await click(page, "scan");
+  await expect(page.locator("#camera-indicator")).toBeVisible();
+  await expect(page.locator("#camera")).toHaveAttribute(
+    "aria-label",
+    "Kameravorschau",
+  );
+  await click(page, "power-off");
+  await expect(page.locator(".wake-screen")).toBeVisible();
+  expect(await page.evaluate(() => window.cameraStops)).toBe(1);
+  await expect(page.locator("#camera-indicator")).toHaveCount(0);
+  await page.goto("./#home");
+  await expect(page.locator(".wake-screen")).toBeVisible();
+  await page.reload();
+  await expect(page.locator(".wake-screen")).toBeVisible();
+  expect(await page.evaluate(() => window.cameraCalls)).toBe(0);
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/#welcome$/);
+  await expect(page.locator("#camera-indicator")).toBeVisible();
+  expect(await page.evaluate(() => window.cameraCalls)).toBe(1);
+});
+
+test("camera permission completing after power-off cannot restart scanning", async ({
+  page,
+}) => {
+  await blankCamera(page, true);
+  await page.goto("./#scan");
+  await expect.poll(() => page.evaluate(() => window.cameraCalls)).toBe(1);
+  await click(page, "power-off");
+  await page.evaluate(() => {
+    window.holdCamera = false;
+    window.releaseCamera();
+  });
+  await expect.poll(() => page.evaluate(() => window.cameraStops)).toBe(1);
+  await expect(page.locator(".wake-screen")).toBeVisible();
+  await expect(page.locator("#camera-indicator,video")).toHaveCount(0);
+  await click(page, "wake");
+  await expect(page.locator("#camera-indicator")).toBeVisible();
+});
+
+test("power-off stops local playback and preserves selected files and confirmed entries", async ({
+  page,
+}) => {
+  const { execFileSync } = await import("node:child_process");
+  const { mkdtempSync, rmSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const dir = mkdtempSync(tmpdir() + "/smarthapti-sleep-");
+  try {
+    execFileSync("ffmpeg", [
+      "-v",
+      "error",
+      "-f",
+      "lavfi",
+      "-i",
+      "sine=frequency=440:duration=2",
+      dir + "/ALMA_P_START.mp3",
+    ]);
+    await page.goto("./#card/P-APT-001");
+    await click(page, "confirm:P-APT-001");
+    await click(page, "add:P-APT-001");
+    await click(page, "home");
+    await click(page, "dialog:ALMA-P-START");
+    await page.locator("#local-files").setInputFiles(dir + "/ALMA_P_START.mp3");
+    await page.locator("audio").evaluate(async (p) => {
+      window.sleepingPlayer = p;
+      await p.play();
+    });
+    await expect
+      .poll(() => page.locator("audio").evaluate((p) => p.currentTime))
+      .toBeGreaterThan(0);
+    await click(page, "power-off");
+    await expect(page.locator(".wake-screen")).toBeVisible();
+    expect(
+      await page.evaluate(
+        () =>
+          window.sleepingPlayer.paused &&
+          !window.sleepingPlayer.getAttribute("src"),
+      ),
+    ).toBe(true);
+    expect(
+      await page.evaluate(
+        () => JSON.parse(localStorage.getItem("smarthapti-demo")).keys,
+      ),
+    ).toContain("J10");
+    await click(page, "wake");
+    await click(page, "home");
+    await click(page, "moderator");
+    await expect(page.locator("#media-list")).toContainText(
+      "ALMA_P_START.mp3: verbunden",
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("power button also works when content loading fails", async ({ page }) => {
+  await page.route("**/content/demo_manifest.json", (route) => route.abort());
+  await page.goto("./#home");
+  await expect(page.locator("h1")).toContainText("konnte nicht geladen");
+  await click(page, "power-off");
+  await expect(page.locator(".wake-screen")).toBeVisible();
+  await click(page, "wake");
+  await expect(page.locator("h1")).toContainText("konnte nicht geladen");
+});
