@@ -96,8 +96,15 @@ test("real service worker update waits for acceptance, reloads and retains assig
     await page.evaluate(() => {
       window.showDirectoryPicker = () =>
         new Promise((resolve) => {
-          window.finishUpdateTestPicker = () =>
-            resolve({ name: "SMART", async *values() {} });
+          window.finishUpdateTestPicker = async () => {
+            const root = await navigator.storage.getDirectory();
+            const directory = await root.getDirectoryHandle("SMART", { create: true });
+            const file = await directory.getFileHandle("Gespeicherter Film.mp4", { create: true });
+            const writer = await file.createWritable();
+            await writer.write(new Blob(["temporary update test file"]));
+            await writer.close();
+            resolve(directory);
+          };
         });
     });
     await page.locator('[data-action="choose-directory"]').click();
@@ -134,6 +141,9 @@ test("real service worker update waits for acceptance, reloads and retains assig
     await page.goto(server.url + "#settings");
     await expect(page.locator('[data-id="M-P-EX-101"]')).toHaveValue(
       "Gespeicherter Film.mp4",
+    );
+    await expect(page.locator('[data-media-access="M-P-EX-101"]')).toHaveText(
+      "Verbunden und lesbar",
     );
     expect(await page.evaluate(() => caches.keys())).toEqual([
       "smarthapti-shell-release-2",

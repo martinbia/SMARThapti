@@ -4,6 +4,13 @@ import "./style.css";
 import { types, resolveQR, visibleEvents, addEvent } from "./model.js";
 import { welcomeMarkup, animateWelcome } from "./welcome.js";
 import {
+  loadMediaHandles,
+  saveDirectoryHandle,
+  saveFileHandles,
+  queryReadPermission,
+  requestReadPermission,
+} from "./media-handle-store.js";
+import {
   assignmentKey,
   xrayAssignmentKey,
   validMediaName,
@@ -36,6 +43,13 @@ let manifest,
   scenario = "discharge",
   keys = [],
   directory = null,
+  storedDirectory = null,
+  storedFileHandles = new Map(),
+  missingFiles = new Set(),
+  permissionMissingFiles = new Set(),
+  permissionRequired = false,
+  handleStoreAvailable = true,
+  handleStoreError = "",
   pickerPending = false,
   selectionRequest = 0,
   files = new Map(),
@@ -73,6 +87,87 @@ function supportedFile(name) {
 }
 function supportedLocalFile(file) {
   return supportedFile(file.name) || validImageFile(file);
+}
+function mediaFileNames() {
+  return [...new Set([
+    ...manifest.media.map((media) => media.fileName),
+    ...(xrayAssignment.fileName ? [xrayAssignment.fileName] : []),
+  ])];
+}
+async function readDirectoryFiles(handle) {
+  const found = new Map();
+  try {
+    for await (const entry of handle.values()) {
+      if (entry.kind === "file" && (supportedFile(entry.name) || /\.(jpe?g|png|webp)$/i.test(entry.name))) {
+        try {
+          const file = await entry.getFile();
+          if (supportedLocalFile(file)) found.set(file.name, file);
+        } catch {}
+      }
+    }
+    missingFiles = new Set(mediaFileNames().filter((name) => !found.has(name)));
+  } catch {
+    permissionRequired = true;
+    return found;
+  }
+  return found;
+}
+async function restoreMediaHandles() {
+  try {
+    permissionMissingFiles = new Set();
+    const records = await loadMediaHandles();
+    storedDirectory = records.find((record) => record.id === "directory")?.handle || null;
+    storedFileHandles = new Map(records
+      .filter((record) => record.id?.startsWith("file:") && record.handle)
+      .map((record) => [record.name || record.id.slice(5), record.handle]));
+    if (storedDirectory) {
+      const permission = await queryReadPermission(storedDirectory);
+      if (permission === "granted") {
+        directory = storedDirectory;
+        permissionRequired = false;
+        files = await readDirectoryFiles(directory);
+        return;
+      }
+      permissionRequired = true;
+      permissionMissingFiles = new Set(mediaFileNames());
+    }
+    let anyPermissionNeeded = false;
+    for (const [name, handle] of storedFileHandles) {
+      const permission = await queryReadPermission(handle);
+      if (permission === "granted") {
+        try {
+          const file = await handle.getFile();
+          if (file.name === name && supportedLocalFile(file)) files.set(name, file);
+          else missingFiles.add(name);
+        } catch {
+          missingFiles.add(name);
+        }
+      } else {
+        anyPermissionNeeded = true;
+        permissionMissingFiles.add(name);
+      }
+    }
+    permissionRequired ||= anyPermissionNeeded;
+  } catch (error) {
+    handleStoreAvailable = false;
+    handleStoreError = error?.message || "IndexedDB nicht verfügbar";
+  }
+}
+function mediaAccessStatuses() {
+  return manifest.media.map((media) => ({
+    id: media.id,
+    name: media.fileName,
+    state: (() => {
+      const file = files.get(media.fileName);
+      return file && file.size > 0 && file.name === media.fileName && validMediaName(file.name, media.kind)
+        ? "Verbunden und lesbar"
+        : missingFiles.has(media.fileName)
+          ? "Datei fehlt oder wurde umbenannt"
+          : permissionMissingFiles.has(media.fileName)
+            ? "Zuordnung gespeichert · Zugriff erneut freigeben"
+            : "Zuordnung gespeichert · Datei noch nicht verbunden";
+    })(),
+  }));
 }
 function recordDate(value) {
   const [year, month, day] = value.split("-");
@@ -200,6 +295,7 @@ function mediaMarkup(ids) {
 function patientVideoCards() {
   return manifest.cards.filter(
     (card) =>
+      card.id !== "P-EX-001" &&
       card.role === "patient" &&
       card.type === "exercise" &&
       manifest.contents
@@ -444,6 +540,13 @@ function render() {
     body = settingsMarkup(manifest, files, esc, button, {
       ...xrayAssignment,
       connected: Boolean(xrayAssignment.fileName && files.has(xrayAssignment.fileName)),
+    }, {
+      media: mediaAccessStatuses(),
+      permissionRequired,
+      handleCount: Number(Boolean(storedDirectory)) + storedFileHandles.size,
+      reconnect: Boolean((storedDirectory || storedFileHandles.size) && permissionRequired),
+      handleStoreAvailable,
+      handleStoreError,
     });
   } else if (view === "record") {
     title = id ? "Patientenakte" : "Patientenakte";
@@ -592,8 +695,13 @@ function render() {
       if (id === "local-directory") {
         directory = null;
         files = new Map();
+        permissionRequired = false;
+        permissionMissingFiles.clear();
       }
       for (const file of selected) files.set(file.name, file);
+      if (id === "local-directory")
+        missingFiles = new Set(mediaFileNames().filter((name) => !files.has(name)));
+      else for (const file of selected) missingFiles.delete(file.name);
       render();
       message(
         `${selected.length} lokale Dateien verbunden. Jetzt unten Filme pro Karte zuordnen und „Zuordnungen speichern“ drücken.`,
@@ -841,11 +949,46 @@ root.addEventListener("click", async (e) => {
       if (!active()) return;
       pickerPending = false;
       saveXray(file);
+      try {
+        await saveFileHandles([handle]);
+        storedFileHandles.set(handle.name, handle);
+        handleStoreAvailable = true;
+        handleStoreError = "";
+      } catch (error) {
+        handleStoreAvailable = false;
+        handleStoreError = error?.message || "Bild-Handle konnte nicht dauerhaft gespeichert werden";
+      }
     } catch (error) {
       if (!active()) return;
       pickerPending = false;
       message(error.name === "AbortError" ? "Auswahl abgebrochen. Die bisherige Zuordnung bleibt erhalten." : "Bild konnte nicht gelesen werden. Bitte im Dateimanager erneut aus Documents/SMART auswählen.");
     }
+  } else if (name === "reconnect-media") {
+    const handles = storedDirectory
+      ? [storedDirectory]
+      : [...storedFileHandles.values()];
+    if (!handles.length) {
+      message("Bitte den Medienordner aus Documents/SMART neu verbinden.");
+      return;
+    }
+    // Invoke every permission request directly from this user action.
+    const permissionRequests = handles.map((handle) => requestReadPermission(handle));
+    const permissions = await Promise.all(permissionRequests);
+    permissionRequired = permissions.some((permission) => permission !== "granted");
+    permissionMissingFiles = new Set();
+    if (permissionRequired) {
+      if (storedDirectory) permissionMissingFiles = new Set(mediaFileNames());
+      else handles.forEach((handle) => permissionMissingFiles.add(handle.name));
+    }
+    files = new Map();
+    missingFiles = new Set();
+    directory = null;
+    if (!permissionRequired) await restoreMediaHandles();
+    render();
+    if (permissionRequired)
+      message("Android hat die Freigabe nicht erteilt. Tippe auf „Medienordner verbinden“ und wähle Documents/SMART erneut aus.");
+    else
+      message(`${files.size} lokale Dateien wieder verbunden. Zuordnungen wurden beibehalten.`);
   } else if (name === "choose-files" || name === "choose-directory") {
     const request = ++selectionRequest;
     pickerPending = true;
@@ -889,7 +1032,19 @@ root.addEventListener("click", async (e) => {
             selected.push(await entry.getFile());
         if (!active()) return;
         directory = picked;
+        storedDirectory = picked;
         files = new Map(selected.map((file) => [file.name, file]));
+        missingFiles = new Set(mediaFileNames().filter((fileName) => !files.has(fileName)));
+        permissionRequired = false;
+        permissionMissingFiles.clear();
+        try {
+          await saveDirectoryHandle(picked);
+          handleStoreAvailable = true;
+          handleStoreError = "";
+        } catch (error) {
+          handleStoreAvailable = false;
+          handleStoreError = error?.message || "Handle konnte nicht dauerhaft gespeichert werden";
+        }
       } else {
         const handles = await window.showOpenFilePicker({
           ...options,
@@ -899,13 +1054,25 @@ root.addEventListener("click", async (e) => {
           handles.map((handle) => handle.getFile()),
         );
         if (!active()) return;
-        for (const file of selected)
+        for (const file of selected) {
           if (supportedLocalFile(file)) files.set(file.name, file);
+          missingFiles.delete(file.name);
+          permissionMissingFiles.delete(file.name);
+        }
+        try {
+          await saveFileHandles(handles);
+          handleStoreAvailable = true;
+          handleStoreError = "";
+          for (const handle of handles) storedFileHandles.set(handle.name, handle);
+        } catch (error) {
+          handleStoreAvailable = false;
+          handleStoreError = error?.message || "Datei-Handles konnten nicht dauerhaft gespeichert werden";
+        }
       }
       pickerPending = false;
       render();
       message(
-        `${files.size} lokale Dateien verbunden. Keine zusätzliche Einzelauswahl nötig. Filme unten zuordnen und speichern.`,
+        `${files.size} lokale Dateien verbunden. Keine zusätzliche Einzelauswahl nötig. Filme unten zuordnen und speichern.${handleStoreError ? ` Die Dateifreigabe gilt möglicherweise nur für diese Sitzung (${handleStoreError}).` : ""}`,
       );
     } catch (error) {
       if (!active()) return;
@@ -987,6 +1154,7 @@ try {
   manifest.media.forEach((m) => {
     m.fileName = assignments[m.id] || m.fileName;
   });
+  await restoreMediaHandles();
   render();
   if (import.meta.env.PROD && "serviceWorker" in navigator)
     setupUpdates({

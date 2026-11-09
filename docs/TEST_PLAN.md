@@ -80,11 +80,12 @@ Alle realen Tablet-Tests bleiben offen. Automatisierte Browserprüfungen sind ke
 ## Patientenmenü und Patientenakte (F18, 09.11.2026)
 
 - **T48:** Screenshotvergleich bei 800×1100 CSS-Pixeln: Kopfzeile, Überschrift und QR-/Kartenauswahlbuttons stimmen bis einschliesslich ihrer bisherigen Fläche pixelgleich mit dem Ausgangsbuild überein. Für nicht betroffene Ansichten werden Vorher-/Nachher-Screenshots verglichen.
-- **T49:** Menü zeigt alle acht Videos je einmal und je Zeile; Layout am Tabletviewport hat links ungefähr 55 % und rechts 45 %, kein horizontaler Überlauf. Wähle ein Video und prüfe direkte Playerroute; fehlende Datei zeigt lokalen Dateiauswahl-Fallback; Zurück stoppt Media; keine Timelineänderung.
+- **T49:** Menü zeigt die sieben vorhandenen Videos je einmal und in bisheriger Reihenfolge; `P-EX-001` erscheint dort nicht. Layout am Tabletviewport hat links ungefähr 55 % und rechts 45 %, kein horizontaler Überlauf. Wähle ein Video und prüfe direkte Playerroute; fehlende Datei zeigt lokalen Dateiauswahl-Fallback; Zurück stoppt Media; keine Timelineänderung.
 - **T50:** Terminliste ist chronologisch und verwendet nur Termin-/Szenariodaten aus dem Manifest. Der Termin öffnet die bestehende Kartendetailansicht; weder Auswahl noch Bestätigungsdialog schreibt vor „Hinzufügen“ einen Timeline-Eintrag.
 - **T51:** Operationsbericht, Austrittsbericht und Terminplan öffnen getrennte vorbereitete Inhalte; jeder Eintrag ist fiktiv, nennt simulierte Herkunft und Datenstand und enthält keine erfundenen klinischen Anweisungen.
 - **T52:** Nur nach Freigabebestätigung lässt sich JPG/JPEG/PNG/WebP lokal auswählen. Prüfe Desktop-Dateidialog, Android Documents/SMART, Ordnerwiederverwendung, Dateitypfehler, Zuordnung über Neustart und Rechteverlust-Fallback. Anzeige nutzt Blob-URL, Zoom/Scroll und Zurück; kein HTTP-/Service-Worker-Medienabruf.
 - **T53:** Regression: Kamera/QR, Alma-Dialog/MP3, Timeline-Bestätigung und Deduplizierung, Video/MP3-Zuordnung und -Wiedergabe, Abschalten/Ruhemodus und Updateangebot bleiben verfügbar.
+- **T54 (Nutzerauftrag 09.11.2026):** Mit File System Access API einen Ordner-Handle und alternativ Datei-Handles in IndexedDB sichern; Reload/Neustart mit gültigem Grant stellt Medien anhand vorhandener Dateinamen ohne Einzelzuordnung wieder her. Simuliertes `prompt`/entzogenes Grant zeigt „Medienordner erneut verbinden“; erst der Klick fordert Zugriff an. Fehlende/umbenannte Datei meldet „Datei nicht gefunden“, gespeicherte Zuordnung bleibt erhalten. Service-Worker-Update soll gespeicherten Handle weiterverwenden; IndexedDB enthält nur Handles/Metadaten und der Service-Worker keine Medien. Android-Neustart, echte Grant-Wiederverwendung und vollständiges Schliessen auf dem Tablet bleiben offen, bis am Gerät geprüft.
 
 Screenshots der betroffenen Ansichten und der pixelgleichen oberen Menüfläche werden im PR abgelegt. Die Android-Dateiauswahl, realer X-Ray-Viewport mit sichtbaren Systemleisten sowie echtes Gerät bleiben bis zur Hardwareprüfung offen.
 
@@ -107,7 +108,7 @@ T41: Zwei reale Service-Worker-Versionen ausliefern: Erstinstallation ohne Hinwe
 ## Patientenfokus-Regressionsprüfungen (F17, 09.11.2026)
 
 - **T43:** Ein fiktiver Patient, sechs Basiskarten und sieben zusätzliche P-Übungskarten, nur P-Alma-Knoten. Keine A-Karten oder A-Medien in aktiven JSON-Daten.
-- **T44:** Das Menü hat keinen Perspektivwechsel; alle acht Patienten-Übungsvideos sowie die 13 P-Karten bleiben auswählbar.
+- **T44:** Das Menü hat keinen Perspektivwechsel; sieben lokal vorhandene Patienten-Übungsvideos erscheinen direkt in der Videoliste; die 13 P-Karten bleiben in der Kartenauswahl verfügbar. `P-EX-001` bleibt als historische Datendefinition erhalten, ist aber nicht in der Video-Hauptmenüliste.
 - **T45:** Historische A-QRs werden als inaktiv erkannt und öffnen keine Angehörigenansicht. Keine Umleitung auf eine P-Karte.
 - **T46:** Alte lokal gespeicherte Angehörigen-Ereignisse werden nicht in der Patienten-Timeline angezeigt; P-Termine und P-Meilensteine behalten ihre bewusste Bestätigung, Idempotenz und lokale Speicherung.
 - **T47:** Der alte gemischte Druckbogen ist nicht als aktueller Patientendruckbogen verlinkt; neue P-QR-Karten bleiben verfügbar.

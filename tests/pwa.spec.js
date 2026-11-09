@@ -123,7 +123,8 @@ test("patient appointment and personal milestone require confirmation, deduplica
 test("only patient media and exercise cards are shown in the menu", async ({ page }) => {
   await page.goto("./#home");
   await expect(page.locator('[data-action="role"], .perspective-options')).toHaveCount(0);
-  await expect(page.locator(".home-video-row")).toHaveCount(8);
+  await expect(page.locator(".home-video-row")).toHaveCount(7);
+  await expect(page.locator('[data-action="video:P-EX-001"]')).toHaveCount(0);
   await expect(page.locator('[data-action^="card:P-EX-"]')).toHaveCount(0);
   await expect(page.locator('[data-action^="card:A-"]')).toHaveCount(0);
   await click(page, "cards");
@@ -135,7 +136,17 @@ test("patient home dashboard keeps the existing upper controls and opens each vi
   await expect(page.locator(".menu-heading")).toHaveText("Was möchten Sie ansehen?");
   await expect(page.locator('[data-action="scan"]')).toHaveText("QR-Karte scannen");
   await expect(page.locator('[data-action="cards"]').first()).toHaveText("Karte auswählen");
-  await expect(page.locator(".home-video-row")).toHaveCount(8);
+  await expect(page.locator(".home-video-row")).toHaveCount(7);
+  await expect(page.locator('[data-action="video:P-EX-001"]')).toHaveCount(0);
+  await expect(page.locator(".home-video-row").evaluateAll((rows) => rows.map((row) => row.dataset.action))).resolves.toEqual([
+    "video:P-EX-101",
+    "video:P-EX-102",
+    "video:P-EX-103",
+    "video:P-EX-104",
+    "video:P-EX-105",
+    "video:P-EX-106",
+    "video:P-EX-107",
+  ]);
   await expect(page.locator(".home-appointment-row")).toHaveCount(1);
   await expect(page.locator(".home-appointment-row")).toContainText("10.11.2026");
   await expect(page.locator(".home-record-row")).toHaveCount(4);
@@ -152,6 +163,106 @@ test("patient home dashboard keeps the existing upper controls and opens each vi
   await page.goto("./#home");
   await expect(page.locator(".home-dashboard")).toHaveCSS("grid-template-columns", /^(\d+(?:\.\d+)?px)$/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
+});
+
+test("saved local media folder handle survives reload and can be re-granted without remapping", async ({ page }) => {
+  await page.addInitScript(() => {
+    if (localStorage.getItem("__test-media-permission") === null)
+      localStorage.setItem("__test-media-permission", "prompt");
+    const proto = window.FileSystemHandle?.prototype;
+    if (!proto) return;
+    const query = proto.queryPermission;
+    const request = proto.requestPermission;
+    Object.defineProperty(proto, "queryPermission", {
+      configurable: true,
+      value: function (options) {
+        if (this.name === "SMART")
+          return Promise.resolve(localStorage.getItem("__test-media-permission") === "granted" ? "granted" : "prompt");
+        return query.call(this, options);
+      },
+    });
+    Object.defineProperty(proto, "requestPermission", {
+      configurable: true,
+      value: function (options) {
+        if (this.name === "SMART") {
+          localStorage.setItem("__test-media-permission", "granted");
+          return Promise.resolve("granted");
+        }
+        return request.call(this, options);
+      },
+    });
+  });
+  await page.goto("./#settings");
+  const supported = await page.evaluate(() => Boolean(navigator.storage?.getDirectory && window.FileSystemHandle));
+  test.skip(!supported, "This browser does not support persistent FileSystemHandles/OPFS");
+  const filenames = exerciseCatalog.media.map((item) => item.fileName);
+  const customName = "Custom walking.mp4";
+  await page.evaluate(async ({ filenames, customName }) => {
+    const root = await navigator.storage.getDirectory();
+    const smart = await root.getDirectoryHandle("SMART", { create: true });
+    for (const name of [...filenames, customName]) {
+      const handle = await smart.getFileHandle(name, { create: true });
+      const writer = await handle.createWritable();
+      await writer.write(new Blob(["temporary browser test file"]));
+      await writer.close();
+    }
+    localStorage.setItem("smarthapti-media-assignments-v1", JSON.stringify({ version: 1, assignments: { "M-P-EX-101": customName } }));
+    const db = await new Promise((resolve, reject) => {
+      const request = indexedDB.open("smarthapti-local-media-handles-v1", 1);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction("handles", "readwrite");
+      tx.objectStore("handles").put({ id: "directory", handle: smart });
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+  }, { filenames, customName });
+
+  await page.reload();
+  await expect(page.locator('[data-action="reconnect-media"]')).toBeVisible();
+  await expect(page.locator('[data-media-access="M-P-EX-101"]')).toContainText("Zugriff erneut freigeben");
+  await click(page, "reconnect-media");
+  await expect(page.locator('[data-media-access="M-P-EX-101"]')).toHaveText("Verbunden und lesbar");
+  await expect(page.locator('[data-id="M-P-EX-101"]')).toHaveValue(customName);
+  for (const item of exerciseCatalog.media)
+    await expect(page.locator(`[data-media-access="${item.id}"]`)).toHaveText("Verbunden und lesbar");
+
+  await page.reload();
+  await expect(page.locator('[data-media-access="M-P-EX-101"]')).toHaveText("Verbunden und lesbar");
+  await page.evaluate(async (name) => {
+    const root = await navigator.storage.getDirectory();
+    const smart = await root.getDirectoryHandle("SMART");
+    await smart.removeEntry(name);
+  }, customName);
+  await page.reload();
+  await expect(page.locator('[data-media-access="M-P-EX-101"]')).toContainText("Datei fehlt oder wurde umbenannt");
+  await expect(page.locator('[data-id="M-P-EX-101"]')).toHaveValue(customName);
+});
+
+test("individually selected FileSystemFileHandle restores its mapped media after reload", async ({ page }) => {
+  await page.goto("./#settings");
+  const supported = await page.evaluate(() => Boolean(navigator.storage?.getDirectory && window.FileSystemFileHandle));
+  test.skip(!supported, "This browser does not support persistent FileSystemHandles/OPFS");
+  const filename = "One selected film.mp4";
+  await page.evaluate(async (name) => {
+    const root = await navigator.storage.getDirectory();
+    const handle = await root.getFileHandle(name, { create: true });
+    const writer = await handle.createWritable();
+    await writer.write(new Blob(["temporary browser test file"]));
+    await writer.close();
+    window.showOpenFilePicker = async () => [handle];
+  }, filename);
+  await page.locator('[data-id="M-P-EX-101"]').fill(filename);
+  await page.locator('#assignment-form button[type="submit"]').click();
+  await click(page, "choose-files");
+  await expect(page.locator('[data-media-access="M-P-EX-101"]')).toHaveText("Verbunden und lesbar");
+  await page.reload();
+  await expect(page.locator('[data-media-access="M-P-EX-101"]')).toHaveText("Verbunden und lesbar");
+  await expect(page.locator('[data-id="M-P-EX-101"]')).toHaveValue(filename);
+  await expect(page.locator('[data-media-access="M-P-EX-102"]')).toContainText("Zuordnung gespeichert");
 });
 
 test("home appointment opens its existing details and still requires explicit timeline confirmation", async ({ page }) => {
