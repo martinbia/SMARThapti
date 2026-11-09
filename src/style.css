@@ -373,7 +373,7 @@ header button {
   box-shadow: 0 0 0 1px #41232344;
   pointer-events: none;
 }
-/* The scrollable content ends above the persistent power control. */
+/* Menus use the full viewport; their power control lives in the first row. */
 #app:not(.welcome-mode):not(.sleep-mode) {
   height: 100vh;
   height: 100dvh;
@@ -426,12 +426,8 @@ body.sleep-mode,
 }
 
 .app-content {
-  height: calc(
-    100vh - max(84px, calc(env(safe-area-inset-bottom, 0px) + 76px))
-  );
-  height: calc(
-    100dvh - max(84px, calc(env(safe-area-inset-bottom, 0px) + 76px))
-  );
+  height: 100vh;
+  height: 100dvh;
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: 24px;
   overflow-y: auto;
@@ -489,4 +485,57 @@ header .settings-button {
   padding: 12px 0;
   color: #23675b;
   font-weight: 600;
+}
+
+.app-content > header {
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  background: #f6f4ed;
+}
+header .power-off {
+  position: static;
+  flex-shrink: 0;
+  min-height: 56px;
+  margin-left: 0;
+  box-shadow: none;
+  background: #b9232c;
+  color: white;
+  border-color: #b9232c;
+}
+header .power-off:hover {
+  background: #951c23;
+}
+@media (max-width: 600px) {
+  header {
+    gap: 6px;
+  }
+  header .power-label {
+    display: none;
+  }
+  header .power-off {
+    width: 48px;
+    padding: 0;
+    font-size: 1.2rem;
+  }
+  header .settings-button {
+    width: 44px;
+  }
+  header .back-navigation {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+}
+@media (max-width: 600px) {
+  .app-content > header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto 44px 48px;
+  }
+  header .back-navigation {
+    min-width: 0;
+  }
+  header .power-off {
+    grid-column: 4;
+  }
 }
