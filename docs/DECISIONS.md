@@ -56,3 +56,7 @@ GitHub Pages ist im Repo noch nicht konfiguriert; die tatsächliche Aktivierung 
 ## Freigabestand und nächste Entscheidung
 
 **Diese Dokumentation ist v0.1-Entwurf, keine Freigabe zur Softwareimplementierung.** `CODEX_START.md` ist ein vorbereiteter, inhaltlich konkreter Folgeauftrag. Erst ein expliziter Auftrag im Projekt-Chat startet die Umsetzung. Freigaben/Änderungen hier mit Datum und betroffenen Dateien ergänzen.
+
+## Implementierungsstand nach ausdrücklicher Freigabe (08.11.2026)
+
+Der Nutzer hat im Cloud-Chat die Ausführung von `CODEX_DRAFT_PROMPT.md` ausdrücklich beauftragt. Der erste PWA-Draft setzt V02/V03/V04 und V12/V13 um; V12 hat die native Mehrfach-Dateiauswahl als gleichwertige Alternative. Reversible technische Umsetzung: Vanilla-JavaScript mit Vite, gebündeltem jsQR, LocalStorage nur für fiktive Bestätigungen/Szenario und App-Shell-Cache ohne Medien. Medienhandles werden bewusst nur während der Sitzung gehalten; nach App-Neustart erneut verbinden. Szenariowechsel setzt den fiktiven Interviewzeitpunkt, sperrt aber keine Übungskarte. Keine neuen klinischen Festlegungen. Validierung und offene Hardwareabnahme: `IMPLEMENTATION.md`.

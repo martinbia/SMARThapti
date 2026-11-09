@@ -62,3 +62,17 @@ Je Szene S1–S6 beobachten: eigenständige Aufgabenerfüllung, Irrtümer beim S
 `Datum | Gerät/OS/Browser | Commit | Test-ID | bestanden/nicht bestanden/nicht getestet | Beobachtung | Reproduktionsschritte | Screenshot (nur fiktiv) | Folgeauftrag`.
 
 **Abnahmesperre:** Ein erfolgreiches Technik-Testvideo ist keine klinische Freigabe. Ohne genehmigte Therapieinhalte bleibt klinische Nutzbarkeit ausdrücklich **nicht geprüft**.
+
+## Aktueller Software-Teststand – PWA-Draft vom 08.11.2026
+
+Die obige Tabelle dokumentiert den ursprünglichen Planungsstand. In der Cloud wurden jetzt 19 automatisierte Playwright-Tests gegen den Produktionsbuild in Linux-Chromium erfolgreich ausgeführt; siehe `IMPLEMENTATION.md` und `tests/pwa.spec.js`.
+
+| Bereich | Jetzt geprüft | Weiterhin nicht getestet |
+| --- | --- | --- |
+| T01–T04 | Build, Projektpfad, Manifest, Offline-App-Shell, drei CSS-Viewportgrössen | Live-Pages, Android-Installation, reale Systemleisten |
+| T05–T10, T26, T28 | Alle 11 SVG-QRs dekodiert, Touch-Ziele, synthetischer Kamerastream, Track-Stopp, Kameraverweigerung, Alma-Ziele | Gedruckte Codes mit realer Front-/Rückkamera; PDF nicht erneut dekodiert |
+| T11–T20 | Unabhängiger Übungszugang, lokale MP4/MP3, Fehlerfallback, Stopp/Blob-Freigabe, Bestätigung/Abbruch, Duplikatschutz, Rollenprivatsphäre, Quellen und Reset | Reale Android-Codec-/Berechtigungs- und Screen-Lock-Zustände |
+| T21–T25 | Native Dateibindung über Browser-Automation, fehlende Ordner-API, kein Mediencache, Reset erhält Dateien | Android-Ordnerdialog, echte Berechtigungsablehnung/-entzug, Dateipfadprüfung am Gerät |
+| T27 | Bestehende Druckmaterialien unverändert | Physischer Ausdruck/Falten und Scan |
+
+Alle realen Tablet-Tests bleiben offen. Automatisierte Browserprüfungen sind keine klinische Freigabe.
