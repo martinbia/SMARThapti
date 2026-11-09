@@ -282,13 +282,14 @@ function cardButtons(cards) {
 function source(content) {
   return `<aside class="panel"><strong>${esc(manifest.sourceKinds[content.sourceKind])}</strong><p>Stand: ${esc(content.sourceDate)} · fiktiv · nicht klinisch geprüft</p>${content.sourceIds.map((id) => `<small>${esc(manifest.sources.find((s) => s.id === id)?.title || id)}</small>`).join("<br>")}</aside>`;
 }
-function mediaMarkup(ids) {
+function mediaMarkup(ids, { videoView = false } = {}) {
   return ids
     .map((id) => {
       const m = manifest.media.find((m) => m.id === id);
-      return m
-        ? `<section class="panel" data-media="${esc(id)}"><p class="notice">Nicht klinisch geprüft. Nur freigegebene Inhalte oder neutrale Techniktest-Dateien verwenden.</p><p>${esc(m.transcriptOrFallback)}</p><div class="player-slot"></div><p class="media-status">Lokale Datei wird geprüft: ${esc(m.fileName)}</p>${button("Lokale Datei(en) auswählen", "choose-files")}</section>`
-        : "";
+      if (!m) return "";
+      if (videoView)
+        return `<section class="video-media-panel" data-media="${esc(id)}"><div class="player-slot video-player-slot"></div><p class="media-status video-media-status" role="status" aria-live="polite" hidden></p><p class="video-media-fallback" hidden>${esc(m.transcriptOrFallback)}</p><div class="video-file-action" hidden>${button("Lokale Datei(en) auswählen", "choose-files", 'class="primary"')}</div><details class="video-notes"><summary>Hinweise zum Video</summary><p>Übungsfilm · Inhalt und persönliche Eignung nicht klinisch geprüft.</p><p>Das Ansehen bestätigt keine durchgeführte Übung.</p><p>Nur freigegebene Inhalte oder neutrale Techniktest-Dateien verwenden.</p><p>${esc(m.transcriptOrFallback)}</p></details></section>`;
+      return `<section class="panel" data-media="${esc(id)}"><p class="notice">Nicht klinisch geprüft. Nur freigegebene Inhalte oder neutrale Techniktest-Dateien verwenden.</p><p>${esc(m.transcriptOrFallback)}</p><div class="player-slot"></div><p class="media-status">Lokale Datei wird geprüft: ${esc(m.fileName)}</p>${button("Lokale Datei(en) auswählen", "choose-files")}</section>`;
     })
     .join("");
 }
@@ -354,15 +355,34 @@ async function localFile(m) {
 async function mountMedia(token) {
   for (const el of document.querySelectorAll("[data-media]")) {
     const m = manifest.media.find((m) => m.id === el.dataset.media);
+    const videoView = el.classList.contains("video-media-panel");
     const file = await localFile(m);
     if (token !== generation) return;
     const status = el.querySelector(".media-status");
+    const fileAction = el.querySelector(".video-file-action");
+    const fallback = el.querySelector(".video-media-fallback");
     if (!file) {
-      status.textContent = `Nicht verbunden oder nicht lesbar: ${m.fileName}. Bitte lokal aus Documents/SMART auswählen. Der Text bleibt verfügbar.`;
+      if (videoView) {
+        el.classList.add("video-media-missing");
+        status.hidden = false;
+        status.textContent = `Video nicht verfügbar. Die lokale Datei ${m.fileName} fehlt oder ist nicht freigegeben.`;
+        fileAction.hidden = false;
+        fallback.hidden = false;
+      } else {
+        status.textContent = `Nicht verbunden oder nicht lesbar: ${m.fileName}. Bitte lokal aus Documents/SMART auswählen. Der Text bleibt verfügbar.`;
+      }
       continue;
     }
     if (!file.size || !validMediaName(file.name, m.kind)) {
-      status.textContent = `Dateiformat nicht lesbar: ${m.fileName}. Bitte eine gültige ${m.kind === "video" ? "MP4" : "MP3"}-Datei auswählen.`;
+      if (videoView) {
+        el.classList.add("video-media-missing");
+        status.hidden = false;
+        status.textContent = `Datei nicht abspielbar: ${m.fileName}. Bitte eine gültige MP4-Datei auswählen.`;
+        fileAction.hidden = false;
+        fallback.hidden = false;
+      } else {
+        status.textContent = `Dateiformat nicht lesbar: ${m.fileName}. Bitte eine gültige ${m.kind === "video" ? "MP4" : "MP3"}-Datei auswählen.`;
+      }
       continue;
     }
     const url = URL.createObjectURL(file);
@@ -370,6 +390,7 @@ async function mountMedia(token) {
     const player = document.createElement(
       m.kind === "video" ? "video" : "audio",
     );
+    if (videoView) player.className = "video-player";
     player.controls = true;
     player.preload = "metadata";
     player.setAttribute("playsinline", "");
@@ -381,18 +402,67 @@ async function mountMedia(token) {
       }),
     );
     player.addEventListener("error", () => {
-      status.textContent = `${m.fileName} ist nicht abspielbar oder die Berechtigung fehlt. Textalternative und Dateiauswahl bleiben verfügbar.`;
-      player.remove();
+      if (videoView) {
+        el.classList.add("video-media-missing");
+        status.hidden = false;
+        status.textContent = "Das Video ist nicht abspielbar oder die lokale Dateifreigabe fehlt. Die Textalternative und Dateiauswahl bleiben verfügbar.";
+        fileAction.hidden = false;
+        fallback.hidden = false;
+        player.closest(".video-player-wrap")?.remove();
+      } else {
+        status.textContent = `${m.fileName} ist nicht abspielbar oder die Berechtigung fehlt. Textalternative und Dateiauswahl bleiben verfügbar.`;
+        player.remove();
+      }
     });
-    el.querySelector(".player-slot").append(player);
-    const stop = document.createElement("button");
-    stop.textContent = "Wiedergabe stoppen";
-    stop.onclick = () => {
-      player.pause();
-      player.currentTime = 0;
-    };
-    el.querySelector(".player-slot").append(stop);
-    status.textContent = `Lokal verbunden: ${m.fileName}. Kein Upload.`;
+    if (videoView) {
+      const wrap = document.createElement("div");
+      wrap.className = "video-player-wrap";
+      const manualStart = document.createElement("button");
+      manualStart.className = "video-start-button primary";
+      manualStart.type = "button";
+      manualStart.textContent = "Video starten";
+      manualStart.hidden = true;
+      manualStart.addEventListener("click", async () => {
+        manualStart.hidden = true;
+        try {
+          if (player.readyState > 0) player.currentTime = 0;
+          await player.play();
+        } catch {
+          manualStart.hidden = false;
+          status.hidden = false;
+          status.textContent = "Tippe auf „Video starten“, um das Video mit Ton abzuspielen.";
+        }
+      });
+      wrap.append(player, manualStart);
+      el.querySelector(".player-slot").append(wrap);
+      player.dataset.autoplayAttempted = "true";
+      try {
+        const playback = player.play();
+        if (playback?.then) await playback;
+      } catch (error) {
+        if (token !== generation) return;
+        if (error?.name === "NotAllowedError") {
+          manualStart.hidden = false;
+          status.hidden = false;
+          status.textContent = "Automatischer Start wurde vom Browser blockiert. Tippe auf „Video starten“, um den Film mit Ton abzuspielen.";
+        } else if (error?.name !== "AbortError") {
+          status.hidden = false;
+          status.textContent = "Das Video konnte nicht automatisch gestartet werden. Verwende die Videosteuerung zum Starten.";
+        }
+      }
+    } else {
+      el.querySelector(".player-slot").append(player);
+    }
+    if (!videoView) {
+      const stop = document.createElement("button");
+      stop.textContent = "Wiedergabe stoppen";
+      stop.onclick = () => {
+        player.pause();
+        player.currentTime = 0;
+      };
+      el.querySelector(".player-slot").append(stop);
+    }
+    if (!videoView) status.textContent = `Lokal verbunden: ${m.fileName}. Kein Upload.`;
   }
 }
 async function mountXray(token) {
@@ -434,6 +504,7 @@ function render() {
   const token = generation;
   const [view, id] = (location.hash.slice(1) || "welcome").split("/");
   root.classList.toggle("welcome-mode", !sleeping && view === "welcome");
+  root.classList.toggle("video-mode", !sleeping && view === "video");
   root.classList.toggle("sleep-mode", sleeping);
   document.body.classList.toggle("sleep-mode", sleeping);
   if (sleeping) {
@@ -493,7 +564,7 @@ function render() {
       return;
     }
     title = c.printTitle || c.title;
-    body = `<h1>${esc(title)}</h1><p class="notice">Übungsfilm · Inhalt und persönliche Eignung nicht klinisch geprüft. Das Ansehen bestätigt keine durchgeführte Übung.</p>${mediaMarkup(content.mediaIds)}${button("Dateizuordnung in Einstellungen öffnen", "settings")}`;
+    body = mediaMarkup(content.mediaIds, { videoView: true });
   } else if (view === "dialog") {
     const node = dialogs.nodes.find((n) => n.id === id);
     if (!node) {
@@ -581,7 +652,7 @@ function render() {
   }
   const backTarget = view === "home" ? "welcome" : view === "record" && id ? "record" : "home";
   const backLabel = view === "home" ? "← Bergwiese" : view === "record" && id ? "← Patientenakte" : "← Zum Menü";
-  root.innerHTML = `<header>${button(backLabel, backTarget, 'class="back-navigation"')}<strong class="role-line">Für ${esc(persona().displayName.split(" ")[0])}</strong>${button("⚙︎", "settings", 'class="settings-button" aria-label="Einstellungen" title="Einstellungen"')}</header><main id="main" tabindex="-1" aria-label="${esc(title)}">${body}<div id="status" role="status" aria-live="polite"></div>${!storageOK ? '<p class="notice">Lokaler Speicher nicht verfügbar. Einträge bleiben nur während dieser Sitzung erhalten.</p>' : ""}</main><footer>Fiktive Interview-Demo · keine medizinische Anweisung · nicht klinisch geprüft<div class="actions">${button("Mein Weg", "timeline")}${button("Demo vorbereiten", "moderator")}${button("Alle Karten", "cards")}</div><small>Nur fiktive Patientendaten verwenden.</small></footer><input id="local-files" type="file" multiple hidden><input id="local-directory" type="file" webkitdirectory directory multiple hidden>`;
+  root.innerHTML = `<header${view === "video" ? ' class="video-header"' : ""}>${button(backLabel, backTarget, 'class="back-navigation"')}<strong class="${view === "video" ? "video-header-title" : "role-line"}">${view === "video" ? esc(title) : `Für ${esc(persona().displayName.split(" ")[0])}`}</strong>${view === "video" ? "" : button("⚙︎", "settings", 'class="settings-button" aria-label="Einstellungen" title="Einstellungen"')}</header><main id="main" class="${view === "video" ? "video-view" : ""}" tabindex="-1" aria-label="${esc(title)}">${body}<div id="status" role="status" aria-live="polite"></div>${!storageOK ? '<p class="notice">Lokaler Speicher nicht verfügbar. Einträge bleiben nur während dieser Sitzung erhalten.</p>' : ""}</main>${view === "video" ? "" : `<footer>Fiktive Interview-Demo · keine medizinische Anweisung · nicht klinisch geprüft<div class="actions">${button("Mein Weg", "timeline")}${button("Demo vorbereiten", "moderator")}${button("Alle Karten", "cards")}</div><small>Nur fiktive Patientendaten verwenden.</small></footer>`}<input id="local-files" type="file" multiple hidden><input id="local-directory" type="file" webkitdirectory directory multiple hidden>`;
   document.title = `${title} · SMARThapti`;
   appendPowerButton();
   document.querySelector("#main").focus({ preventScroll: true });
@@ -810,9 +881,20 @@ async function startCamera(token) {
 function openCard(card) {
   if (!card || card.role !== role) return;
   const content = manifest.contents.find((c) => c.id === card.contentId);
-  go(
-    content.dialogNodeId ? "dialog/" + content.dialogNodeId : "card/" + card.id,
-  );
+  if (content.dialogNodeId) {
+    go("dialog/" + content.dialogNodeId);
+    return;
+  }
+  if (
+    card.type === "exercise" &&
+    content.mediaIds.some((mediaId) =>
+      manifest.media.some((media) => media.id === mediaId && media.kind === "video"),
+    )
+  ) {
+    go("video/" + card.id);
+    return;
+  }
+  go("card/" + card.id);
 }
 root.addEventListener("click", async (e) => {
   const action = e.target.closest("[data-action]")?.dataset.action;

@@ -15,11 +15,11 @@
 | Kennung | Ansicht | Inhalt und wichtigste Aktionen |
 | --- | --- | --- |
 | U0 | Bergwiesen-Einstieg | Landschaft mit Kühen, Kamera nach Freigabe im Hintergrund; 3 s Einblendung, fünf Kartenvorführungen à 2,4 s, 3 s Ausblendung, 10 s Bildruhe. Tippen/Enter öffnet das Menü. |
-| U1 | Patienten-Hauptmenü | Nur Ernst: links alle acht Patienten-Übungsvideos, rechts kommende Physiotherapietermine und Patientenakte; Karten, Mein Weg und Alma bleiben erreichbar. Zweispaltenlayout ist mit F18 ausdrücklich beauftragt. |
+| U1 | Patienten-Hauptmenü | Nur Ernst: links die sieben verfügbaren Patienten-Übungsvideos, rechts kommende Physiotherapietermine und Patientenakte; Karten, Mein Weg und Alma bleiben erreichbar. Zweispaltenlayout ist mit F18 ausdrücklich beauftragt. |
 | U2 | QR scannen | Live-Kamera, Positionierungshinweis, Kamerawechsel, „Karte ohne Kamera wählen“, Schliessen |
-| U3 | Kartenübersicht | Nach Rolle und Typ sortierbare grosse Karten mit Bildsymbol; manuelle Auswahl öffnet denselben Detailinhalt wie QR |
+| U3 | Kartenübersicht | Nach Rolle und Typ sortierbare grosse Karten mit Bildsymbol; Übungskarten mit Video öffnen direkt denselben Player wie Videozeile und QR, übrige Karten öffnen ihren bestehenden Inhalt |
 | U4 | Kartendetail | Kurztitel, kleine Kernaussage, Quelle/Stand, Vertiefungsbuttons, je nach Typ „Video“ / „Termin vormerken“ / „Eintrag vorschlagen“ |
-| U5 | Medien | Video oder MP3 mit Start/Pause/Stopp, Untertiteln/Transkript bzw. Textalternative, Zurück |
+| U5 | Medien | Übungsvideo gross innerhalb der verfügbaren Tabletfläche, Titel mittig in der Kopfzeile, Start/Pause und Zeitsteuerung; MP3-Dialoge behalten ihren bisherigen Player. Hinweise zum Übungsvideo sind zugeklappt unter dem Player; bei blockiertem Ton-Autoplay erscheint „Video starten“. |
 | U6 | Alma-Dialog | Sprechtext lesbar, optional MP3, 2–4 grosse Antwortbuttons, „Beenden“ |
 | U7 | Timeline | Stationen „geschehen“, „geplant“, „selbst berichtet“, „persönliches Ziel“; Details ansehen, neue Einträge nur auf Bestätigung |
 | U8 | Bestätigung | „Diesen Eintrag hinzufügen?“ + Titel, Datum, Herkunft, „Hinzufügen“ / „Abbrechen“; nach Erfolg deutliches, neutrales Feedback |
@@ -29,11 +29,13 @@
 
 **Vorbereitung lokaler Medien:** Vor dem Interview kopiert die Moderatorperson die zulässigen MP4-/MP3-Dateien nach `Internal storage/Documents/SMART`. In U9 öffnet sie „Medienordner verbinden“ und wählt diesen Ordner ausdrücklich im Android-Dateidialog (V: `showDirectoryPicker()`). Die PWA zeigt die gefundenen/fehlenden Dateinamen und verknüpft sie per Manifest-ID. Bei fehlender Ordnerunterstützung „Lokale Datei(en) auswählen“ als Alternative. Sofern unterstützt, bleiben freigegebene Ordner-/Datei-Handles in IndexedDB; beim Start prüft die App die Leseberechtigung ohne automatisches Nachfragen und bietet bei Verlust die bewusste Wiederfreigabe an. Dateinamen/Zuordnungen bleiben im LocalStorage erhalten. **Keine** direkte Dateisystemfreigabe durch blosses Hinterlegen eines Pfades und keine Medienbytes in IndexedDB. Der Patient muss bei gültiger Verbindung nicht jedes Video einzeln auswählen.
 
-**Papier -> Tablet -> Video:** Häftchen/Anhängerkärtchen lesen -> QR vor Tablet-Frontkamera halten -> erkannte ID -> Kartendetail -> „Video ansehen“ -> Video starten/pausieren/stoppen -> zurück; Video endet beim Verlassen. **Touch-Alternative:** Start -> „Karten wählen“ -> dieselbe Karte -> identischer Inhalt.
+**Papier -> Tablet -> Video:** Häftchen/Anhängerkärtchen lesen -> QR vor Tablet-Frontkamera halten -> Übungs-QR öffnet direkt den passenden Player -> lokales Video startet mit Ton, wenn Browserregeln es erlauben; andernfalls „Video starten“ antippen -> Video endet beim Verlassen. Videotitel steht mittig zwischen Menü- und Abschaltbutton; medizinische Hinweise sind unter „Hinweise zum Video“ erreichbar. **Touch-Alternativen:** Hauptmenü-Videozeile oder Kartenübersicht -> derselbe Player ohne zwischengeschaltetes Kartendetail.
 
 **Termin-/Meilensteinkarte:** QR -> Detail -> „Zur Timeline hinzufügen“ -> U8 -> erst bei „Hinzufügen“ speichern. „Abbrechen“ schreibt nichts. Wiederholte Bestätigung desselben Ereignisschlüssels meldet „bereits vorhanden“ und zeigt vorhandenen Eintrag statt Duplikat.
 
 **Übungskarte:** Öffnen, Video ansehen, rückwärts navigieren; **kein** automatisches „ausgeführt“. Falls eine separate freiwillige Selbstangabe angeboten wird, benötigt auch diese einen eindeutig bestätigten Eintrag.
+
+**Videoansicht (Nutzerauftrag 09.11.2026):** Ausschliesslich die Videoansicht ersetzt „Für Ernst“ durch den aus Kartendaten übernommenen Titel und entfernt dort das Zahnrad. Der Titel ist im dreispaltig zentrierten Kopfbereich zwischen „Zum Menü“ und „Abschalten“. Kein Titel im Inhaltsbereich. Player nutzt die verfügbare Höhe/Breite mit `object-fit:contain`; Android-Systemleisten bleiben sichtbar. Die medizinischen Hinweise und „Ansehen bestätigt keine Übungsdurchführung“ bleiben im standardmässig geschlossenen Bereich unter dem Player. Autoplay wird ungestummt versucht; bei `NotAllowedError` zeigt ein grosser Button den Tonstart nach Nutzertipp. Bei fehlender Datei erscheint Dateiname, Textalternative und lokale Dateiauswahl. Navigation stoppt Kamera und Medien.
 
 **Dialog:** U1 -> Alma -> vorbereiteter Text sichtbar / MP3 optional -> Antwortbutton -> Folgeknoten; zurück oder beenden; Ton stoppt sofort.
 
@@ -98,7 +100,7 @@ Die feste 850-CSS-Pixel-Begrenzung der App-Fläche entfällt. Menü und Unterans
 
 ## Ausdrücklich beauftragte Patientenübersicht und Patientenakte (09.11.2026)
 
-F18 beauftragt ausschliesslich die Gestaltung unterhalb der bestehenden Überschrift und den Buttons „QR-Karte scannen“ und „Karte auswählen“. Kopfzeile, Überschrift, diese beiden Buttons, ihre Positionen und der Bergwiesen-Einstieg bleiben visuell unverändert. Darunter stehen links acht kompakte Videozeilen; rechts folgen der nächste fiktive Physiotherapietermin und anklickbare Patientenakten-Einträge. Videos öffnen direkt ihren Player. Alma und „Mein Weg“ bleiben unterhalb des Dashboards erreichbar.
+F18 beauftragt ausschliesslich die Gestaltung unterhalb der bestehenden Überschrift und den Buttons „QR-Karte scannen“ und „Karte auswählen“. Kopfzeile, Überschrift, diese beiden Buttons, ihre Positionen und der Bergwiesen-Einstieg bleiben visuell unverändert. Darunter stehen links sieben verfügbare kompakte Videozeilen; `P-EX-001` bleibt in den Kartendaten, ist jedoch nicht im Menü angeboten. Rechts folgen der nächste fiktive Physiotherapietermin und anklickbare Patientenakten-Einträge. Videos öffnen direkt ihren Player. Alma und „Mein Weg“ bleiben unterhalb des Dashboards erreichbar.
 
 Der Termin zeigt nur Felder, die in den Demodaten existieren. Aktuell ist das Datum 10.11.2026 hinterlegt; eine Uhrzeit und ein Ort sind nicht vorhanden. In der Austrittsszene wird das Szenariodatum aus `manifest.asOf`, in der Physioszene das Datum des vorhandenen Termins verwendet.
 

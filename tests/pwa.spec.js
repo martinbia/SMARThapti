@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { PNG } from "pngjs";
 import jsQR from "jsqr";
+import QRCode from "qrcode";
 import { resolveQR, visibleEvents, addEvent } from "../src/model.js";
 const m = JSON.parse(readFileSync("content/demo_manifest.json"));
 const dialogs = JSON.parse(readFileSync("content/demo_dialogs.json"));
@@ -81,18 +82,28 @@ for (const entry of index.cards)
     await click(page, "card:" + entry.cardId);
     const card = m.cards.find((c) => c.id === entry.cardId),
       content = m.contents.find((c) => c.id === card.contentId);
+    const opensVideo =
+      card.type === "exercise" &&
+      content.mediaIds.some((id) => m.media.some((media) => media.id === id && media.kind === "video"));
     await expect(page).toHaveURL(
       new RegExp(
-        content.dialogNodeId
+        opensVideo
+          ? `#video/${card.id}`
+          : content.dialogNodeId
           ? `#dialog/${content.dialogNodeId}`
           : `#card/${card.id}`,
       ),
     );
-    await expect(page.locator("main")).toContainText(
-      content.dialogNodeId
-        ? dialogs.nodes.find((n) => n.id === content.dialogNodeId).text
-        : content.detailText,
-    );
+    if (opensVideo) {
+      await expect(page.locator(".video-header-title")).toHaveText(card.printTitle || card.title);
+      await expect(page.locator("h1")).toHaveCount(0);
+    } else {
+      await expect(page.locator("main")).toContainText(
+        content.dialogNodeId
+          ? dialogs.nodes.find((n) => n.id === content.dialogNodeId).text
+          : content.detailText,
+      );
+    }
   });
 test("patient appointment and personal milestone require confirmation, deduplicate and persist", async ({
   page,
@@ -156,13 +167,132 @@ test("patient home dashboard keeps the existing upper controls and opens each vi
   await page.locator('[data-action="video:P-EX-102"]').click();
   await expect(page).toHaveURL(/#video\/P-EX-102$/);
   await expect(page.locator("video")).toHaveCount(0);
-  await expect(page.locator(".media-status")).toContainText("Nicht verbunden");
-  await expect(page.locator("main")).toContainText("Hüftflexion im Stehen");
+  await expect(page.locator(".media-status")).toContainText("Video nicht verfügbar");
+  await expect(page.locator(".video-header-title")).toContainText("Hüftflexion im Stehen");
   await expect(page.locator("main")).toContainText("nicht klinisch geprüft");
   await page.setViewportSize({ width: 480, height: 850 });
   await page.goto("./#home");
   await expect(page.locator(".home-dashboard")).toHaveCSS("grid-template-columns", /^(\d+(?:\.\d+)?px)$/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
+});
+
+test("video view centers its title, fills the portrait viewport and keeps notes collapsed below the player", async ({ page }) => {
+  await page.setViewportSize({ width: 800, height: 1100 });
+  await page.goto("./#video/P-EX-101");
+  await expect(page).toHaveURL(/#video\/P-EX-101$/);
+  await expect(page.locator(".video-header-title")).toHaveText("Gehen mit Teilbelastung");
+  await expect(page.locator("h1")).toHaveCount(0);
+  await expect(page.locator(".settings-button")).toHaveCount(0);
+  await expect(page.locator("footer")).toHaveCount(0);
+  await expect(page.locator(".video-notes")).not.toHaveAttribute("open", "");
+  await expect(page.locator(".video-notes summary")).toHaveText("Hinweise zum Video");
+  await expect(page.locator(".video-notes")).toContainText("nicht klinisch geprüft");
+  await expect(page.locator(".video-notes")).toContainText("keine durchgeführte Übung");
+  await expect(page.locator(".video-notes > p").first()).toBeHidden();
+  await expect(page.locator(".video-media-status")).toContainText("Video nicht verfügbar");
+  await expect(page.locator('.video-file-action [data-action="choose-files"]')).toBeVisible();
+  await expect(page.locator(".video-player-slot")).toBeHidden();
+  const geometry = await page.evaluate(() => {
+    const header = document.querySelector(".video-header").getBoundingClientRect();
+    const title = document.querySelector(".video-header-title").getBoundingClientRect();
+    const back = document.querySelector(".video-header .back-navigation").getBoundingClientRect();
+    const power = document.querySelector(".video-header .power-off").getBoundingClientRect();
+    const player = document.querySelector(".video-player-slot").getBoundingClientRect();
+    return {
+      centerOffset: Math.abs(title.x + title.width / 2 - (header.x + header.width / 2)),
+      controlsOverlap: back.right > title.left || title.right > power.left,
+      playerHeight: player.height,
+      viewportHeight: innerHeight,
+      horizontalOverflow: document.documentElement.scrollWidth > innerWidth,
+    };
+  });
+  expect(geometry.centerOffset).toBeLessThan(1);
+  expect(geometry.controlsOverlap).toBe(false);
+  expect(geometry.horizontalOverflow).toBe(false);
+  await page.setViewportSize({ width: 1100, height: 700 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.setViewportSize({ width: 360, height: 640 });
+  await page.goto("./#video/P-EX-102");
+  const narrow = await page.evaluate(() => {
+    const title = document.querySelector(".video-header-title").getBoundingClientRect();
+    const back = document.querySelector(".video-header .back-navigation").getBoundingClientRect();
+    const power = document.querySelector(".video-header .power-off").getBoundingClientRect();
+    return {
+      overlaps: back.right > title.left || title.right > power.left,
+      scrolls: document.documentElement.scrollWidth > innerWidth,
+      titleHeight: title.height,
+    };
+  });
+  expect(narrow.overlaps).toBe(false);
+  expect(narrow.scrolls).toBe(false);
+  expect(narrow.titleHeight).toBeGreaterThanOrEqual(20);
+});
+
+test("welcome exercise QR opens the local video directly and attempts audible playback", async ({ page }) => {
+  const qr = readFileSync(index.cards.find((card) => card.cardId === "P-EX-101").qrFile, "utf8");
+  const { execFileSync } = await import("node:child_process");
+  const { mkdtempSync, rmSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const dir = mkdtempSync(tmpdir() + "/smarthapti-qr-video-");
+  const videoName = "GehenMitTeilbelastung_video_720p.mp4";
+  try {
+    execFileSync("ffmpeg", ["-v", "error", "-f", "lavfi", "-i", "color=c=gray:s=160x120:d=3", "-f", "lavfi", "-i", "sine=frequency=440:duration=3", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", `${dir}/${videoName}`]);
+    await page.addInitScript(({ svg }) => {
+      window.scannerTrackStops = 0;
+      window.blockInitialVideoPlay = true;
+      const nativePlay = HTMLMediaElement.prototype.play;
+      HTMLMediaElement.prototype.play = function (...args) {
+        if (this.classList?.contains("video-player") && window.blockInitialVideoPlay) {
+          window.blockInitialVideoPlay = false;
+          return Promise.reject(new DOMException("Autoplay blocked", "NotAllowedError"));
+        }
+        return nativePlay.apply(this, args);
+      };
+      navigator.mediaDevices.getUserMedia = async () => {
+        const image = new Image();
+        image.src = "data:image/svg+xml;base64," + btoa(svg);
+        await image.decode();
+        const canvas = document.createElement("canvas");
+        canvas.width = canvas.height = 640;
+        const context = canvas.getContext("2d");
+        context.fillStyle = "white";
+        context.fillRect(0, 0, 640, 640);
+        context.drawImage(image, 60, 60, 520, 520);
+        const stream = canvas.captureStream(10);
+        for (const track of stream.getTracks()) {
+          const stop = track.stop.bind(track);
+          track.stop = () => {
+            window.scannerTrackStops++;
+            stop();
+          };
+        }
+        return stream;
+      };
+    }, { svg: qr });
+    await page.goto("./#home");
+    await page.locator("#local-files").setInputFiles(`${dir}/${videoName}`);
+    await page.goto("./#welcome");
+    await expect(page).toHaveURL(/#video\/P-EX-101$/);
+    await expect(page.locator(".video-header-title")).toHaveText("Gehen mit Teilbelastung");
+    const player = page.locator("video.video-player");
+    await expect(player).toHaveAttribute("src", /^blob:/);
+    await expect(player).toHaveAttribute("data-autoplay-attempted", "true");
+    expect(await player.evaluate((video) => video.muted)).toBe(false);
+    expect(await player.evaluate((video) => getComputedStyle(video).objectFit)).toBe("contain");
+    expect(await page.locator(".video-player-slot").evaluate((el) => el.getBoundingClientRect().height)).toBeGreaterThan(600);
+    await expect(page.locator(".video-start-button")).toBeVisible();
+    await expect(page.locator(".video-media-status")).toContainText("Automatischer Start wurde vom Browser blockiert");
+    await page.locator(".video-start-button").click();
+    await expect.poll(() => player.evaluate((video) => video.currentTime)).toBeGreaterThan(0);
+    expect(await page.evaluate(() => window.scannerTrackStops)).toBeGreaterThan(0);
+    await page.setViewportSize({ width: 1100, height: 700 });
+    expect(await page.locator(".video-player-slot").evaluate((el) => el.getBoundingClientRect().height)).toBeGreaterThan(300);
+    await player.evaluate((video) => { window.oldVideo = video; });
+    await click(page, "home");
+    await expect.poll(() => page.evaluate(() => window.oldVideo.paused && !window.oldVideo.getAttribute("src"))).toBe(true);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test("saved local media folder handle survives reload and can be re-granted without remapping", async ({ page }) => {
@@ -529,7 +659,7 @@ test("actual local MP4 and MP3 playback stops and revokes blobs on navigation", 
       revoke(url);
     };
   });
-  await page.goto("./#card/P-EX-001");
+  await page.goto("./#video/P-EX-101");
   const h264 = await page.evaluate(() =>
     document
       .createElement("video")
@@ -578,11 +708,18 @@ test("actual local MP4 and MP3 playback stops and revokes blobs on navigation", 
       "lavfi",
       "-i",
       "color=c=gray:s=160x120:d=2",
+      "-f",
+      "lavfi",
+      "-i",
+      "sine=frequency=440:duration=2",
       "-c:v",
       "libx264",
       "-pix_fmt",
       "yuv420p",
-      dir + "/P_EX_001.mp4",
+      "-c:a",
+      "aac",
+      "-shortest",
+      dir + "/GehenMitTeilbelastung_video_720p.mp4",
     ]);
     execFileSync("ffmpeg", [
       "-v",
@@ -593,14 +730,20 @@ test("actual local MP4 and MP3 playback stops and revokes blobs on navigation", 
       "sine=frequency=440:duration=2",
       dir + "/ALMA_P_START.mp3",
     ]);
-    await page.goto("./#card/P-EX-001");
+    await page.goto("./#video/P-EX-101");
     await page
       .locator("#local-files")
-      .setInputFiles([dir + "/P_EX_001.mp4", dir + "/ALMA_P_START.mp3"]);
-    await expect(page.locator("video")).toHaveAttribute("src", /^blob:/);
-    await startPlayback(page.locator("video"));
+      .setInputFiles([dir + "/GehenMitTeilbelastung_video_720p.mp4", dir + "/ALMA_P_START.mp3"]);
+    const video = page.locator("video.video-player");
+    await expect(video).toHaveAttribute("src", /^blob:/);
+    await expect(video).toHaveAttribute("data-autoplay-attempted", "true");
+    await expect(video).toHaveJSProperty("muted", false);
+    await video.evaluate((player) => { window.oldPlayer = player; });
+    if (await page.locator(".video-start-button").isVisible())
+      await page.locator(".video-start-button").click();
+    else await startPlayback(video);
     await expect
-      .poll(() => page.locator("video").evaluate((p) => p.currentTime))
+      .poll(() => video.evaluate((p) => p.currentTime))
       .toBeGreaterThan(0);
     await click(page, "home");
     await expect
@@ -775,6 +918,33 @@ test("patient QR opens from welcome; retired relative QR does not change the tar
   expect(
     await page.evaluate(() => localStorage.getItem("smarthapti-demo")),
   ).toBeNull();
+});
+
+test("unknown QR keeps the welcome view and reports a neutral message", async ({ page }) => {
+  const svg = await QRCode.toString("SH1:P-UNKNOWN", {
+    type: "svg",
+    errorCorrectionLevel: "H",
+  });
+  await page.addInitScript(({ svg }) => {
+    navigator.mediaDevices.getUserMedia = async () => {
+      const image = new Image();
+      image.src = "data:image/svg+xml;base64," + btoa(svg);
+      await image.decode();
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = 640;
+      const context = canvas.getContext("2d");
+      context.fillStyle = "white";
+      context.fillRect(0, 0, 640, 640);
+      context.drawImage(image, 60, 60, 520, 520);
+      return canvas.captureStream(10);
+    };
+  }, { svg });
+  await page.goto("./#welcome");
+  await expect(page.locator("#status")).toContainText("Diese Karte kenne ich noch nicht");
+  await expect(page.locator(".welcome-open")).toBeVisible();
+  await expect(page).toHaveURL(/#welcome$/);
+  await expect(page.locator(".video-player")).toHaveCount(0);
+  await expect(page.locator(".card-detail")).toHaveCount(0);
 });
 
 test("red camera dot appears only when scanning is ready and clears on navigation or detection", async ({
