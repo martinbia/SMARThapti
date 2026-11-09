@@ -5,7 +5,7 @@
 
 ## Worum es geht
 
-Interview-Demonstrator zur Unterstützung nach einer Hüftfraktur-Operation während der Rehabilitation zu Hause. Im Zentrum stehen **Alma**, eine ca. 20 cm grosse, sitzende Plüschkuh, ein separat davor abgestütztes Tablet im **Hochformat**, kurze **persönliche Papier-Info-Häftchen**, **QR-Schlüsselanhänger** und bei Austritt bzw. Physiotherapie übergebene Karten. Die PWA ergänzt Papierinformationen durch kurze Erklärungen, Übungs- und Unterstützungsvideos, MP3-Dialoge und eine Timeline. Patienten und Angehörige haben eigenständige Perspektiven.
+Interview-Demonstrator zur Unterstützung nach einer Hüftfraktur-Operation während der Rehabilitation zu Hause. Im Zentrum stehen **Alma**, eine ca. 20 cm grosse, sitzende Plüschkuh, ein separat davor abgestütztes Tablet im **Hochformat**, kurze **persönliche Papier-Info-Häftchen**, **QR-Schlüsselanhänger** und bei Austritt bzw. Physiotherapie übergebene Karten. Die PWA ergänzt Papierinformationen durch kurze Erklärungen, Übungs- und Unterstützungsvideos, MP3-Dialoge und eine Timeline. **Seit F17 (09.11.2026) ist ausschliesslich der Patient Zielgruppe; es gibt keinen Angehörigenmodus mehr.**
 
 **Wichtig:** Fiktive Daten; keine klinische Beratung; keine echte EPIC-Anbindung; keine generative KI oder Spracherkennung in der Demo.
 
@@ -33,13 +33,13 @@ Alle Dokumente sind v0.1-Entwürfe. `AGENTS.md` enthält verbindliche *Arbeitsre
 
 ## Weitere Dateien (nur redaktionelle Daten)
 
-- `content/demo_manifest.json`: fiktive Personen, Beispiele, Karten, Quellen, Ereignisse und Medienreferenzen.
+- `content/demo_manifest.json`: fiktiver Patient Ernst, Basiskarten und Medienreferenzen; `content/exercise_catalog.json` ergänzt sieben Patientenübungen.
 - `content/demo_dialogs.json`: ausschliesslich vorbereitete Alma-Dialogknoten und Antwortbuttons.
 
 **FESTGELEGT (08.11.2026):** Videos, MP3s und weitere Mediendateien liegen ausschliesslich auf dem Android-Tablet unter `Internal storage/Documents/SMART`. Die PWA und Text-/Karten-Daten kommen über GitHub Pages; Medien werden nicht über GitHub Pages ausgeliefert. Zum Lesen muss die App den Ordner mit Einwilligung am Tablet auswählen/verbinden; siehe `media/README.md`.
 - `media/README.md`: **lokalen Medienordner auf dem Tablet** verbinden, Dateinamen, Berechtigungen und Freigaben. **Keine MP4-/MP3-Dateien im öffentlichen Repository.**
 - `assets/qr/`: elf einzelne **SVG-QR-Codes**, davon fünf mit referenziertem Video-/MP3-Dateinamen im Dateinamen.
-- `print/SMARThapti_Faltkarten_A4.pdf`: druckfertige PDF-Vorlage (11 Faltkarten/3 Seiten), links Label und rechts QR-Rückseite; bei 100 % drucken.
+- `print/SMARThapti_Faltkarten_A4.pdf`: **historische** Misch-PDF mit inzwischen deaktivierten Angehörigenkarten; nicht für neue Interviews drucken. Aktive P-QRs unter `assets/qr/`.
 - `print/CARD_INDEX.json` und `print/README.md`: QR-Payloads, Dateizuordnung und Schnitt-/Falthinweise.
 - `CODEX_DRAFT_PROMPT.md`: konkreter Copy-&-Paste-Auftrag zur **ersten PWA-Implementierung**. Die Datei selbst startet Codex nicht.
 
@@ -60,3 +60,9 @@ Nach ausdrücklichem Implementierungsauftrag im Cloud-Chat liegt jetzt ein funkt
 ## Einstellungen und zusätzliche Übungsfilme (09.11.2026)
 
 Das Zahnrad in der Kopfzeile öffnet die lokale Filmzuordnung. Sieben zusätzliche Übungskarten und ihre Dateinamen stehen in `content/exercise_catalog.json`; QR-SVGs sind in den Einstellungen herunterladbar. Gespeicherte Zuordnungen überstehen Neustarts und neue Builds derselben Website, Android-Dateifreigaben bleiben separat. Sicherungsexport/-import und Anleitung: `docs/IMPLEMENTATION.md`, Abschnitt „Lokale Filmzuordnung“.
+
+## Aktueller Beschluss F17 – ausschliesslich Patient (09.11.2026)
+
+- Ein fiktiver Patient **Ernst** ist die einzige Zielgruppe. Kein Angehörigenmodus, keine zweite Timeline, keine Rollenumschaltung. Nur P-Karten und Patienten-Alma-Dialog sind aktiv; alte A-QRs und die bisherige Misch-PDF bleiben Archiv und dürfen nicht auf Patienteninhalte umgeleitet werden.
+- Patienten-Karten: sechs Basiskarten und sieben weitere Übungen, also **13 aktive Karten**, darunter **acht Übungsvideos**. Die lokale Medienablage, das bewusst bestätigte Speichern und alle klinischen Grenzen bleiben erhalten.
+- **GUI-Freeze:** Nur Entfernung des Perspektivenwechsels ist mit F17 ausdrücklich freigegeben. Die zuvor besprochene Zweispalten-Startseite (links Videos, rechts nächster Physiotermin und Berichte/Erklärungen) ist **Vorschlag V16, noch nicht implementierungsfreigegeben**.

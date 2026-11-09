@@ -1,10 +1,10 @@
 # Konzept – SMARThapti
 
-**Status:** ENTWURF v0.1, 08.11.2026. **F:** Grundkonzept, **V:** fiktiver Beispielverlauf und konkrete Demo-Setzung.
+**Status:** ENTWURF v0.2, 09.11.2026. **F17 hebt die alte doppelte Zielgruppe auf.** **F:** Grundkonzept, **V:** fiktiver Beispielverlauf und konkrete Demo-Setzung.
 
 ## Ziel und Forschungsfrage
 
-SMARThapti untersucht in Interviews, ob ältere Patienten nach operierter Hüftfraktur sowie ihre Angehörigen kurze, wiederauffindbare Informationen mit haptischen Karten und optionaler digitaler Vertiefung als hilfreich, verständlich und selbstbestimmt erleben. **Der Demonstrator testet Interaktion und Akzeptanz; keine klinische Wirksamkeit.**
+SMARThapti untersucht in Interviews, ob ältere Patienten nach operierter Hüftfraktur kurze, wiederauffindbare Informationen mit haptischen Karten und optionaler digitaler Vertiefung als hilfreich, verständlich und selbstbestimmt erleben. **Der Demonstrator testet Interaktion und Akzeptanz; keine klinische Wirksamkeit.**
 
 ## Drei aufeinander abgestimmte Ebenen (F)
 
@@ -16,17 +16,15 @@ Ein eigenes Smartphone ist **keine** Voraussetzung. Tablet, Papier und Anhänger
 
 **Lokale Medien (F, ergänzt 08.11.2026):** Filme, MP3s und weitere Mediendateien befinden sich auf dem Android-Tablet unter `Internal storage/Documents/SMART`, nicht auf GitHub Pages. Die PWA stellt Bedienoberfläche und Zuordnung bereit und liest Medien nach expliziter Ordner-/Dateifreigabe. Die Verknüpfung soll in der Interviewvorbereitung erfolgen; Details sind in `media/README.md` spezifiziert.
 
-## Eigenständige Zielgruppen (F)
+## Einzige Zielgruppe seit F17: Patienten
 
-**Patienten:** Wollen verstehen, was passiert ist, relevante Information nachlesen, eigene Ziele verfolgen, Übungen aus dem **individuellen, geprüften Plan** auffinden und selbst entscheiden, ob etwas als erledigt berichtet wird. Nicht jede Person möchte laufend erinnert oder bewertet werden.
+**Patient:** Versteht seine fiktiven Austrittsinformationen, findet acht Patienten-Übungsvideos, Berichte und Erklärungen, wählt vorbereitete Alma-Dialoge und bestätigt Termine oder persönliche Alltagsmeilensteine selbst. Die frühere Angehörigenperspektive, ihr Rollenwechsel, ihre Inhalte und Meilensteine werden nicht mehr als aktive Demo angeboten.
 
-**Angehörige:** Wollen Unterstützung im Alltag verständlich sehen, ohne Entscheidungen des Patienten zu übernehmen; brauchen Sicherheit bei ungeklärten Fragen, Terminübersicht, vorbereitete Gesprächsfragen und Informationen über **eigene Entlastung**. Eigene Sorgen sind getrennt vom gemeinsamen Verlauf zu behandeln.
-
-**Behandelnde/Forschende:** Geben bei Austritt bzw. Physioterminen Häftchen/Karten aus und begleiten das Interview. Keine klinische Software oder Personalverwaltung in v0.1.
+**Moderation und Fachpersonen** bereiten nur das Interview und fachlich freigegebene Inhalte vor; sie sind keine weiteren App-Personas. Die alte fiktive Anna-Journey bleibt historisches Quellenmaterial, nicht aktive Nutzerrolle.
 
 ## Typischer Weg (V: Demo-Beispiel)
 
-Austritt nach Hause -> Häftchen und QR-Anhänger -> Patient oder Angehörige öffnet QR-Inhalt am Tablet -> sieht Video oder Erklärung -> entscheidet bei Termin/Meilenstein ausdrücklich über Timeline-Eintrag -> erhält bei späterem Physiotermin weitere Karten. Die individuelle Übungsinformation bleibt unabhängig von Meilensteinen erreichbar.
+Austritt nach Hause -> Patienten-Häftchen und QR-Anhänger -> Patient öffnet QR-Inhalt am Tablet -> sieht Video oder Erklärung -> entscheidet bei Termin/Meilenstein ausdrücklich über Timeline-Eintrag -> erhält bei späterem Physiotermin weitere Karten. Die individuelle Übungsinformation bleibt unabhängig von Meilensteinen erreichbar.
 
 ## Inhaltliche Leitplanken (F)
 
@@ -50,4 +48,10 @@ Austritt nach Hause -> Häftchen und QR-Anhänger -> Patient oder Angehörige ö
 
 Kein eigener Sprachassistent mit offener Konversation, keine Spracherkennung, keine KI-generierten Antworten, keine Geräteintegration in Alma, kein EMR-/EPIC-Zugriff, keine echte Nutzerauthentifizierung, keine reale Patientendatenspeicherung, keine automatische Therapiebeurteilung.
 
-**Ergänzung 09.11.2026 (F16):** Das ausdrücklich beauftragte dekorative Bergwiesenbild gehört zur App-Shell und darf mit der PWA ausgeliefert werden. Die QR-Kartenanleitung wird mit SVG und Browseranimation umgesetzt. Therapie-/Dialog-MP4s und MP3s bleiben ausschliesslich lokal auf dem Tablet. QR-Karten wählen primär automatisch die passende Perspektive.
+**Ergänzung 09.11.2026 (F16):** Das ausdrücklich beauftragte dekorative Bergwiesenbild gehört zur App-Shell und darf mit der PWA ausgeliefert werden. Die QR-Kartenanleitung wird mit SVG und Browseranimation umgesetzt. Therapie-/Dialog-MP4s und MP3s bleiben ausschliesslich lokal auf dem Tablet. QR-Karten öffnen direkt Patienteninhalte ohne Perspektivenwahl.
+
+## Aktueller Beschluss F17 – ausschliesslich Patient (09.11.2026)
+
+- Ein fiktiver Patient **Ernst** ist die einzige Zielgruppe. Kein Angehörigenmodus, keine zweite Timeline, keine Rollenumschaltung. Nur P-Karten und Patienten-Alma-Dialog sind aktiv; alte A-QRs und die bisherige Misch-PDF bleiben Archiv und dürfen nicht auf Patienteninhalte umgeleitet werden.
+- Patienten-Karten: sechs Basiskarten und sieben weitere Übungen, also **13 aktive Karten**, darunter **acht Übungsvideos**. Die lokale Medienablage, das bewusst bestätigte Speichern und alle klinischen Grenzen bleiben erhalten.
+- **GUI-Freeze:** Nur Entfernung des Perspektivenwechsels ist mit F17 ausdrücklich freigegeben. Die zuvor besprochene Zweispalten-Startseite (links Videos, rechts nächster Physiotermin und Berichte/Erklärungen) ist **Vorschlag V16, noch nicht implementierungsfreigegeben**.

@@ -117,3 +117,9 @@ Erst wenn eine neue App-Shell vollständig installiert bereitsteht, erscheint de
 Der Hinweis erscheint nicht bei der ersten Installation, im schwarzen Ruhemodus oder während einer laufenden Dateiauswahl. Es werden nur neue, auf GitHub Pages tatsächlich veröffentlichte Versionen erkannt, keine ungemergten PRs. Damit diese Updatefunktion selbst erstmals verfügbar wird, muss die bisherige App einmal wie bisher aktualisiert/geschlossen und neu geöffnet werden.
 
 Validierung: 42/42 Browsertests bestanden. Echter HTTP-Testserver liefert zwei Service-Worker-Versionen: Bereitschaft, Später, ausdrückliche Aktivierung/Neuladen, Kamera-Stopp und erhaltene Filmzuordnung geprüft. Offline und ausgeblendeter Hinweis im Ruhemodus geprüft. Arbeitsbaseline bb0658b mit aktuellem Build bei 800×1060 CSS-Pixeln verglichen: Menü, Einstellungen, Informationskarte und Timeline ohne Updatehinweis pixelgleich. Keine freigegebenen Screenshot-Baselines geändert; reale Android-PWA-Updates bleiben am Gerät zu prüfen.
+
+## Patient-only – Feature-Branch (09.11.2026, F17)
+
+**Status:** Änderung auf `feature/patient-only-demo`, vor PR-Merge/Android-Abnahme. Nur Ernst als fiktiver Patient; kein Rollenwechsel, keine A-Karten, A-Medien oder A-Alma-Dialoge im geladenen Manifest. Alte QR-SVGs/PDF bleiben historisch und werden nicht auf P-Karten umgelenkt. Alle acht P-Übungskarten bleiben im bestehenden Hauptmenü erreichbar. Bestehende lokale Videodateien/Medienzuordnungen werden nicht verändert; alte Ereignisschlüssel werden ausgefiltert.
+
+Die zweispaltige Menügestaltung ist **V16 (nicht freigegeben, nicht umgesetzt)**. Tests und CI-Ergebnis erst nach dem PR tatsächlich dokumentieren; reale Tabletprüfung weiterhin offen.

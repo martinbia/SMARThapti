@@ -1,3 +1,5 @@
+> **HISTORISCHER IMPLEMENTIERUNGSAUFTRAG.** Seit dem Nutzerbeschluss F17 vom 09.11.2026 ist SMARThapti ausschliesslich für Patienten. Angaben über Angehörige, Rollenwechsel oder A-Karten in diesem älteren Auftrag sind überholt. Aktuelle Grundlagen: AGENTS.md, docs/DECISIONS.md und docs/CONCEPT.md. **Nicht erneut ausführen.**
+
 # Codex – vorbereiteter Auftrag: erste SMARThapti-PWA
 
 **Status:** VORBEREITET / **NICHT FREIGEGEBEN**, 08.11.2026.  

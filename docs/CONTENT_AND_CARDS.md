@@ -4,7 +4,7 @@
 
 ## 1. Papier-Häftchen – selbstständig sinnvoll (F)
 
-Bei relevanten Ereignissen/Übergängen erhalten Patienten bzw. Angehörige **separate kurze, individualisierte Häftchen**. Struktur je Häftchen:
+Bei relevanten Ereignissen/Übergängen erhalten **Patienten** kurze, individualisierte Häftchen. Struktur je Häftchen:
 
 1. **Was ist passiert / worum geht es?** Kurzer Titel, 2–3 verständliche Sätze.
 2. **Was ist für mich wichtig?** Nur geprüfte oder explizit als Demo-Platzhalter markierte Aussagen.
@@ -25,9 +25,11 @@ Bei relevanten Ereignissen/Übergängen erhalten Patienten bzw. Angehörige **se
 
 **F:** Vorderseite jeder Karte = Titel + Bildsymbol; Rückseite = QR. **V:** kleine Karten aus Karton, deutliche Farbakzente nach Kartentyp, einheitlicher kontrastreicher Code. Schlüsselanhänger verweisen auf häufig benötigte Vertiefungen; Ausgabe bei Austritt sowie zusätzliche Karten bei Physioterminen.
 
-**F:** Patient und Angehörige erhalten unterscheidbare Kartensets und Inhalte. **V:** Prefix `P` / `A`; stabiler Bezeichner `P-EX-001`. Keine Gesundheitsdaten/Namen in QR-Nutzlast.
+**F17 (09.11.2026):** Aktiv sind ausschliesslich Patienten-Kartensets mit Prefix `P`. Historische `A-*`-Karten haben keine aktive Zuordnung mehr. Keine Gesundheitsdaten/Namen in QR-Nutzlast.
 
-## 3. Zuordnung für die erste fiktive Demo (V)
+## 3. Zuordnung der Patienten-Karten (aktuell) und früheren Angehörigenkarten (historisch)
+
+**Aktuell:** Nur `P-*`-Karten, einschliesslich der sieben Übungskarten P-EX-101 bis P-EX-107 aus `content/exercise_catalog.json`. **Die nachstehenden `A-*`-Zeilen sind historisch und nicht für neue Interviews zu verwenden.**
 
 | Karte / Anhänger | Rolle, Ausgabe | Titel und Medienziel | Aktion |
 | --- | --- | --- | --- |
@@ -37,15 +39,15 @@ Bei relevanten Ereignissen/Übergängen erhalten Patienten bzw. Angehörige **se
 | `P-EX-001` | Patient, Austritt oder Physio | „Meine Übung ansehen“ / **Video-Slot ohne medizinischen Inhalt bis Freigabe** | ansehen, nicht abhaken |
 | `P-APT-001` | Patient, Austritt | „Nächster Physiotherapietermin“ / 10.11. (fiktiv) | nach Bestätigung in Timeline |
 | `P-MIL-001` | Patient, Physio 10.11. | „Ein eigener Alltagsschritt“ / selbst berichteter Meilenstein | nach Bestätigung in Timeline |
-| `A-INF-001` | Angehörige, Austritt | „Unterstützen ohne zu übernehmen“ / Unterstützungsvideo-Slot | ansehen |
-| `A-INF-002` | Angehörige, Austritt | „Auch an mich denken“ / Entlastungsinfo, Video-Slot | ansehen |
-| `A-INF-003` | Angehörige, Austritt | **„Alma für Angehörige“**, vorbereiteter Dialog mit lokalem `ALMA_A_START.mp3` | Dialog ansehen; MP3 optional |
-| `A-APT-001` | Angehörige, Austritt | „Physiotherapie: gemeinsam Fragen sammeln“ / **derselbe Termin-Eventkey wie P-APT-001** | nach Bestätigung; kein doppelter Termin |
-| `A-MIL-001` | Angehörige, Physio 10.11. | „Eine Pause für mich eingeplant“ / eigene Angabe | nach Bestätigung; nur Angehörigenansicht |
+| `A-INF-001` | **Historisch, inaktiv** (Angehörige), Austritt | „Unterstützen ohne zu übernehmen“ / Unterstützungsvideo-Slot | **nicht aktiv** |
+| `A-INF-002` | **Historisch, inaktiv** (Angehörige), Austritt | „Auch an mich denken“ / Entlastungsinfo, Video-Slot | **nicht aktiv** |
+| `A-INF-003` | **Historisch, inaktiv** (Angehörige), Austritt | **„Alma für Angehörige“**, früherer Dialog | **nicht aktiv** |
+| `A-APT-001` | **Historisch, inaktiv** (Angehörige), Austritt | früherer gemeinsamer Termin | **nicht aktiv** |
+| `A-MIL-001` | **Historisch, inaktiv** (Angehörige), Physio 10.11. | „Eine Pause für mich eingeplant“ / eigene Angabe | **nicht aktiv** |
 
 **V:** P-MIL-001 ist bewusst ein **freiwillig berichteter Alltagsschritt**, keine klinische Leistungszusage. Beispielsatz: „Ich habe heute selbst das Frühstück vorbereitet.“ Das ist **keine** Aussage über Freigabe oder Sicherheit dieser Handlung.
 
-**V (08.11.2026):** Damit auch beide vorgesehenen Alma-MP3s per QR erreichbar sind, ergänzt die Demo die zwei Informationskarten `P-INF-003` und `A-INF-003`. Beide verwenden den bestehenden QR-Vertrag und einen `dialogNodeId` in ihrem Content. Beim Scan öffnet U6 den vorbereiteten Dialog; die MP3 ist dessen optionale Tonspur, nicht ein neuer, offener Chat.
+**F17:** Nur der Patienten-Dialog `P-INF-003` mit der optionalen lokalen MP3 `ALMA_P_START.mp3` bleibt aktiv. Der frühere Dialog `A-INF-003` wird nicht mehr geladen; die alte gedruckte Karte bleibt rein historisch.
 
 ## 4. QR-Vertrag und Duplikate (V)
 
@@ -78,7 +80,7 @@ Eine abgespielte MP3 stammt aus vorbereiteter Datei, nicht aus Laufzeit-TTS; Dia
 ## 7. Druckmaterial und QR-Dateien (F: Ausgabewunsch; V: Layoutdetails)
 
 - `assets/qr/` enthält **11 einzeln druckbare SVG-QR-Codes** mit eindeutiger Karten-ID. Bei direkt verlinktem Video/MP3 enthält **auch der Dateiname** den vorgesehenen lokalen Mediennamen, z. B. `P-EX-001__P_EX_001_mp4.svg`.
-- `print/SMARThapti_Faltkarten_A4.pdf` enthält alle elf Karten auf **3 A4-Seiten**: links menschenlesbare Vorderseite, rechts QR-Rückseite, senkrechte Faltlinie und äussere Schnittkontur. Auf 100 %/Originalgrösse drucken und **mit den unbedruckten Seiten nach innen** falten.
+- **Historische** `print/SMARThapti_Faltkarten_A4.pdf` enthält noch 11 Karten, darunter fünf deaktivierte A-Karten. Nicht für neue Patienteninterviews drucken. Aktive P-QR-SVGs unter `assets/qr/`; ein neuer reiner Patientendruckbogen ist noch V17 (offen).
 - `print/CARD_INDEX.json` bildet Karten-ID, exakt kodierten QR-Text und Medien-Dateiname ab. QR kodiert bewusst **nur** `SH1:<CARD-ID>`; Dateiname wird durch Manifest-Verknüpfung ermittelt. **Ein gewöhnlicher Smartphone-QR-Scanner öffnet dadurch keine Medien-URL.**
 - `P-INF-003` und `A-INF-003` sind **zusätzliche, als Vorschlag markierte** Alma-Zugriffskarten. Vor breitem Druck/Praxiseinsatz QR-Grösse, Kontrast und Lesbarkeit am realen Tablet prüfen.
 
@@ -95,3 +97,7 @@ Das dezente Zahnrad in der Kopfzeile öffnet **Einstellungen**. Die hervorgehobe
 5. Die Zuordnung ersetzt keine Android-Dateiberechtigung. Nach vollständigem App-Neustart ggf. die lokalen Dateien erneut auswählen; keine automatische Freigabe allein durch einen Android-Pfad. Keine Medien werden hochgeladen oder in den Service-Worker-Cache kopiert.
 
 Standardzuordnung: P-EX-101 Gehen mit Teilbelastung; 102 Hüftflexion im Stehen; 103 Kniebeugen; 104 Tandemstand; 105 Treppensteigen mit Krücken; 106 Treppensteigen mit Teilbelastung; 107 Wadenheber mit Festhalten. Die bestehende Karte P-EX-001 bleibt ebenfalls frei zuordenbar. Neue SVGs lassen sich direkt in den Einstellungen herunterladen. Reproduzierbar erzeugen: `node scripts/generate-exercise-qr.mjs`.
+
+## F17 – aktueller Kartenbestand ab 09.11.2026
+
+**13 aktive Patienten-Karten:** sechs P-Basiskarten aus `content/demo_manifest.json` und sieben P-Übungskarten aus `content/exercise_catalog.json`. Acht Patienten-Übungsvideos bleiben per Touch/QR erreichbar. Keine Angehörigen-Medien, -Dialoge oder -Ereignisse im aktiven Manifest. Historische A-QRs und die alte Misch-PDF werden nicht gelöscht, aber nicht mehr verwendet. Ein Video angesehen bedeutet **nicht** durchgeführt.

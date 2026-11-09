@@ -1,9 +1,8 @@
 {
-  "schemaVersion": "0.1.0",
-  "status": "PROPOSAL - prewritten dialogue graph; no speech recognition or generative AI",
+  "schemaVersion": "0.2.0",
+  "status": "PATIENT-ONLY DEMO; prewritten dialogue, optional local MP3",
   "startNodes": {
-    "patient": "ALMA-P-START",
-    "relative": "ALMA-A-START"
+    "patient": "ALMA-P-START"
   },
   "nodes": [
     {
@@ -26,34 +25,6 @@
           "label": "Meinen Weg sehen",
           "action": "open-view",
           "target": "timeline"
-        },
-        {
-          "label": "Beenden",
-          "action": "end",
-          "target": null
-        }
-      ]
-    },
-    {
-      "id": "ALMA-A-START",
-      "role": "relative",
-      "text": "Hallo, Anna. Moechten Sie Informationen zur Begleitung oder zu Ihrer eigenen Entlastung?",
-      "audioMediaId": "M-ALMA-A",
-      "answers": [
-        {
-          "label": "Gut unterstuetzen",
-          "action": "open-card",
-          "target": "A-INF-001"
-        },
-        {
-          "label": "Eigene Entlastung",
-          "action": "open-card",
-          "target": "A-INF-002"
-        },
-        {
-          "label": "Naechsten Termin ansehen",
-          "action": "open-card",
-          "target": "A-APT-001"
         },
         {
           "label": "Beenden",

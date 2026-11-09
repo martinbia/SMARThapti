@@ -8,9 +8,9 @@
 | ID | Beschluss / Rahmen |
 | --- | --- |
 | F01 | Alma ist eine ca. 20 cm grosse, sitzende Plüschkuh; separates, davor abgestütztes Tablet im **Hochformat**. |
-| F02 | Kurz-Häftchen zu Ereignissen/Übergängen sind individuell, für Patient und Angehörige getrennt und auch ohne Tablet hilfreich. |
+| F02 (historisch) | Früher Häftchen für beide Zielgruppen; **F17 hebt Angehörigen-Häftchen im Demonstrator auf**. |
 | F03 | QR-Schlüsselanhänger vertiefen Informationen; bei Austritt und Physioterminen werden Karten ergänzt. Vorderseite Titel + Bildsymbol, Rückseite QR. |
-| F04 | Vier Typen: Information, Übung, Termin, Meilenstein; differenzierte Patienten-/Angehörigeninhalte. |
+| F04 (teilweise ersetzt) | Vier Kartentypen bleiben. Durch F17 sind nur Patienten-Karten aktiv. |
 | F05 | Installierbare PWA; **echter QR-Scan**, vorzugsweise Frontkamera; jederzeit Touch-Alternative. Kein eigenes Smartphone nötig. |
 | F06 | Vorbereitete Texte, Videos, MP3 und Alma-Dialoge mit auswählbaren Antwortbuttons; **keine** Spracherkennung/GenAI in der Demo. |
 | F07 | Videoangebote (Übungen und Alltagshilfe) zentral; Übungen unabhängig von Meilenstein erreichbar. |
@@ -21,14 +21,14 @@
 | F12 | GitHub als gemeinsame versionierte Spezifikation von Projekt-Chat und Codex; neue Commits starten **keinen** Codex-Auftrag. |
 | F13 | Öffentliches Repo darf keine vertraulichen Ursprungsunterlagen oder echten Patientendaten enthalten. |
 | F14 | **Neu festgelegt am 08.11.2026:** Sämtliche Medien (insbesondere Videos und MP3s) liegen **lokal auf dem Android-Tablet** im Verzeichnis `Internal storage/Documents/SMART`, nicht auf GitHub Pages oder im GitHub-Repository (Ausnahme für dekorative Appgrafik: F16). Die PWA darf nur nach expliziter Benutzerfreigabe darauf zugreifen. |
-| F16 | **Nutzerauftrag 09.11.2026:** Start mit Zentralschweizer Bergwiese und Kühen; Kamera scannt nach Browserfreigabe bereits dort. QR-Karten bestimmen primär Ernst/Anna. Tippen öffnet das Menü mit einzeiligem Rollenhinweis. Anleitung: 3 s einblenden, fünf Vorführungen, 3 s ausblenden, 10 s nur Landschaft, dann wiederholen. Dekorative Appgrafik darf mit der PWA ausgeliefert werden; Therapie-/Dialogmedien bleiben lokal. |
+| F16 (teilweise ersetzt) | Bergwiese, QR-Einstieg, Animation, Kameraindikator und lokale Medien bleiben. Die frühere automatische Auswahl Ernst/Anna entfällt durch F17. |
 | F15 | **Aktuell beauftragt:** QR-Karten als druckbares PDF mit Vorder-/Rückseite auf demselben Blatt und Faltlinie bereitstellen; QR-SVG-Dateien in separatem GitHub-Verzeichnis. Keine personenbezogenen Daten in QR-Payloads. |
 
 ## VORSCHLÄGE – für Umsetzung v0.1
 
 | ID | Vorschlag | Grund / Rückfall |
 | --- | --- | --- |
-| V01 | Fiktiver Fall **Ernst/Anna** aus SMARTcoach-Journey v0.2 | Vergleichbare Gesprächsszenen; kann vollständig ersetzt werden |
+| V01 (durch F17 angepasst) | Fiktiver Fall **Ernst** aus SMARTcoach-Journey v0.2 | Anna bleibt nur historische Kontextfigur, keine App-Nutzerin |
 | V02 | QR-Kurztext `SH1:<CARD-ID>`, IDs `P-INF-001` etc. | Robust, keine PII, unabhängig von Live-URL |
 | V03 | Statische GitHub-Pages-PWA, Daten in `content/*.json` | Einfach, Inhalte unabhängig vom Code austauschbar |
 | V04 | Browser-LocalStorage für bestätigte Demo-Einträge und Reset | Ohne Backend; keine Sicherheits-/Privatsphärengarantie |
@@ -83,3 +83,9 @@ Expliziter Nutzerauftrag: Bei Verbindung nach Updates suchen und eine neue Versi
 ## F20 – App-Breite ohne feste Obergrenze
 
 Auf ausdrücklichen Nutzerwunsch die 850-CSS-Pixel-Obergrenze der App-Fläche aufheben. Volle verfügbare Tabletbreite bei erhaltenen Rand-/Safe-Area-Abständen; Hochformat bleibt der primäre Betriebsmodus.
+
+## Aktueller Beschluss F17 – ausschliesslich Patient (09.11.2026)
+
+- Ein fiktiver Patient **Ernst** ist die einzige Zielgruppe. Kein Angehörigenmodus, keine zweite Timeline, keine Rollenumschaltung. Nur P-Karten und Patienten-Alma-Dialog sind aktiv; alte A-QRs und die bisherige Misch-PDF bleiben Archiv und dürfen nicht auf Patienteninhalte umgeleitet werden.
+- Patienten-Karten: sechs Basiskarten und sieben weitere Übungen, also **13 aktive Karten**, darunter **acht Übungsvideos**. Die lokale Medienablage, das bewusst bestätigte Speichern und alle klinischen Grenzen bleiben erhalten.
+- **GUI-Freeze:** Nur Entfernung des Perspektivenwechsels ist mit F17 ausdrücklich freigegeben. Die zuvor besprochene Zweispalten-Startseite (links Videos, rechts nächster Physiotermin und Berichte/Erklärungen) ist **Vorschlag V16, noch nicht implementierungsfreigegeben**.
