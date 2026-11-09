@@ -135,13 +135,11 @@ test("local file binding, media errors, URL revocation, reset preserves media bi
   });
   await page.goto("./#card/P-EX-001");
   await expect(page.locator(".media-status")).toContainText("Nicht verbunden");
-  await page
-    .locator("#local-files")
-    .setInputFiles({
-      name: "P_EX_001.mp4",
-      mimeType: "video/mp4",
-      buffer: Buffer.from("invalid media"),
-    });
+  await page.locator("#local-files").setInputFiles({
+    name: "P_EX_001.mp4",
+    mimeType: "video/mp4",
+    buffer: Buffer.from("invalid media"),
+  });
   await expect(page.locator(".media-status")).toContainText("nicht abspielbar");
   await click(page, "moderator");
   await expect(page.locator("#media-list")).toContainText(
@@ -248,6 +246,43 @@ test("portrait and landscape have no horizontal overflow and large controls", as
 test("actual local MP4 and MP3 playback stops and revokes blobs on navigation", async ({
   page,
 }) => {
+  await page.goto("./#card/P-EX-001");
+  const h264 = await page.evaluate(() =>
+    document
+      .createElement("video")
+      .canPlayType('video/mp4; codecs="avc1.42E01E"'),
+  );
+  expect(
+    h264,
+    "The MP4 playback test requires an H.264-capable browser. Use Google Chrome (npx playwright install chrome) or CHROMIUM_PATH pointing to a codec-enabled Chromium.",
+  ).not.toBe("");
+  const startPlayback = async (player) => {
+    await expect
+      .poll(() => player.evaluate((p) => p.readyState))
+      .toBeGreaterThan(0);
+    await player.evaluate(async (p) => {
+      window.oldPlayer = p;
+      let timer;
+      try {
+        await Promise.race([
+          p.play(),
+          new Promise((_, reject) => {
+            timer = setTimeout(
+              () =>
+                reject(
+                  new Error(
+                    "Local media did not start playing within 5 seconds",
+                  ),
+                ),
+              5000,
+            );
+          }),
+        ]);
+      } finally {
+        clearTimeout(timer);
+      }
+    });
+  };
   const { execFileSync } = await import("node:child_process");
   const { mkdtempSync, rmSync } = await import("node:fs");
   const { tmpdir } = await import("node:os");
@@ -288,10 +323,7 @@ test("actual local MP4 and MP3 playback stops and revokes blobs on navigation", 
       .locator("#local-files")
       .setInputFiles([dir + "/P_EX_001.mp4", dir + "/ALMA_P_START.mp3"]);
     await expect(page.locator("video")).toHaveAttribute("src", /^blob:/);
-    await page.locator("video").evaluate(async (p) => {
-      window.oldPlayer = p;
-      await p.play();
-    });
+    await startPlayback(page.locator("video"));
     await expect
       .poll(() => page.locator("video").evaluate((p) => p.currentTime))
       .toBeGreaterThan(0);
@@ -306,10 +338,7 @@ test("actual local MP4 and MP3 playback stops and revokes blobs on navigation", 
       .toBe(true);
     await click(page, "dialog:ALMA-P-START");
     await expect(page.locator("audio")).toHaveAttribute("src", /^blob:/);
-    await page.locator("audio").evaluate(async (p) => {
-      window.oldPlayer = p;
-      await p.play();
-    });
+    await startPlayback(page.locator("audio"));
     await expect
       .poll(() => page.locator("audio").evaluate((p) => p.currentTime))
       .toBeGreaterThan(0);

@@ -12,7 +12,7 @@ npm run build
 npm run dev
 ```
 
-Projektpfad ist `/SMARThapti/`. `npm run preview -- --port 4173` startet den Produktionsbuild. `npm test` startet selbst einen Previewserver. In der vorbereiteten Cloud-Umgebung lautet der Testaufruf `CHROMIUM_PATH=/usr/bin/chromium npm test`. Andernorts zuerst `npx playwright install --with-deps chromium` ausführen und ffmpeg installieren. Testmedien werden mit ffmpeg neutral in einem temporären Verzeichnis erzeugt und danach gelöscht; keine Mediendateien committen.
+Projektpfad ist `/SMARThapti/`. `npm run preview -- --port 4173` startet den Produktionsbuild. `npm test` startet selbst einen Previewserver. In der vorbereiteten Cloud-Umgebung lautet der Testaufruf `CHROMIUM_PATH=/usr/bin/chromium npm test`. Andernorts zuerst `npx playwright install --with-deps chrome` ausführen und ffmpeg installieren. Standardmässig verwenden die Tests Google Chrome, weil Playwrights Chromium nicht alle für den H.264-MP4-Test benötigten Medien-Codecs enthält. Ein eigener `CHROMIUM_PATH` muss auf einen Browser mit H.264-Unterstützung zeigen. Testmedien werden mit ffmpeg neutral in einem temporären Verzeichnis erzeugt und danach gelöscht; keine Mediendateien committen.
 
 Vite bündelt die Anwendung einschliesslich jsQR ohne CDN. Der Build kopiert vorhandene Textdaten, QR-Dateien und Druckmaterialien unverändert nach `dist`. Der Service Worker speichert nur die explizite App-Shell und JSON-Daten; der Cache wird über einen Inhaltshash versioniert. Nach erfolgreicher Erstladung sind diese Inhalte offline nutzbar. Medien, Blob-URLs und Druckmaterialien werden nicht in den App-Cache aufgenommen. Ein neuer Service Worker aktiviert sich nach Schliessen der bisherigen App-Fenster.
 
