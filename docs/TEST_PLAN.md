@@ -49,7 +49,7 @@
 1. **Viewport protokollieren:** Tabletmodell, Android/Chrome-Version, Browser/PWA-Modus, CSS-Viewport-Breite/Höhe und sichtbare Systemleisten; Screenshots nur mit fiktiven Inhalten.
 2. **QR-Erkennung testen:** Frontkamera initial; Lesedistanz, Erkennungsdauer, Spiegelung, Fokus und Beleuchtung beobachten; Rückkamera und Touch-Alternative testen.
 3. **Lesbarkeit und Bedienbarkeit:** Schrift, Touch-Ziele, Scrollaufwand, Position von Zurück/Stopp, Videogrösse im Portrait und Landscape.
-4. **Medien- und Stream-Lebenszyklus:** Zurück, Home, Rollenwechsel, Browserwechsel, Screen-Lock (soweit prüfbar); keine unbeabsichtigte Fortsetzung.
+4. **Medien- und Stream-Lebenszyklus:** Zurück, Home, Browserwechsel, Screen-Lock (soweit prüfbar); keine unbeabsichtigte Fortsetzung. Der frühere Rollenwechsel entfällt mit F17.
    Zusätzlich: **lokales Ordner-Grant**, Datei-Zuordnung nach Dateiname, Abbruch, Berechtigungsentzug, Neustart und Nachweis, dass beim Video-/MP3-Start keine Mediendatei von GitHub geladen wird.
 5. **Offline nur falls explizit beauftragt:** PWA-Cache/Medienumfang getrennt testen; ansonsten keine Offline-Zusage.
 
@@ -79,7 +79,7 @@ Alle realen Tablet-Tests bleiben offen. Automatisierte Browserprüfungen sind ke
 
 ## Ergänzende Einstiegstests vom 09.11.2026
 
-T29: Bergwiese ohne Menü beim Erstaufruf, Kamera nach Freigabe, Anna-/Ernst-QR wählen automatisch die Perspektive; Touch und Enter öffnen das Menü. T30: 3 s Einblenden, fünf Vorführungen à 2,4 s, 3 s Ausblenden, 10 s ausschliesslich Hintergrundbild, Wiederholung und Timer-Ende bei Navigation. T31: Kopfzeile „Für Ernst/Anna“ einzeilig, manueller Wechsel nachgeordnet, reduzierte Bewegungseinstellung ohne Handbewegung. Browserautomation prüft diese Abläufe; Darstellung, Einwilligung, Kamerafokus und Systemleisten auf dem realen Android-Tablet bleiben offen.
+T29 (F17): Bergwiese ohne Menü beim Erstaufruf, Kamera nach Freigabe; nur aktive Patienten-QRs öffnen Inhalte. Historische A-QRs bleiben inaktiv; Touch und Enter öffnen das Menü. T30: 3 s Einblenden, fünf Vorführungen à 2,4 s, 3 s Ausblenden, 10 s ausschliesslich Hintergrundbild, Wiederholung und Timer-Ende bei Navigation. T31 (F17): Kopfzeile „Für Ernst“ einzeilig, kein manueller Perspektivenwechsel, reduzierte Bewegungseinstellung ohne Handbewegung. Browserautomation prüft diese Abläufe; Darstellung, Einwilligung, Kamerafokus und Systemleisten auf dem realen Android-Tablet bleiben offen.
 
 T32: Roter Punkt erst bei laufendem Stream und bereiter QR-Erkennung; bei fehlender/verweigerter Kamera kein Punkt. Punkt bleibt während der Animationspause sichtbar und verschwindet nach erkanntem QR oder Navigation. Browserautomation mit Kamerastream prüft Ein-/Ausschalten; Sichtbarkeit bei realen Android-Systemleisten am Tablet prüfen.
 

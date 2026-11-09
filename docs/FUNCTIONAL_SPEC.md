@@ -14,7 +14,7 @@
 | FS-05 | F | Kamera scannt **echte** QR-Codes; zuerst Frontkamera anfragen, bei inkompatibler/ungeeigneter Kamera Wechsel zur Rückkamera anbieten; unbekannte Codes höflich behandeln. |
 | FS-06 | F | QR-Scan öffnet Zielinhalt ohne unbeabsichtigte Schreibaktion. Mehrfachscan derselben Karte erzeugt nie automatisch Timeline-Einträge. |
 | FS-07 | F | Übungskarte und Unterstützungskarte öffnen vorbereitete Texte und Videos; **Übungen sind auch ohne erreichten Meilenstein aufrufbar**. Video zeigt keine automatisch abgeleitete Durchführung. |
-| FS-08 | F | Video- und MP3-Steuerung Start/Pause/Stopp; Medien enden beim Navigationswechsel, Schliessen oder Rollenwechsel. Keine gleichzeitige ungesteuerte Wiedergabe. |
+| FS-08 | F | Video- und MP3-Steuerung Start/Pause/Stopp; Medien enden beim Navigationswechsel oder Schliessen. Keine gleichzeitige ungesteuerte Wiedergabe. |
 | FS-09 | F | Alma-Dialoge sind aus **vorbereiteten Texten/MP3-Dateien und Antwortbuttons** aufgebaut; jede angebotene Antwort führt zu definiertem Folgeknoten oder zurück. Keine Mikrofon-/LLM-Funktion. |
 | FS-10 | F | Timeline zeigt fiktive vergangene Ereignisse, geplante Termine, persönliche Ziele und eigene Angaben semantisch unterscheidbar. Keine Heilungsprognose oder Rankings. |
 | FS-11 | F | Neu hinzuzufügende Termin-/Meilensteineinträge zeigen vor dem Speichern eine verständliche Bestätigungsansicht mit „Hinzufügen“ und „Abbrechen“. Abbrechen verändert Timeline nicht. |

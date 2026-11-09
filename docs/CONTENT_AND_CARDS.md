@@ -39,11 +39,11 @@ Bei relevanten Ereignissen/Übergängen erhalten **Patienten** kurze, individual
 | `P-EX-001` | Patient, Austritt oder Physio | „Meine Übung ansehen“ / **Video-Slot ohne medizinischen Inhalt bis Freigabe** | ansehen, nicht abhaken |
 | `P-APT-001` | Patient, Austritt | „Nächster Physiotherapietermin“ / 10.11. (fiktiv) | nach Bestätigung in Timeline |
 | `P-MIL-001` | Patient, Physio 10.11. | „Ein eigener Alltagsschritt“ / selbst berichteter Meilenstein | nach Bestätigung in Timeline |
-| `A-INF-001` | **Historisch, inaktiv** (Angehörige), Austritt | „Unterstützen ohne zu übernehmen“ / Unterstützungsvideo-Slot | ansehen |
-| `A-INF-002` | **Historisch, inaktiv** (Angehörige), Austritt | „Auch an mich denken“ / Entlastungsinfo, Video-Slot | ansehen |
-| `A-INF-003` | **Historisch, inaktiv** (Angehörige), Austritt | **„Alma für Angehörige“**, vorbereiteter Dialog mit lokalem `ALMA_A_START.mp3` | Dialog ansehen; MP3 optional |
-| `A-APT-001` | **Historisch, inaktiv** (Angehörige), Austritt | „Physiotherapie: gemeinsam Fragen sammeln“ / **derselbe Termin-Eventkey wie P-APT-001** | nach Bestätigung; kein doppelter Termin |
-| `A-MIL-001` | **Historisch, inaktiv** (Angehörige), Physio 10.11. | „Eine Pause für mich eingeplant“ / eigene Angabe | nach Bestätigung; nur Angehörigenansicht |
+| `A-INF-001` | **Historisch, inaktiv** (Angehörige), Austritt | „Unterstützen ohne zu übernehmen“ / Unterstützungsvideo-Slot | **nicht aktiv** |
+| `A-INF-002` | **Historisch, inaktiv** (Angehörige), Austritt | „Auch an mich denken“ / Entlastungsinfo, Video-Slot | **nicht aktiv** |
+| `A-INF-003` | **Historisch, inaktiv** (Angehörige), Austritt | **„Alma für Angehörige“**, früherer Dialog | **nicht aktiv** |
+| `A-APT-001` | **Historisch, inaktiv** (Angehörige), Austritt | früherer gemeinsamer Termin | **nicht aktiv** |
+| `A-MIL-001` | **Historisch, inaktiv** (Angehörige), Physio 10.11. | „Eine Pause für mich eingeplant“ / eigene Angabe | **nicht aktiv** |
 
 **V:** P-MIL-001 ist bewusst ein **freiwillig berichteter Alltagsschritt**, keine klinische Leistungszusage. Beispielsatz: „Ich habe heute selbst das Frühstück vorbereitet.“ Das ist **keine** Aussage über Freigabe oder Sicherheit dieser Handlung.
 

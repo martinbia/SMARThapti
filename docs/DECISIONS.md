@@ -28,7 +28,7 @@
 
 | ID | Vorschlag | Grund / Rückfall |
 | --- | --- | --- |
-| V01 | Fiktiver Fall **Ernst/Anna** aus SMARTcoach-Journey v0.2 | Vergleichbare Gesprächsszenen; kann vollständig ersetzt werden |
+| V01 (durch F17 angepasst) | Fiktiver Fall **Ernst** aus SMARTcoach-Journey v0.2 | Anna bleibt nur historische Kontextfigur, keine App-Nutzerin |
 | V02 | QR-Kurztext `SH1:<CARD-ID>`, IDs `P-INF-001` etc. | Robust, keine PII, unabhängig von Live-URL |
 | V03 | Statische GitHub-Pages-PWA, Daten in `content/*.json` | Einfach, Inhalte unabhängig vom Code austauschbar |
 | V04 | Browser-LocalStorage für bestätigte Demo-Einträge und Reset | Ohne Backend; keine Sicherheits-/Privatsphärengarantie |
