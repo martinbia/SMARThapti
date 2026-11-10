@@ -1,6 +1,8 @@
 import { test, expect } from "@playwright/test";
 import { createServer } from "node:http";
-import { readFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
+import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 
 async function updateServer() {
@@ -63,6 +65,9 @@ test("real service worker update waits for acceptance, reloads and retains assig
   page,
 }) => {
   const server = await updateServer();
+  const mediaDir = await mkdtemp(tmpdir() + "/smarthapti-update-local-copy-");
+  const localVideo = `${mediaDir}/GehenMitTeilbelastung_video_720p.mp4`;
+  execFileSync("ffmpeg", ["-v", "error", "-f", "lavfi", "-i", "color=c=gray:s=160x120:d=2", "-c:v", "libx264", "-pix_fmt", "yuv420p", localVideo]);
   try {
     await page.addInitScript(() => {
       navigator.mediaDevices.getUserMedia = async () => {
@@ -88,6 +93,10 @@ test("real service worker update waits for acceptance, reloads and retains assig
       .poll(() => page.evaluate(() => !!navigator.serviceWorker.controller))
       .toBe(true);
     await expect(page.locator("#app-update")).toBeHidden();
+    await page.locator("#local-files").setInputFiles(localVideo);
+    page.once("dialog", (dialog) => dialog.accept());
+    await page.locator('[data-action="save-local-video:M-P-EX-101"]').click();
+    await expect(page.locator('[data-media-access="M-P-EX-101"]')).toHaveText("Dauerhaft auf diesem Tablet gespeichert und abspielbar");
     await page.locator('[data-id="M-P-EX-101"]').fill("Gespeicherter Film.mp4");
     await page.locator('#assignment-form button[type="submit"]').click();
     server.publish();
@@ -143,13 +152,16 @@ test("real service worker update waits for acceptance, reloads and retains assig
       "Gespeicherter Film.mp4",
     );
     await expect(page.locator('[data-media-access="M-P-EX-101"]')).toHaveText(
-      "Verbunden und lesbar",
+      "Dauerhaft auf diesem Tablet gespeichert und abspielbar",
     );
+    await page.goto(server.url + "#video/P-EX-101");
+    await expect(page.locator("video.video-player")).toHaveAttribute("src", /^blob:/);
     expect(await page.evaluate(() => caches.keys())).toEqual([
       "smarthapti-shell-release-2",
     ]);
   } finally {
     await server.close();
+    await rm(mediaDir, { recursive: true, force: true });
   }
 });
 
