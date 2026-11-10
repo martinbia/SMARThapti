@@ -115,3 +115,7 @@ Die Einstellungen unterscheiden lesbare Dateien, gespeicherte Dateizuordnungen o
 ### Lokale PWA-Videokopien (ausdrücklich beauftragte Ergänzung vom 10.11.2026)
 
 In Einstellungen zeigt der Bereich „Lokale Videokopien“ für jede der sieben Übungskarten, ob eine geprüfte Kopie abspielbar ist, nur die aktuell verbundene Android-Originaldatei vorliegt, die Datei derzeit nicht erreichbar ist oder noch keine Quelle verbunden wurde. Der Button „Videos dauerhaft auf diesem Tablet speichern“ kopiert nur lesbare ausgewählte Übungsvideos nach ausdrücklicher Bestätigung. Die Bestätigung nennt die betroffene Anzahl und den benötigten Speicher; Speicherverbrauch, Browserquote und Status des Browser-Speicherschutzes werden angezeigt. Einzelkopien lassen sich ersetzen oder entfernen; „Alle Videokopien löschen“ braucht Bestätigung. Dabei bleiben die Originale unter Documents/SMART unberührt. Die übrigen Appansichten bleiben visuell erhalten.
+
+### Videoende
+
+Nach regulärem Ende liegt für zehn Sekunden eine textlose, höchstens 4 px hohe grüne Fortschrittslinie unmittelbar unter dem Player. Sie schrumpft linear von voller Breite auf null und verändert dessen Grösse nicht. Bei Wiedergabe, Interaktion, Navigation, Abschalten oder Verbergen verschwindet die Linie und der Countdown endet. Nach Ablauf öffnet die App die Bergwiese mit aktiver Begrüssungsanimation und QR-Erkennung.

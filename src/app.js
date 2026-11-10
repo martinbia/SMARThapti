@@ -79,6 +79,8 @@ let manifest,
   files = new Map(),
   stream = null,
   frame = 0,
+  videoReturnTimer = null,
+  videoReturnFrame = 0,
   urls = [],
   generation = 0,
   facing = "user",
@@ -405,6 +407,7 @@ function persistXrayFile(file) {
   return true;
 }
 function cleanup() {
+  cancelVideoReturnCountdown();
   stopWelcome();
   stopWelcome = () => {};
   document.querySelector("#camera-indicator")?.remove();
@@ -420,6 +423,44 @@ function cleanup() {
   });
   urls.forEach(URL.revokeObjectURL);
   urls = [];
+}
+function cancelVideoReturnCountdown() {
+  if (videoReturnTimer !== null) clearTimeout(videoReturnTimer);
+  videoReturnTimer = null;
+  cancelAnimationFrame(videoReturnFrame);
+  videoReturnFrame = 0;
+  const progress = document.querySelector(".video-return-countdown");
+  progress?.closest(".video-player-slot")?.classList.remove("countdown-active");
+  progress?.remove();
+}
+function startVideoReturnCountdown(player) {
+  cancelVideoReturnCountdown();
+  const wrap = player?.closest(".video-player-wrap");
+  if (!wrap) return;
+  const progress = document.createElement("div");
+  progress.className = "video-return-countdown";
+  progress.setAttribute("role", "progressbar");
+  progress.setAttribute("aria-label", "Rückkehr zur Bergwiese in zehn Sekunden");
+  progress.setAttribute("aria-valuemin", "0");
+  progress.setAttribute("aria-valuemax", "100");
+  progress.setAttribute("aria-valuenow", "100");
+  const fill = document.createElement("span");
+  fill.className = "video-return-countdown-fill";
+  progress.append(fill);
+  wrap.closest(".video-player-slot")?.classList.add("countdown-active");
+  wrap.append(progress);
+  const startedAt = performance.now();
+  const updateAccessibleProgress = (now) => {
+    const value = Math.max(0, Math.round(100 - ((now - startedAt) / 10_000) * 100));
+    progress.setAttribute("aria-valuenow", String(value));
+    if (value > 0) videoReturnFrame = requestAnimationFrame(updateAccessibleProgress);
+    else videoReturnFrame = 0;
+  };
+  videoReturnFrame = requestAnimationFrame(updateAccessibleProgress);
+  videoReturnTimer = window.setTimeout(() => {
+    videoReturnTimer = null;
+    go("welcome");
+  }, 10_000);
 }
 function go(path) {
   selectionRequest++;
@@ -601,6 +642,13 @@ async function mountMedia(token) {
         if (p !== player) p.pause();
       }),
     );
+    if (videoView) {
+      player.addEventListener("play", cancelVideoReturnCountdown);
+      player.addEventListener("ended", () => startVideoReturnCountdown(player));
+      const videoMain = document.querySelector(".video-view");
+      videoMain?.addEventListener("pointerdown", cancelVideoReturnCountdown);
+      videoMain?.addEventListener("keydown", cancelVideoReturnCountdown);
+    }
     player.addEventListener("error", () => {
       if (videoView) {
         el.classList.add("video-media-missing");
