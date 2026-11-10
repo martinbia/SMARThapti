@@ -35,7 +35,7 @@
     },
     {
       "id": "E07",
-      "title": "Fiktiver Terminplan",
+      "title": "Fiktiver persönlicher Terminplan",
       "dated": "2026-11-02",
       "kind": "personal-demo",
       "reviewed": false
@@ -123,9 +123,9 @@
     {
       "id": "C-P-APT",
       "role": "patient",
-      "title": "Naechster Physiotermin",
-      "shortText": "10.11.2026 – ausschliesslich fiktives Beispieldatum.",
-      "detailText": "Bei diesem Termin koennen Fragen zum persoenlichen Therapieplan besprochen werden. Zur Timeline erst nach Bestaetigung hinzufuegen.",
+      "title": "Nächster Physiotherapietermin",
+      "shortText": "Ein geplanter Folgetermin aus dem fiktiven persönlichen Terminplan.",
+      "detailText": "Alle Angaben zu diesem Termin sind ausschliesslich fiktive Beispieldaten.",
       "sourceIds": [
         "E07"
       ],
@@ -282,13 +282,25 @@
     },
     {
       "eventKey": "J10",
-      "date": "2026-11-10",
-      "title": "Physiotherapie (geplant)",
+      "date": "2026-11-17",
+      "title": "Nächster Physiotherapietermin",
       "kind": "planned-candidate",
       "sourceKind": "personal-demo",
       "sourceIds": [
         "E07"
       ],
+      "appointment": {
+        "time": "10:30",
+        "place": "Physiotherapiepraxis (Demo), Raum 2",
+        "appointmentType": "Physiotherapie – Folgetermin",
+        "status": "Geplant",
+        "discussionPoints": [
+          "Wie es zu Hause mit der Bewegung geht.",
+          "Welche Übungen und Videos hilfreich sind.",
+          "Welche Fragen noch offen sind."
+        ],
+        "questionLines": 3
+      },
       "fictional": true,
       "requiresConfirmation": true
     },

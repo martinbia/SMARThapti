@@ -4,7 +4,7 @@
 
 ## Fiktiver Fall und Interview-Set-up
 
-Ernst Baumann (79, fiktiv) ist nach einer fiktiven Hüftfraktur-Operation wieder zu Hause. OP-Bericht E02 (27.10.2026), Austritt E06 (02.11.2026), geplante Physiotherapie E07 (10.11.2026) sind **nur fiktive Beispieldaten**. Keine konkreten Belastungsfreigaben, Übungsdosierungen oder medizinischen Anweisungen erfinden.
+Ernst Baumann (79, fiktiv) ist nach einer fiktiven Hüftfraktur-Operation wieder zu Hause. OP-Bericht E02 (27.10.2026), Austritt E06 (02.11.2026), geplanter Physiotherapie-Folgetermin E07 (17.11.2026, 10:30 Uhr, Physiotherapiepraxis (Demo), Raum 2) sind **nur fiktive Beispieldaten**. Der Datenstand des persönlichen Terminplans ist 02.11.2026. Keine konkreten Belastungsfreigaben, Übungsdosierungen oder medizinischen Anweisungen erfinden.
 
 Alma steht neben dem Hochformat-Tablet. Ernst erhält ein **Patienten-Häftchen** und **nur P-Karten**, keine A-Karten. Videos/MP3 liegen nur nach technischer Freigabe unter Internal storage/Documents/SMART. Auch ohne Smartphone und Video ist das Papier sinnvoll. Die frühere Figur Anna bleibt historischer Ausgangskontext, nicht eigenständige Zielperson der PWA.
 
@@ -18,7 +18,7 @@ Alma steht neben dem Hochformat-Tablet. Ernst erhält ein **Patienten-Häftchen*
 
 **S4 – Alma:** Ernst scannt P-INF-003 oder nutzt „Alma fragen“, hört optional ALMA_P_START.mp3 und wählt vorbereitete Antwortbuttons. Kein KI-Dialog, Ton stoppt beim Verlassen.
 
-**S5 – Physiotermin:** Ernst scannt P-APT-001, liest den fiktiven Termin und fügt ihn nur nach expliziter Bestätigung hinzu. Wiederholungen erzeugen keinen zweiten Eintrag.
+**S5 – Physiotermin:** Ernst scannt P-APT-001 und sieht denselben fiktiven Termin wie in der Menüzeile. Der Scan trägt nichts ein. Nur „Zur Timeline hinzufügen“ und die anschliessende Bestätigung speichern J10; Wiederholungen erzeugen keinen zweiten Eintrag.
 
 **S6 – Mein Weg:** Ernst betrachtet seine Timeline, bestätigt oder verwirft den selbst berichteten Meilenstein P-MIL-001. Keine Ranglisten und keine festgelegte Genesungsfrist.
 

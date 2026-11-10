@@ -373,6 +373,25 @@ function recordDate(value) {
   const [year, month, day] = value.split("-");
   return `${day}.${month}.${year}`;
 }
+function appointmentDate(value) {
+  return new Intl.DateTimeFormat("de-CH", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${value}T12:00:00Z`));
+}
+function appointmentDetailMarkup(card) {
+  const event = manifest.timeline.find((item) => item.eventKey === card.eventKey);
+  const appointment = event?.appointment;
+  if (!event || !appointment) return "<p>Für diesen Termin sind keine fiktiven Beispieldaten hinterlegt.</p>";
+  const sourceRecord = event.sourceIds
+    .map((sourceId) => manifest.sources.find((item) => item.id === sourceId))
+    .find(Boolean);
+  const lineCount = Math.min(3, Math.max(2, Number(appointment.questionLines) || 3));
+  return `<article class="appointment-detail"><h1>${esc(event.title)}</h1><section class="appointment-summary" aria-label="Terminangaben"><div class="appointment-date-time"><p class="appointment-date">${esc(appointmentDate(event.date))}</p><p class="appointment-time">${esc(appointment.time)} Uhr</p></div><span class="appointment-status">${esc(appointment.status)}</span><ul class="appointment-meta"><li><span aria-hidden="true">📍</span><span>${esc(appointment.place)}</span></li><li><span aria-hidden="true">◷</span><span>${esc(appointment.appointmentType)}</span></li></ul></section><section class="appointment-agenda"><h2>Was wir beim Termin besprechen können</h2><ul>${appointment.discussionPoints.map((point) => `<li>${esc(point)}</li>`).join("")}</ul></section><section class="appointment-questions"><h2>Meine Fragen für den Termin</h2><div class="appointment-note-lines" aria-label="Leerer Notizbereich mit ${lineCount} Schreiblinien">${Array.from({ length: lineCount }, () => '<span aria-hidden="true"></span>').join("")}</div></section><div class="appointment-action">${button(keys.includes(card.eventKey) ? "Eintrag bereits vorhanden – ansehen" : "Zur Timeline hinzufügen", keys.includes(card.eventKey) ? "timeline" : `confirm:${card.id}`, 'class="primary"')}</div><p class="appointment-source">Fiktive Quelle: ${esc(sourceRecord?.title || "Fiktiver Terminplan")} · Datenstand ${sourceRecord?.dated ? recordDate(sourceRecord.dated) : "unbekannt"} · kein echter Termin</p></article>`;
+}
 function persistAssignments(value) {
   try {
     const next = validateAssignments(value, manifest.media);
@@ -803,7 +822,9 @@ function render() {
     }
     const content = manifest.contents.find((x) => x.id === c.contentId);
     title = c.printTitle || c.title;
-    body = `<span class="tag">${esc(types[c.type])} · ${esc(c.id)}</span><h1>${esc(title)}</h1><p>${esc(content.shortText)}</p><p>${esc(content.detailText)}</p>${source(content)}${mediaMarkup(content.mediaIds)}${c.eventKey ? button(keys.includes(c.eventKey) ? "Eintrag bereits vorhanden – ansehen" : "Zur Timeline hinzufügen", keys.includes(c.eventKey) ? "timeline" : "confirm:" + c.id, 'class="primary"') : ""}`;
+    body = c.type === "appointment"
+      ? appointmentDetailMarkup(c)
+      : `<span class="tag">${esc(types[c.type])} · ${esc(c.id)}</span><h1>${esc(title)}</h1><p>${esc(content.shortText)}</p><p>${esc(content.detailText)}</p>${source(content)}${mediaMarkup(content.mediaIds)}${c.eventKey ? button(keys.includes(c.eventKey) ? "Eintrag bereits vorhanden – ansehen" : "Zur Timeline hinzufügen", keys.includes(c.eventKey) ? "timeline" : "confirm:" + c.id, 'class="primary"') : ""}`;
   } else if (view === "video") {
     const c = manifest.cards.find((card) => card.id === id && card.role === role && card.type === "exercise");
     const content = manifest.contents.find((entry) => entry.id === c?.contentId);
@@ -918,7 +939,8 @@ function render() {
     }
   } else if (view === "moderator") {
     title = "Moderatorbereich";
-    body = `<h1>Demo vorbereiten</h1><p>Medien ausschliesslich lokal unter <strong>Internal storage/Documents/SMART</strong>. Auswahl erlaubt nur Lesen; kein Upload und keine Kopie in den App-Speicher.</p><div class="actions">${button("Medienordner verbinden", "choose-directory")}${button("Lokale Datei(en) auswählen", "choose-files")}</div><ul id="media-list">${manifest.media.map((m) => `<li>${esc(m.fileName)}: wird geprüft …</li>`).join("")}</ul><p>Zuordnungen bleiben nach einem Neustart erhalten. Je nach Android-/Chrome-Dateiauswahl muss der Ordner erneut freigegeben werden; einzelne Filme müssen dann nicht neu zugeordnet werden.</p><label>Interview-Szenario <select id="scenario"><option value="discharge" ${scenario === "discharge" ? "selected" : ""}>Austritt · ${esc(manifest.asOf)}</option><option value="physio" ${scenario === "physio" ? "selected" : ""}>Physiotermin · 10.11.2026</option></select></label><p>Alle Karten bleiben in beiden Szenarien erreichbar. Die Szene setzt nur den fiktiven Interviewzeitpunkt.</p>${button("Fiktive Einträge zurücksetzen", "reset")}<p class="notice">Die bisherige Faltkarten-PDF enthält historische Angehörigenkarten und ist nicht mehr für aktuelle Patienteninterviews vorgesehen. Die Patienten-QR-Codes sind weiterhin in den Einstellungen verfügbar.</p>`;
+    const physioDate = appointmentDate(manifest.timeline.find((event) => event.eventKey === "J10")?.date || manifest.asOf);
+    body = `<h1>Demo vorbereiten</h1><p>Medien ausschliesslich lokal unter <strong>Internal storage/Documents/SMART</strong>. Auswahl erlaubt nur Lesen; kein Upload und keine Kopie in den App-Speicher.</p><div class="actions">${button("Medienordner verbinden", "choose-directory")}${button("Lokale Datei(en) auswählen", "choose-files")}</div><ul id="media-list">${manifest.media.map((m) => `<li>${esc(m.fileName)}: wird geprüft …</li>`).join("")}</ul><p>Zuordnungen bleiben nach einem Neustart erhalten. Je nach Android-/Chrome-Dateiauswahl muss der Ordner erneut freigegeben werden; einzelne Filme müssen dann nicht neu zugeordnet werden.</p><label>Interview-Szenario <select id="scenario"><option value="discharge" ${scenario === "discharge" ? "selected" : ""}>Austritt · ${esc(manifest.asOf)}</option><option value="physio" ${scenario === "physio" ? "selected" : ""}>Physiotermin · ${esc(physioDate)}</option></select></label><p>Alle Karten bleiben in beiden Szenarien erreichbar. Die Szene setzt nur den fiktiven Interviewzeitpunkt.</p>${button("Fiktive Einträge zurücksetzen", "reset")}<p class="notice">Die bisherige Faltkarten-PDF enthält historische Angehörigenkarten und ist nicht mehr für aktuelle Patienteninterviews vorgesehen. Die Patienten-QR-Codes sind weiterhin in den Einstellungen verfügbar.</p>`;
   } else {
     go("home");
     return;
