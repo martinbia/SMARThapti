@@ -11,6 +11,15 @@ import {
   requestReadPermission,
 } from "./media-handle-store.js";
 import {
+  listLocalVideoRecords,
+  loadLocalVideo,
+  localVideoStoredBytes,
+  removeLocalVideo,
+  requestPersistentStorage,
+  saveLocalVideo,
+  storageEstimate,
+} from "./local-media-library.js";
+import {
   assignmentKey,
   xrayAssignmentKey,
   validMediaName,
@@ -29,6 +38,8 @@ const esc = (value) =>
         c
       ],
   );
+const safeErrorCode = (error, fallback = "MediaError") =>
+  error?.name && error.name !== "Error" ? error.name : error?.message || fallback;
 const button = (text, action, extra = "") =>
   `<button data-action="${esc(action)}" ${extra}>${esc(text)}</button>`;
 let manifest,
@@ -56,6 +67,13 @@ let manifest,
   filePermissionCounts = { granted: 0, prompt: 0, denied: 0, unsupported: 0 },
   lastPickerMode = "",
   lastHandleError = "",
+  localVideoFiles = new Map(),
+  localVideoRecords = new Map(),
+  localVideoErrors = new Map(),
+  localVideoBytes = 0,
+  mediaStorageEstimate = null,
+  storagePersistence = "unknown",
+  videoStorageBusy = false,
   pickerPending = false,
   selectionRequest = 0,
   files = new Map(),
@@ -189,6 +207,8 @@ function mediaAccessStatuses() {
       const mappingState = Object.hasOwn(assignments, media.id)
         ? "Zuordnung gespeichert"
         : "Standarddateiname";
+      if (media.kind === "video" && localVideoFiles.has(media.id))
+        return "Dauerhaft auf diesem Tablet gespeichert und abspielbar";
       return file && file.size > 0 && file.name === media.fileName && validMediaName(file.name, media.kind)
         ? "Verbunden und lesbar"
         : permissionMissingFiles.has(media.fileName)
@@ -227,7 +247,7 @@ function mediaDiagnostics() {
     readableVideoCount: [...videoNames].filter((name) => {
       const file = files.get(name);
       return file && file.size > 0 && validMediaName(file.name, "video");
-    }).length,
+    }).length + [...localVideoFiles.keys()].length,
     lastPickerMode: lastPickerMode || "keine Auswahl erfasst",
     lastHandleError,
   };
@@ -252,6 +272,100 @@ function formatMediaDiagnostics() {
     `Letzte Auswahlmethode: ${d.lastPickerMode}`,
     `Letzter technischer Fehler: ${d.lastHandleError || "keiner"}`,
   ].join("\n");
+}
+function exerciseVideoMedia() {
+  return manifest.media.filter((media) => media.kind === "video" && /^M-P-EX-10[1-7]$/.test(media.id));
+}
+async function restoreLocalVideoLibrary() {
+  localVideoFiles = new Map();
+  localVideoRecords = new Map();
+  localVideoErrors = new Map();
+  try {
+    const records = await listLocalVideoRecords();
+    for (const record of records) localVideoRecords.set(record.mediaId, record);
+  } catch (error) {
+    const code = error?.name || "IndexedDBUnavailable";
+    for (const media of exerciseVideoMedia()) localVideoErrors.set(media.id, code);
+  }
+  for (const media of exerciseVideoMedia()) {
+    if (!localVideoRecords.has(media.id)) continue;
+    try {
+      const { file, error } = await loadLocalVideo(media.id);
+      if (file) localVideoFiles.set(media.id, file);
+      else if (error) localVideoErrors.set(media.id, error);
+    } catch (error) {
+      localVideoErrors.set(media.id, safeErrorCode(error, "StoredVideoUnreadable"));
+    }
+  }
+  try {
+    localVideoBytes = await localVideoStoredBytes();
+  } catch {
+    localVideoBytes = [...localVideoRecords.values()].reduce((sum, record) => sum + (Number(record.size) || 0), 0);
+  }
+  mediaStorageEstimate = await storageEstimate();
+  if (typeof navigator.storage?.persisted === "function") {
+    try {
+      storagePersistence = (await navigator.storage.persisted()) ? "granted" : "not-granted";
+    } catch {
+      storagePersistence = "unknown";
+    }
+  } else storagePersistence = "unsupported";
+}
+async function refreshLocalVideoStorageStats() {
+  try {
+    localVideoBytes = await localVideoStoredBytes();
+  } catch {
+    localVideoBytes = [...localVideoRecords.values()].reduce((sum, record) => sum + (Number(record.size) || 0), 0);
+  }
+  mediaStorageEstimate = await storageEstimate();
+}
+function formatBytes(value) {
+  if (!Number.isFinite(value) || value < 0) return "unbekannt";
+  if (value < 1024) return `${value} Byte`;
+  const units = ["KB", "MB", "GB", "TB"];
+  let amount = value / 1024;
+  let index = 0;
+  while (amount >= 1024 && index < units.length - 1) {
+    amount /= 1024;
+    index++;
+  }
+  return `${amount.toFixed(amount >= 100 ? 0 : 1)} ${units[index]}`;
+}
+function localVideoLibraryStatus(media) {
+  const record = localVideoRecords.get(media.id);
+  const savedFile = localVideoFiles.get(media.id);
+  const originalAvailable = Boolean(files.get(media.fileName));
+  const error = localVideoErrors.get(media.id);
+  const state = savedFile
+    ? "Dauerhaft auf diesem Tablet gespeichert und abspielbar"
+    : record
+      ? `Kopie gespeichert, aber derzeit nicht lesbar${error ? ` (${error})` : ""}`
+      : originalAvailable
+        ? "Nur über die aktuell verbundene Originaldatei verfügbar"
+        : permissionMissingFiles.has(media.fileName)
+          ? "Zugeordnet, aber Originaldatei erfordert eine Freigabe"
+          : missingFiles.has(media.fileName)
+            ? "Zugeordnet, aber Originaldatei nicht gefunden"
+            : "Noch nicht eingerichtet";
+  return {
+    id: media.id,
+    title: manifest.contents.find((content) => content.mediaIds.includes(media.id))?.title || media.id,
+    fileName: media.fileName,
+    size: record?.size ? formatBytes(record.size) : "",
+    state,
+    hasCopy: Boolean(record),
+    playableCopy: Boolean(savedFile),
+    sourceAvailable: originalAvailable,
+  };
+}
+async function sourceMediaFile(media) {
+  if (files.has(media.fileName)) return files.get(media.fileName);
+  if (directory) {
+    try {
+      return await (await directory.getFileHandle(media.fileName)).getFile();
+    } catch {}
+  }
+  return files.get(media.fileName) || null;
 }
 function recordDate(value) {
   const [year, month, day] = value.split("-");
@@ -426,6 +540,8 @@ function recordSummary(item) {
   return `<p class="record-demo-source">Fiktive Demo · nicht klinisch geprüft · Herkunft: simulierte EPIC-Ansicht (${esc(sourceItem?.title || "Patientenakte")}) · Datenstand ${recordDate(item.dataDate)}</p>`;
 }
 async function localFile(m) {
+  if (m.kind === "video" && localVideoFiles.has(m.id))
+    return localVideoFiles.get(m.id);
   if (directory) {
     try {
       const handle = await directory.getFileHandle(m.fileName);
@@ -706,6 +822,27 @@ function render() {
       durableFolderSharingUnavailable: typeof window.showDirectoryPicker !== "function" || !handleStoreAvailable,
       requiresDirectoryReselect: !storedDirectory && storedFileHandles.size === 0 && Boolean(lastPickerMode || Object.keys(assignments).length),
       diagnostics: mediaDiagnostics(),
+      videoLibrary: exerciseVideoMedia().map((media) => localVideoLibraryStatus(media)),
+      videoSourceCount: exerciseVideoMedia().filter((media) => files.has(media.fileName)).length,
+      storedVideoCount: localVideoRecords.size,
+      storedVideoBytes: formatBytes(localVideoBytes),
+      storageEstimate: mediaStorageEstimate
+        ? {
+            used: mediaStorageEstimate.usage === null ? "unbekannt" : formatBytes(mediaStorageEstimate.usage),
+            quota: mediaStorageEstimate.quota === null ? "unbekannt" : formatBytes(mediaStorageEstimate.quota),
+            available: mediaStorageEstimate.available === null ? null : formatBytes(mediaStorageEstimate.available),
+          }
+        : null,
+      storagePersistence: storagePersistence === "granted"
+        ? "Browser-Speicher geschützt"
+        : storagePersistence === "not-granted"
+          ? "Browser-Schutz nicht gewährt; Browser kann Speicher bereinigen"
+          : storagePersistence === "unsupported"
+            ? "Browser unterstützt diese Abfrage nicht"
+            : storagePersistence === "failed"
+              ? "Abfrage fehlgeschlagen"
+              : "nicht geprüft",
+      videoStorageBusy,
     });
   } else if (view === "record") {
     title = id ? "Patientenakte" : "Patientenakte";
@@ -990,6 +1127,103 @@ function openCard(card) {
   }
   go("card/" + card.id);
 }
+async function saveSelectedVideoCopies(mediaIds) {
+  if (videoStorageBusy) return;
+  const selected = [];
+  for (const media of exerciseVideoMedia().filter((item) => mediaIds.includes(item.id))) {
+    const file = await sourceMediaFile(media);
+    if (file && file.size > 0 && validMediaName(file.name, "video"))
+      selected.push({ media, file });
+  }
+  if (!selected.length) {
+    message("Keine aktuell lesbaren Originaldateien ausgewählt. Verbinde Documents/SMART oder wähle die Videodateien zuerst aus.");
+    return;
+  }
+  const required = selected.reduce((total, item) => total + item.file.size, 0);
+  mediaStorageEstimate = await storageEstimate();
+  if (mediaStorageEstimate?.available !== null && mediaStorageEstimate?.available < required) {
+    render();
+    message(`Nicht genügend Browser-Speicher: benötigt werden etwa ${formatBytes(required)}, verfügbar sind ${formatBytes(mediaStorageEstimate.available)}. Entferne alte Kopien oder wähle weniger Videos aus.`);
+    return;
+  }
+  const capacity = mediaStorageEstimate?.available === null || !mediaStorageEstimate
+    ? "Der Browser meldet keinen verfügbaren Speicherplatz."
+    : `Geschätzt verfügbar: ${formatBytes(mediaStorageEstimate.available)}.`;
+  const prompt = `${selected.length} Video${selected.length === 1 ? "" : "s"} werden ausschliesslich in den privaten Speicher dieser PWA kopiert. Erforderlicher zusätzlicher Platz: etwa ${formatBytes(required)}. ${capacity} Originaldateien in Documents/SMART bleiben unverändert. Fortfahren?`;
+  if (!window.confirm(prompt)) return;
+  videoStorageBusy = true;
+  render();
+  storagePersistence = await requestPersistentStorage();
+  const saved = [];
+  const failed = [];
+  try {
+    for (const { media, file } of selected) {
+      try {
+        let lastPercent = -10;
+        message(`Speichere ${media.fileName} …`);
+        const record = await saveLocalVideo(media.id, file, (written, total) => {
+          const percent = total ? Math.floor((written / total) * 100) : 100;
+          if (percent === 100 || percent - lastPercent >= 10) {
+            lastPercent = percent;
+            message(`Speichere ${media.fileName} · ${percent} %`);
+          }
+        });
+        localVideoRecords.set(media.id, record);
+        const restored = await loadLocalVideo(media.id);
+        if (!restored.file) throw new Error(restored.error || "VideoVerificationFailed");
+        localVideoFiles.set(media.id, restored.file);
+        localVideoErrors.delete(media.id);
+        saved.push(media.id);
+      } catch (error) {
+        localVideoErrors.set(media.id, safeErrorCode(error, "VideoSaveFailed"));
+        failed.push({ id: media.id, error: safeErrorCode(error, "VideoSaveFailed") });
+      }
+    }
+  } finally {
+    videoStorageBusy = false;
+    await refreshLocalVideoStorageStats();
+    render();
+    const persistenceNote = storagePersistence === "granted"
+      ? " Browser-Speicherschutz wurde gewährt."
+      : " Browser-Speicher kann trotz Kopie unter Speicherdruck oder beim Löschen der Appdaten entfernt werden.";
+    const failures = failed.length
+      ? ` ${failed.length} Datei${failed.length === 1 ? "" : "en"} konnten nicht gespeichert werden (${failed.map((item) => item.error).join(", ")}).`
+      : "";
+    message(`${saved.length} Video${saved.length === 1 ? "" : "s"} lokal gespeichert${saved.length ? persistenceNote : "."}${failures}`);
+  }
+}
+async function removeSelectedVideoCopies(mediaIds) {
+  if (videoStorageBusy) return;
+  const existing = mediaIds.filter((id) => localVideoRecords.has(id));
+  if (!existing.length) return;
+  const all = mediaIds.length === exerciseVideoMedia().length;
+  const prompt = all
+    ? `Alle ${existing.length} lokalen Videokopien (${formatBytes(localVideoBytes)}) aus dem privaten PWA-Speicher entfernen? Die Originale in Documents/SMART bleiben unverändert.`
+    : `Die lokale Videokopie aus dem privaten PWA-Speicher entfernen? Die Originaldatei bleibt unverändert.`;
+  if (!window.confirm(prompt)) return;
+  videoStorageBusy = true;
+  render();
+  const removed = [];
+  const failed = [];
+  try {
+    for (const id of existing) {
+      try {
+        await removeLocalVideo(id);
+        localVideoRecords.delete(id);
+        localVideoFiles.delete(id);
+        localVideoErrors.delete(id);
+        removed.push(id);
+      } catch (error) {
+        failed.push(safeErrorCode(error, "VideoRemoveFailed"));
+      }
+    }
+  } finally {
+    videoStorageBusy = false;
+    await refreshLocalVideoStorageStats();
+    render();
+    message(`${removed.length} lokale Videokopie${removed.length === 1 ? "" : "n"} entfernt. Originaldateien wurden nicht verändert.${failed.length ? ` Fehler: ${failed.join(", ")}` : ""}`);
+  }
+}
 root.addEventListener("click", async (e) => {
   const action = e.target.closest("[data-action]")?.dataset.action;
   if (!action) return;
@@ -1010,6 +1244,22 @@ root.addEventListener("click", async (e) => {
     } catch {
       message("Diagnose konnte nicht kopiert werden. Öffne den Diagnosebereich und prüfe, ob Clipboard-Zugriff erlaubt ist.");
     }
+    return;
+  }
+  if (name === "save-local-videos") {
+    await saveSelectedVideoCopies(exerciseVideoMedia().map((media) => media.id));
+    return;
+  }
+  if (name === "save-local-video") {
+    await saveSelectedVideoCopies([id]);
+    return;
+  }
+  if (name === "remove-local-video") {
+    await removeSelectedVideoCopies([id]);
+    return;
+  }
+  if (name === "remove-all-local-videos") {
+    await removeSelectedVideoCopies(exerciseVideoMedia().map((media) => media.id));
     return;
   }
   if (name === "export-assignments") {
@@ -1357,6 +1607,7 @@ try {
   manifest.media.forEach((m) => {
     m.fileName = assignments[m.id] || m.fileName;
   });
+  await restoreLocalVideoLibrary();
   await restoreMediaHandles();
   render();
   if (import.meta.env.PROD && "serviceWorker" in navigator)

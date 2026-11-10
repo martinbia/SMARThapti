@@ -835,6 +835,235 @@ test("actual local MP4 and MP3 playback stops and revokes blobs on navigation", 
   }
 });
 
+test("saved exercise video survives a fresh PWA page without the source grant and removal preserves the original", async ({ page }) => {
+  const { execFileSync } = await import("node:child_process");
+  const { mkdtempSync, readFileSync, rmSync, statSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const dir = mkdtempSync(tmpdir() + "/smarthapti-persistent-video-");
+  const source = `${dir}/GehenMitTeilbelastung_video_720p.mp4`;
+  const replacement = `${dir}/A replacement walking video.mp4`;
+  execFileSync("ffmpeg", ["-v", "error", "-f", "lavfi", "-i", "color=c=gray:s=160x120:d=4", "-f", "lavfi", "-i", "sine=frequency=440:duration=4", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", source]);
+  execFileSync("ffmpeg", ["-v", "error", "-f", "lavfi", "-i", "color=c=blue:s=160x120:d=3", "-c:v", "libx264", "-pix_fmt", "yuv420p", replacement]);
+  const mediaRequests = [];
+  page.on("request", (request) => {
+    if (/GehenMitTeilbelastung_video_720p\.mp4/.test(request.url())) mediaRequests.push(request.url());
+  });
+  try {
+    await page.goto("./#settings");
+    await page.locator("#local-files").setInputFiles(source);
+    page.once("dialog", (dialog) => dialog.accept());
+    await click(page, "save-local-video:M-P-EX-101");
+    await expect(page.locator('[data-media-access="M-P-EX-101"]')).toHaveText("Dauerhaft auf diesem Tablet gespeichert und abspielbar");
+    const storedRecord = await page.evaluate(async (mediaId) => {
+      const db = await new Promise((resolve, reject) => {
+        const request = indexedDB.open("smarthapti-persistent-local-videos-v1", 1);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      const value = await new Promise((resolve, reject) => {
+        const tx = db.transaction("videos", "readonly");
+        const request = tx.objectStore("videos").get(mediaId);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      db.close();
+      return { backend: value.backend, fileName: value.fileName, size: value.size, hasBlob: value.blob instanceof Blob };
+    }, "M-P-EX-101");
+    expect(storedRecord.backend).toBe("opfs");
+    expect(storedRecord.fileName).toBe("GehenMitTeilbelastung_video_720p.mp4");
+    expect(storedRecord.size).toBeGreaterThan(0);
+    expect(storedRecord.hasBlob).toBe(false);
+
+    await page.locator("#local-files").setInputFiles({
+      name: "GehenMitTeilbelastung_video_720p.mp4",
+      mimeType: "video/mp4",
+      buffer: readFileSync(replacement),
+    });
+    page.once("dialog", (dialog) => dialog.accept());
+    await click(page, "save-local-video:M-P-EX-101");
+    await expect(page.locator("#status")).toContainText("1 Video lokal gespeichert");
+    await expect(page.locator('[data-id="M-P-EX-101"]')).toHaveValue("GehenMitTeilbelastung_video_720p.mp4");
+    expect(await page.evaluate(async () => {
+      const db = await new Promise((resolve, reject) => {
+        const request = indexedDB.open("smarthapti-persistent-local-videos-v1", 1);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      const value = await new Promise((resolve, reject) => {
+        const tx = db.transaction("videos", "readonly");
+        const request = tx.objectStore("videos").get("M-P-EX-101");
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      db.close();
+      return { fileName: value.fileName, size: value.size };
+    })).toEqual({
+      fileName: "GehenMitTeilbelastung_video_720p.mp4",
+      size: statSync(replacement).size,
+    });
+
+    const context = page.context();
+    await page.close();
+    const restarted = await context.newPage();
+    await restarted.goto("./#video/P-EX-101");
+    const player = restarted.locator("video.video-player");
+    await expect(player).toHaveAttribute("src", /^blob:/);
+    await expect.poll(() => player.evaluate((video) => video.currentTime)).toBeGreaterThan(0);
+    await restarted.goto("./#settings");
+    await expect(restarted.locator('[data-media-access="M-P-EX-101"]')).toHaveText("Dauerhaft auf diesem Tablet gespeichert und abspielbar");
+
+    await restarted.locator("#local-files").setInputFiles({
+      name: "GehenMitTeilbelastung_video_720p.mp4",
+      mimeType: "video/mp4",
+      buffer: readFileSync(replacement),
+    });
+    restarted.once("dialog", (dialog) => dialog.accept());
+    await click(restarted, "remove-local-video:M-P-EX-101");
+    await expect(restarted.locator('[data-media-access="M-P-EX-101"]')).toHaveText("Verbunden und lesbar");
+    expect(statSync(source).size).toBeGreaterThan(0);
+    expect(statSync(replacement).size).toBeGreaterThan(0);
+    expect(await restarted.evaluate(async () => {
+      const db = await new Promise((resolve, reject) => {
+        const request = indexedDB.open("smarthapti-persistent-local-videos-v1", 1);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      const count = await new Promise((resolve, reject) => {
+        const tx = db.transaction("videos", "readonly");
+        const request = tx.objectStore("videos").count();
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      db.close();
+      return count;
+    })).toBe(0);
+    expect(mediaRequests).toEqual([]);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("video library uses IndexedDB Blob fallback when OPFS is unavailable", async ({ page }) => {
+  const { execFileSync } = await import("node:child_process");
+  const { mkdtempSync, rmSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const dir = mkdtempSync(tmpdir() + "/smarthapti-video-idb-");
+  const source = `${dir}/GehenMitTeilbelastung_video_720p.mp4`;
+  execFileSync("ffmpeg", ["-v", "error", "-f", "lavfi", "-i", "color=c=gray:s=160x120:d=2", "-c:v", "libx264", "-pix_fmt", "yuv420p", source]);
+  try {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator.storage, "getDirectory", { configurable: true, value: undefined });
+    });
+    await page.goto("./#settings");
+    await page.locator("#local-files").setInputFiles(source);
+    page.once("dialog", (dialog) => dialog.accept());
+    await click(page, "save-local-video:M-P-EX-101");
+    await expect(page.locator('[data-media-access="M-P-EX-101"]')).toHaveText("Dauerhaft auf diesem Tablet gespeichert und abspielbar");
+    expect(await page.evaluate(async () => {
+      const db = await new Promise((resolve, reject) => {
+        const request = indexedDB.open("smarthapti-persistent-local-videos-v1", 1);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      const record = await new Promise((resolve, reject) => {
+        const tx = db.transaction("videos", "readonly");
+        const request = tx.objectStore("videos").get("M-P-EX-101");
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      db.close();
+      return { backend: record.backend, hasBlob: record.blob instanceof Blob };
+    })).toEqual({ backend: "indexeddb", hasBlob: true });
+    await page.reload();
+    await page.goto("./#video/P-EX-101");
+    await expect(page.locator("video.video-player")).toHaveAttribute("src", /^blob:/);
+    await expect(page.locator(".video-media-status")).toBeHidden();
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("bulk video save copies only selected IDs and bulk removal leaves both originals intact", async ({ page }) => {
+  const { execFileSync } = await import("node:child_process");
+  const { mkdtempSync, rmSync, statSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const dir = mkdtempSync(tmpdir() + "/smarthapti-video-bulk-");
+  const first = `${dir}/Local walking.mp4`;
+  const second = `${dir}/Local squats.mp4`;
+  for (const output of [first, second])
+    execFileSync("ffmpeg", ["-v", "error", "-f", "lavfi", "-i", "color=c=gray:s=160x120:d=2", "-c:v", "libx264", "-pix_fmt", "yuv420p", output]);
+  try {
+    await page.goto("./#settings");
+    await page.locator("#local-files").setInputFiles([first, second]);
+    await page.locator('[data-id="M-P-EX-101"]').fill("Local walking.mp4");
+    await page.locator('[data-id="M-P-EX-102"]').fill("Local squats.mp4");
+    await page.locator('#assignment-form button[type="submit"]').click();
+    page.once("dialog", (dialog) => dialog.accept());
+    await click(page, "save-local-videos");
+    for (const id of ["M-P-EX-101", "M-P-EX-102"])
+      await expect(page.locator(`[data-media-access="${id}"]`)).toHaveText("Dauerhaft auf diesem Tablet gespeichert und abspielbar");
+    expect(await page.evaluate(async () => {
+      const db = await new Promise((resolve, reject) => {
+        const request = indexedDB.open("smarthapti-persistent-local-videos-v1", 1);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      const records = await new Promise((resolve, reject) => {
+        const tx = db.transaction("videos", "readonly");
+        const request = tx.objectStore("videos").getAll();
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      db.close();
+      return records.map((record) => [record.mediaId, record.fileName]).sort();
+    })).toEqual([["M-P-EX-101", "Local walking.mp4"], ["M-P-EX-102", "Local squats.mp4"]]);
+    page.once("dialog", (dialog) => dialog.accept());
+    await click(page, "remove-all-local-videos");
+    await expect(page.locator('[data-media-access="M-P-EX-101"]')).toHaveText("Verbunden und lesbar");
+    expect(statSync(first).size).toBeGreaterThan(0);
+    expect(statSync(second).size).toBeGreaterThan(0);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("insufficient browser quota prevents any video copy and reports the needed space", async ({ page }) => {
+  const { execFileSync } = await import("node:child_process");
+  const { mkdtempSync, rmSync, statSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const dir = mkdtempSync(tmpdir() + "/smarthapti-video-quota-");
+  const source = `${dir}/GehenMitTeilbelastung_video_720p.mp4`;
+  execFileSync("ffmpeg", ["-v", "error", "-f", "lavfi", "-i", "color=c=gray:s=160x120:d=2", "-c:v", "libx264", "-pix_fmt", "yuv420p", source]);
+  try {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator.storage, "estimate", { configurable: true, value: async () => ({ usage: 0, quota: 1, available: 1 }) });
+    });
+    await page.goto("./#settings");
+    await page.locator("#local-files").setInputFiles(source);
+    await click(page, "save-local-video:M-P-EX-101");
+    await expect(page.locator("#status")).toContainText("Nicht genügend Browser-Speicher");
+    expect(await page.evaluate(async () => {
+      const db = await new Promise((resolve, reject) => {
+        const request = indexedDB.open("smarthapti-persistent-local-videos-v1", 1);
+        request.onupgradeneeded = () => request.result.createObjectStore("videos", { keyPath: "mediaId" });
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      const count = await new Promise((resolve, reject) => {
+        const tx = db.transaction("videos", "readonly");
+        const request = tx.objectStore("videos").count();
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      db.close();
+      return count;
+    })).toBe(0);
+    expect(statSync(source).size).toBeGreaterThan(1);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("landscape welcome opens a compact menu by touch and keyboard", async ({
   page,
 }) => {
