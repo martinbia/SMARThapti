@@ -228,6 +228,109 @@ test("video view centers its title, fills the portrait viewport and keeps notes 
   expect(narrow.titleHeight).toBeGreaterThanOrEqual(20);
 });
 
+test("video end shows a 4px textless countdown without resizing the player, then returns to QR-ready welcome", async ({ page }) => {
+  const { execFileSync } = await import("node:child_process");
+  const { mkdtempSync, rmSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const dir = mkdtempSync(tmpdir() + "/smarthapti-video-countdown-");
+  const videoPath = `${dir}/GehenMitTeilbelastung_video_720p.mp4`;
+  execFileSync("ffmpeg", ["-v", "error", "-f", "lavfi", "-i", "color=c=gray:s=160x120:r=1", "-t", "60", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-an", videoPath]);
+  await blankCamera(page);
+  try {
+    await page.setViewportSize({ width: 800, height: 1100 });
+    await page.goto("./#video/P-EX-101");
+    await page.locator("#local-files").setInputFiles(videoPath);
+    const player = page.locator("video.video-player");
+    await expect(player).toHaveAttribute("src", /^blob:/);
+    const before = await player.boundingBox();
+    await player.evaluate((element) => element.dispatchEvent(new Event("ended")));
+
+    const progress = page.locator(".video-return-countdown");
+    await expect(progress).toBeVisible();
+    await expect(progress).toHaveAttribute("aria-valuenow", "100");
+    await expect(progress).toHaveText("");
+    const geometry = await page.evaluate(() => {
+      const playerRect = document.querySelector("video.video-player").getBoundingClientRect();
+      const progressRect = document.querySelector(".video-return-countdown").getBoundingClientRect();
+      return {
+        player: { x: playerRect.x, y: playerRect.y, width: playerRect.width, height: playerRect.height },
+        progress: { x: progressRect.x, y: progressRect.y, width: progressRect.width, height: progressRect.height },
+        fillTransform: getComputedStyle(document.querySelector(".video-return-countdown-fill")).transform,
+      };
+    });
+    expect(geometry.progress.height).toBeLessThanOrEqual(4);
+    expect(Math.abs(geometry.progress.y - (geometry.player.y + geometry.player.height))).toBeLessThanOrEqual(1);
+    expect(geometry.progress.x).toBe(geometry.player.x);
+    expect(geometry.progress.width).toBe(geometry.player.width);
+    const initialScale = geometry.fillTransform === "none" ? 1 : Number(geometry.fillTransform.match(/^matrix\(([^,]+)/)?.[1]);
+    expect(initialScale).toBeGreaterThan(0.95);
+    expect(before).toMatchObject({ width: geometry.player.width, height: geometry.player.height });
+    await expect(page.locator(".video-view")).not.toContainText(/seconds?|sekunden|zurück in/i);
+
+    await page.waitForTimeout(5000);
+    const progressValue = Number(await progress.getAttribute("aria-valuenow"));
+    expect(progressValue).toBeGreaterThan(35);
+    expect(progressValue).toBeLessThan(65);
+    const scale = await page.locator(".video-return-countdown-fill").evaluate((el) => {
+      const transform = getComputedStyle(el).transform;
+      return transform === "none" ? 1 : new DOMMatrixReadOnly(transform).a;
+    });
+    expect(scale).toBeGreaterThan(0.35);
+    expect(scale).toBeLessThan(0.65);
+
+    await expect(page).toHaveURL(/#welcome$/, { timeout: 7000 });
+    await expect(page.locator(".welcome-open")).toBeVisible();
+    await expect(page.locator("#camera-indicator")).toBeVisible();
+    expect(await page.evaluate(() => window.cameraCalls)).toBe(1);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("replaying or interacting with the video cancels and removes the return countdown", async ({ page }) => {
+  const { execFileSync } = await import("node:child_process");
+  const { mkdtempSync, rmSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const dir = mkdtempSync(tmpdir() + "/smarthapti-video-countdown-cancel-");
+  const videoPath = `${dir}/GehenMitTeilbelastung_video_720p.mp4`;
+  execFileSync("ffmpeg", ["-v", "error", "-f", "lavfi", "-i", "color=c=gray:s=160x120:r=1", "-t", "60", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-an", videoPath]);
+  try {
+    await page.goto("./#video/P-EX-101");
+    await page.locator("#local-files").setInputFiles(videoPath);
+    const player = page.locator("video.video-player");
+    await expect(player).toHaveAttribute("src", /^blob:/);
+    await player.evaluate((element) => element.dispatchEvent(new Event("ended")));
+    await expect(page.locator(".video-return-countdown")).toBeVisible();
+    await player.evaluate((element) => element.dispatchEvent(new Event("play")));
+    await expect(page.locator(".video-return-countdown")).toHaveCount(0);
+    await expect(page).toHaveURL(/#video\/P-EX-101$/);
+
+    await player.evaluate((element) => element.dispatchEvent(new Event("ended")));
+    await expect(page.locator(".video-return-countdown")).toBeVisible();
+    await page.locator(".video-notes summary").click();
+    await expect(page.locator(".video-return-countdown")).toHaveCount(0);
+    await page.waitForTimeout(1000);
+    await expect(page).toHaveURL(/#video\/P-EX-101$/);
+
+    await player.evaluate((element) => element.dispatchEvent(new Event("ended")));
+    await expect(page.locator(".video-return-countdown")).toBeVisible();
+    await click(page, "home");
+    await expect(page).toHaveURL(/#home$/);
+    await expect(page.locator(".video-return-countdown")).toHaveCount(0);
+
+    await page.goto("./#video/P-EX-101");
+    const resumedPlayer = page.locator("video.video-player");
+    await expect(resumedPlayer).toHaveAttribute("src", /^blob:/);
+    await resumedPlayer.evaluate((element) => element.dispatchEvent(new Event("ended")));
+    await expect(page.locator(".video-return-countdown")).toBeVisible();
+    await click(page, "power-off");
+    await expect(page.locator(".wake-screen")).toBeVisible();
+    await expect(page.locator(".video-return-countdown")).toHaveCount(0);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("welcome exercise QR opens the local video directly and attempts audible playback", async ({ page }) => {
   const qr = readFileSync(index.cards.find((card) => card.cardId === "P-EX-101").qrFile, "utf8");
   const { execFileSync } = await import("node:child_process");

@@ -727,6 +727,28 @@ header .power-off:hover {
   padding: 0;
   overflow: hidden;
 }
+#app.video-mode .video-return-countdown {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: -4px;
+  left: 0;
+  height: 4px;
+  overflow: hidden;
+  pointer-events: none;
+}
+#app.video-mode .video-return-countdown-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #23675b;
+  transform: scaleX(1);
+  transform-origin: left center;
+  animation: video-return-shrink 10s linear forwards;
+}
+@keyframes video-return-shrink {
+  to { transform: scaleX(0); }
+}
 #app.video-mode .video-media-panel {
   display: flex;
   flex: 1 1 auto;
@@ -742,6 +764,9 @@ header .power-off:hover {
   justify-content: center;
   overflow: hidden;
   background: #162722;
+}
+#app.video-mode .video-player-slot.countdown-active {
+  overflow: visible;
 }
 #app.video-mode .video-media-missing .video-player-slot {
   display: none;
