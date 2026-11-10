@@ -97,6 +97,9 @@ for (const entry of index.cards)
     if (opensVideo) {
       await expect(page.locator(".video-header-title")).toHaveText(card.printTitle || card.title);
       await expect(page.locator("h1")).toHaveCount(0);
+    } else if (card.type === "appointment") {
+      await expect(page.locator(".appointment-detail > h1")).toHaveText("Nächster Physiotherapietermin");
+      await expect(page.locator(".appointment-date")).toHaveText("Dienstag, 17. November 2026");
     } else {
       await expect(page.locator("main")).toContainText(
         content.dialogNodeId
@@ -117,6 +120,7 @@ test("patient appointment and personal milestone require confirmation, deduplica
   await click(page, "confirm:P-APT-001");
   await click(page, "add:P-APT-001");
   await expect(page.locator(".timeline li")).toHaveCount(4);
+  await expect(page.locator(".timeline li").filter({ hasText: "Nächster Physiotherapietermin" })).toContainText("2026-11-17");
   await page.goto("./#card/P-APT-001");
   await expect(page.locator("main")).toContainText("Eintrag bereits vorhanden");
   await page.goto("./#card/P-MIL-001");
@@ -125,6 +129,7 @@ test("patient appointment and personal milestone require confirmation, deduplica
   await expect(page.locator(".timeline li")).toHaveCount(5);
   await page.reload();
   await expect(page.locator(".timeline li")).toHaveCount(5);
+  await expect(page.locator(".timeline li").filter({ hasText: "Nächster Physiotherapietermin" })).toContainText("2026-11-17");
   await click(page, "moderator");
   page.once("dialog", (d) => d.accept());
   await click(page, "reset");
@@ -159,7 +164,7 @@ test("patient home dashboard keeps the existing upper controls and opens each vi
     "video:P-EX-107",
   ]);
   await expect(page.locator(".home-appointment-row")).toHaveCount(1);
-  await expect(page.locator(".home-appointment-row")).toContainText("10.11.2026");
+  await expect(page.locator(".home-appointment-row")).toContainText("17.11.2026");
   await expect(page.locator(".home-record-row")).toHaveCount(4);
   await expect(page.locator(".home-dashboard")).toHaveCSS("grid-template-columns", /\d+(?:\.\d+)?px \d+(?:\.\d+)?px/);
   const widths = await page.locator(".home-dashboard").evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(" ").map(parseFloat));
@@ -556,11 +561,69 @@ test("HTML folder picker fallback keeps custom mappings and reconnects every med
   }
 });
 
-test("home appointment opens its existing details and still requires explicit timeline confirmation", async ({ page }) => {
+test("appointment detail displays the structured fictional schedule and blank question lines", async ({ page }) => {
+  await page.setViewportSize({ width: 800, height: 1100 });
+  await page.goto("./#card/P-APT-001");
+  await expect(page.locator(".appointment-detail > h1")).toHaveText("Nächster Physiotherapietermin");
+  await expect(page.locator(".appointment-date")).toHaveText("Dienstag, 17. November 2026");
+  await expect(page.locator(".appointment-time")).toHaveText("10:30 Uhr");
+  await expect(page.locator(".appointment-meta")).toContainText("Physiotherapiepraxis (Demo), Raum 2");
+  await expect(page.locator(".appointment-meta")).toContainText("Physiotherapie – Folgetermin");
+  await expect(page.locator(".appointment-status")).toHaveText("Geplant");
+  await expect(page.locator(".appointment-agenda li")).toHaveText([
+    "Wie es zu Hause mit der Bewegung geht.",
+    "Welche Übungen und Videos hilfreich sind.",
+    "Welche Fragen noch offen sind.",
+  ]);
+  await expect(page.locator(".appointment-note-lines span")).toHaveCount(3);
+  await expect(page.locator(".appointment-note-lines")).toBeInViewport();
+  await expect(page.locator('.appointment-action [data-action="confirm:P-APT-001"]')).toBeInViewport();
+  await expect(page.locator(".appointment-source")).toContainText("Fiktiver persönlicher Terminplan");
+  await expect(page.locator(".appointment-source")).toContainText("02.11.2026");
+  await expect(page.locator(".appointment-source")).toContainText("kein echter Termin");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(800);
+  await page.goto("./#moderator");
+  await expect(page.locator('#scenario option[value="physio"]')).toHaveText("Physiotermin · Dienstag, 17. November 2026");
+});
+
+test("appointment QR on welcome and in menu opens the same detail without writing to timeline", async ({ page }) => {
+  const svg = readFileSync(index.cards.find((card) => card.cardId === "P-APT-001").qrFile, "utf8");
+  await page.addInitScript(({ svg }) => {
+    window.appointmentQrSvg = svg;
+    navigator.mediaDevices.getUserMedia = async () => {
+      const image = new Image();
+      image.src = "data:image/svg+xml;base64," + btoa(window.appointmentQrSvg);
+      await image.decode();
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = 640;
+      const context = canvas.getContext("2d");
+      context.fillStyle = "white";
+      context.fillRect(0, 0, 640, 640);
+      context.drawImage(image, 60, 60, 520, 520);
+      return canvas.captureStream(10);
+    };
+  }, { svg });
+  await page.goto("./#welcome");
+  await expect(page).toHaveURL(/#card\/P-APT-001$/);
+  await expect(page.locator(".appointment-date")).toHaveText("Dienstag, 17. November 2026");
+  await expect(page.locator(".appointment-time")).toHaveText("10:30 Uhr");
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("smarthapti-demo") || "{}").keys || [])).not.toContain("J10");
+
+  await page.goto("./#home");
+  await click(page, "scan");
+  await expect(page).toHaveURL(/#card\/P-APT-001$/);
+  await expect(page.locator(".appointment-date")).toHaveText("Dienstag, 17. November 2026");
+  await expect(page.locator(".appointment-meta")).toContainText("Physiotherapiepraxis (Demo), Raum 2");
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("smarthapti-demo") || "{}").keys || [])).not.toContain("J10");
+});
+
+test("home appointment opens its shared detail and still requires explicit timeline confirmation", async ({ page }) => {
   await page.goto("./#home");
   await click(page, "card:P-APT-001");
   await expect(page).toHaveURL(/#card\/P-APT-001$/);
-  await expect(page.locator("main")).toContainText("10.11.2026");
+  await expect(page.locator(".appointment-date")).toHaveText("Dienstag, 17. November 2026");
+  await expect(page.locator(".appointment-time")).toHaveText("10:30 Uhr");
+  await expect(page.locator(".appointment-meta")).toContainText("Physiotherapiepraxis (Demo), Raum 2");
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem("smarthapti-demo") || "{}").keys || [])).not.toContain("J10");
   await click(page, "confirm:P-APT-001");
   await expect(page.locator("main")).toContainText("Diesen Eintrag hinzufügen?");

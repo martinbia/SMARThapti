@@ -33,7 +33,7 @@
 | V03 | Statische GitHub-Pages-PWA, Daten in `content/*.json` | Einfach, Inhalte unabhängig vom Code austauschbar |
 | V04 | Browser-LocalStorage für bestätigte Demo-Einträge und Reset | Ohne Backend; keine Sicherheits-/Privatsphärengarantie |
 | V05 | Navigationsstruktur U0–U9 in `UX_SPEC`, grosse Touch-Ziele | Erst auf realem Tablet verifizieren |
-| V06 | Fixdatum 06.11.2026 und 10.11.-Physiotermin als Interviewszenen | Reproduzierbares Interview; keine Reha-Frist |
+| V06 | Früherer Interviewszenen-Entwurf mit Fixdatum 06.11.2026 und Physiotermin am 10.11.2026; Termindatum wurde durch F26 auf 17.11.2026 aktualisiert | Reproduzierbares Interview; keine Reha-Frist |
 | V07 | Papier-Häftchen A6 und kartonbasierte Kartensets | Format und Lesbarkeit mit Zielpersonen testen |
 | V08 | Neutrale Videodatei/MP3 nur für technischen Test, bis fachlich freigegebene Medien vorliegen | Keine erfundene Therapie |
 | V09 | Eine leicht auffindbare, moderatorseitige Demo-Reset-/Szenarioansicht | Wiederholbare Interviews |
@@ -121,3 +121,7 @@ Vergleich mit SMARTcoach: `local-videos.js` (sowie `local-prompt-audio.js` und `
 ## F25 – Countdown nach Videoende als schmaler Fortschrittsbalken
 
 Auf ausdrücklichen Nutzerwunsch erscheint nach regulärem Videoende zehn Sekunden lang nur eine 4-px-Linie direkt unter dem Video. Der Balken schrumpft linear von 100 auf 0 Prozent; er bleibt ausserhalb des Layoutflusses, sodass die Playergeometrie gleich bleibt. Danach führt die App zu `#welcome` zurück. Video-Wiedergabe oder sonstige Interaktion sowie Navigation, Abschalten und Verbergen löschen Countdown und Anzeige. Der Begrüssigungsbildschirm startet beim Rücksprung wie üblich seine Animation und QR-Erkennung. Im geprüften Ausgangsstand war diese Countdownfunktion noch nicht implementiert; sie wurde für das gewünschte Verhalten ergänzt.
+
+## F26 – Fiktiver Physiotermin am 17.11.2026
+
+Auf ausdrücklichen Nutzerwunsch wird J10 als geplanter Physiotherapie-Folgetermin am Dienstag, 17.11.2026 um 10:30 Uhr in „Physiotherapiepraxis (Demo), Raum 2“ dargestellt. Das gemeinsame J10-Objekt ist Quelle für Termindetail, Hauptmenü, Moderator-Szenario und Timeline. P-APT-001, QR-Payload `SH1:P-APT-001` und Eventkey `J10` bleiben stabil. Quelle ist der fiktive persönliche Terminplan mit Datenstand 02.11.2026; Gesprächspunkte sind neutral und enthalten keine Therapieanweisung. QR-Scan öffnet nur die Detailseite. Timeline-Speicherung bleibt explizit bestätigungspflichtig und duplikatgeschützt.

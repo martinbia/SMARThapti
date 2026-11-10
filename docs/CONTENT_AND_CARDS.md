@@ -37,7 +37,7 @@ Bei relevanten Ereignissen/Übergängen erhalten **Patienten** kurze, individual
 | `P-INF-002` | Patient, Austritt | „Was ist bei der Operation passiert?“ / E02-Demoquelle | ansehen |
 | `P-INF-003` | Patient, Austritt | **„Alma fragen“**, vorbereiteter Dialog mit lokalem `ALMA_P_START.mp3` | Dialog ansehen; MP3 optional |
 | `P-EX-001` | Patient, Austritt oder Physio | „Meine Übung ansehen“ / **Video-Slot ohne medizinischen Inhalt bis Freigabe** | ansehen, nicht abhaken |
-| `P-APT-001` | Patient, Austritt | „Nächster Physiotherapietermin“ / 10.11. (fiktiv) | nach Bestätigung in Timeline |
+| `P-APT-001` | Patient, Austritt | „Nächster Physiotherapietermin“ / 17.11.2026, 10:30, Physiotherapiepraxis (Demo), Raum 2 (fiktiv) | nach Bestätigung in Timeline |
 | `P-MIL-001` | Patient, Physio 10.11. | „Ein eigener Alltagsschritt“ / selbst berichteter Meilenstein | nach Bestätigung in Timeline |
 | `A-INF-001` | **Historisch, inaktiv** (Angehörige), Austritt | „Unterstützen ohne zu übernehmen“ / Unterstützungsvideo-Slot | **nicht aktiv** |
 | `A-INF-002` | **Historisch, inaktiv** (Angehörige), Austritt | „Auch an mich denken“ / Entlastungsinfo, Video-Slot | **nicht aktiv** |
@@ -53,7 +53,7 @@ Bei relevanten Ereignissen/Übergängen erhalten **Patienten** kurze, individual
 
 Payload-Vorschlag: `SH1:P-EX-001`. Format: ASCII, Version `SH1`, Doppelpunkt, stabile Karten-ID. Kein Link zu einer Person, keine sensiblen Angaben; Scanner validiert Format, sucht ID im Manifest, führt eine reine Leseaktion aus. Falls sich später echte URL-QRs als praktischer erweisen, in `docs/DECISIONS.md` entscheiden, bevor Karten gedruckt werden.
 
-Mehrere Karten dürfen auf **denselben fachlichen Eventkey** verweisen (z. B. `J10` für 10.11.2026). Ein Eintrag wird nur nach expliziter Bestätigung unter diesem Key gespeichert. Die Karte selbst bleibt unabhängig davon beliebig oft anzeigbar.
+Mehrere Karten dürfen auf **denselben fachlichen Eventkey** verweisen (z. B. `J10` für den fiktiven Termin am 17.11.2026). Ein Eintrag wird nur nach expliziter Bestätigung unter diesem Key gespeichert. Die Karte selbst bleibt unabhängig davon beliebig oft anzeigbar.
 
 ## 5. Inhalte getrennt von Code (V)
 
@@ -104,7 +104,7 @@ Standardzuordnung: P-EX-101 Gehen mit Teilbelastung; 102 Hüftflexion im Stehen;
 
 ## F18 – zweispaltige Patientenübersicht und Akten-Demodaten (09.11.2026)
 
-Das Hauptmenü liest die acht Videozeilen aus den aktiven Patienten-Übungskarten in `demo_manifest.json` und `exercise_catalog.json`. Ihre Medienstammdaten und Dateinamen bleiben unverändert. Das existierende fiktive Physiotherapieereignis `J10` am 10.11.2026 ist die einzige derzeitige Terminzeile; weder Uhrzeit noch Ort sind hinterlegt. Die Szene `discharge` vergleicht mit `manifest.asOf`, die Szene `physio` mit dem vorhandenen J10-Datum. Der Karte-/Detail-/Bestätigungsweg bleibt unverändert.
+Das Hauptmenü liest die acht Videozeilen aus den aktiven Patienten-Übungskarten in `demo_manifest.json` und `exercise_catalog.json`. Ihre Medienstammdaten und Dateinamen bleiben unverändert. Das fiktive J10 enthält nun Termin am 17.11.2026, Uhrzeit, Ort, Terminart, Status und Quellenstand in einem gemeinsamen strukturierten Datensatz. Hauptmenü, Moderator-Szene, Detail und Bestätigung lesen diese Daten statt ein separates Datum zu hardcodieren. Die Szene `discharge` vergleicht mit `manifest.asOf`, die Szene `physio` mit dem J10-Datum. J10 wird erst nach Bestätigung gespeichert.
 
 Die Patientenakte trennt Metadaten (`patient_record.json`) von vorgefertigten Berichtstexten (`patient_record_contents.json`). Enthalten sind Operationsbericht, Austrittsbericht, Terminplan und der lokale Röntgenbildplatzhalter. Alle Texte sind fiktiv und absichtlich ohne klinische Befunde, medizinische Anordnungen, Belastungsfreigaben, Dosierungen oder Übungen. Als Herkunft erscheint eine simulierte EPIC-Ansicht; es gibt keine EPIC- oder Krankenhausserver-Verbindung.
 

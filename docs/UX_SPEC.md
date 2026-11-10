@@ -102,7 +102,7 @@ Die feste 850-CSS-Pixel-Begrenzung der App-Fläche entfällt. Menü und Unterans
 
 F18 beauftragt ausschliesslich die Gestaltung unterhalb der bestehenden Überschrift und den Buttons „QR-Karte scannen“ und „Karte auswählen“. Kopfzeile, Überschrift, diese beiden Buttons, ihre Positionen und der Bergwiesen-Einstieg bleiben visuell unverändert. Darunter stehen links sieben verfügbare kompakte Videozeilen; `P-EX-001` bleibt in den Kartendaten, ist jedoch nicht im Menü angeboten. Rechts folgen der nächste fiktive Physiotherapietermin und anklickbare Patientenakten-Einträge. Videos öffnen direkt ihren Player. Alma und „Mein Weg“ bleiben unterhalb des Dashboards erreichbar.
 
-Der Termin zeigt nur Felder, die in den Demodaten existieren. Aktuell ist das Datum 10.11.2026 hinterlegt; eine Uhrzeit und ein Ort sind nicht vorhanden. In der Austrittsszene wird das Szenariodatum aus `manifest.asOf`, in der Physioszene das Datum des vorhandenen Termins verwendet.
+Der fiktive Termin `J10` am Dienstag, 17.11.2026 um 10:30 Uhr findet in der Physiotherapiepraxis (Demo), Raum 2 statt. Die Termindetailansicht zeigt Terminart, Status, drei neutrale Gesprächspunkte, leere Schreiblinien und den fiktiven persönlichen Terminplan mit Datenstand 02.11.2026. Datum, Uhrzeit, Ort, Terminart und Status werden im gemeinsamen J10-Datensatz gepflegt und auch im Hauptmenü, Moderator-Szenario, Bestätigungsweg und Timeline verwendet. Ein QR-Scan ändert die Timeline nicht.
 
 Die Patientenakte simuliert EPIC lokal mit vorbereiteten, fiktiven Texten aus `content/patient_record.json` und `content/patient_record_contents.json`. Jeder Eintrag nennt die simulierte Herkunft und den Datenstand. Es gibt keine Serververbindung. Die Bildansicht nimmt nur eine in den Einstellungen ausdrücklich als fiktiv oder für Demonstrationen freigegebene lokale JPG-/JPEG-/PNG-/WebP-Datei an; gespeichert wird nur der Dateiname und der Freigabestatus. Nach einem Neustart kann die Datei erneut ausgewählt werden. Keine Bilddatei wird ausgeliefert, hochgeladen oder in den Service-Worker-Cache aufgenommen.
 
@@ -119,3 +119,7 @@ In Einstellungen zeigt der Bereich „Lokale Videokopien“ für jede der sieben
 ### Videoende
 
 Nach regulärem Ende liegt für zehn Sekunden eine textlose, höchstens 4 px hohe grüne Fortschrittslinie unmittelbar unter dem Player. Sie schrumpft linear von voller Breite auf null und verändert dessen Grösse nicht. Bei Wiedergabe, Interaktion, Navigation, Abschalten oder Verbergen verschwindet die Linie und der Countdown endet. Nach Ablauf öffnet die App die Bergwiese mit aktiver Begrüssungsanimation und QR-Erkennung.
+
+### Fiktiver Physiotherapietermin
+
+Die Detailseite der Karte P-APT-001 stellt Datum und Uhrzeit deutlich heraus. Ort und Terminart stehen mit Symbolen dabei; anschliessend folgen die drei neutralen Gesprächspunkte und drei leere Notizlinien. „Zur Timeline hinzufügen“ bleibt die ausdrückliche Bestätigungsaktion. Die kompakte Quellenzeile sagt, dass es sich um keinen echten Termin handelt und nennt den Datenstand. Auf dem Tablet-Hochformat sollen Termin, Gesprächspunkte, Notizbereich und Aktion ohne Scrollen erreichbar sein.
